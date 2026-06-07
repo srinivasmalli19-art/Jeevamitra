@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "com.pasumitra" "\0"
-            VALUE "FileDescription", "pasumitra" "\0"
+            VALUE "CompanyName", "com.jeevamitra" "\0"
+            VALUE "FileDescription", "jeevamitra" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "pasumitra" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2026 com.pasumitra. All rights reserved." "\0"
-            VALUE "OriginalFilename", "pasumitra.exe" "\0"
-            VALUE "ProductName", "pasumitra" "\0"
+            VALUE "InternalName", "jeevamitra" "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2026 com.jeevamitra. All rights reserved." "\0"
+            VALUE "OriginalFilename", "jeevamitra.exe" "\0"
+            VALUE "ProductName", "jeevamitra" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

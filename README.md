@@ -1,4 +1,4 @@
-# pasumitra
+# jeevamitra
 
 Livestock Marketplace for Indian Farmers
 

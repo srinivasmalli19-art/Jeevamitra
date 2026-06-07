@@ -60,7 +60,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '360739375700',
     projectId: 'jeevamitra',
     storageBucket: 'jeevamitra.firebasestorage.app',
-    iosBundleId: 'com.pasumitra.pasumitra',
+    iosBundleId: 'com.jeevamitra.app',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
