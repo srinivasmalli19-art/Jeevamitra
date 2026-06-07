@@ -1,0 +1,139 @@
+{
+  "@@locale": "hi",
+
+  "appName": "जीवमित्र",
+  "tagline": "आपका कृषि मित्र",
+  "continueBtn": "जारी रखें",
+  "skipBtn": "छोड़ें",
+  "backBtn": "वापस",
+  "saveBtn": "सहेजें",
+  "cancelBtn": "रद्द करें",
+  "confirmBtn": "पुष्टि करें",
+  "deleteBtn": "हटाएं",
+  "editBtn": "संपादित करें",
+  "retryBtn": "पुनः प्रयास करें",
+  "closeBtn": "बंद करें",
+  "doneBtn": "हो गया",
+  "nextBtn": "अगला",
+  "yesBtn": "हाँ",
+  "noBtn": "नहीं",
+  "searchHint": "खोजें...",
+  "loadingMsg": "लोड हो रहा है...",
+  "noInternetMsg": "इंटरनेट कनेक्शन नहीं है",
+  "errorMsg": "कुछ गलत हो गया",
+  "noDataMsg": "कोई डेटा नहीं मिला",
+
+  "selectLanguage": "भाषा चुनें",
+  "languageHint": "अपनी पसंदीदा भाषा चुनें",
+
+  "onboardTitle1": "अपनी भूमि सूचीबद्ध करें",
+  "onboardBody1": "किसान अपनी जमीन पंजीकृत कर चरवाहों के लिए उपलब्ध करा सकते हैं।",
+  "onboardTitle2": "पास में चराई भूमि खोजें",
+  "onboardBody2": "आस-पास उपलब्ध चराई भूमि खोजें और किसान से सीधे बुक करें।",
+  "onboardTitle3": "पास में पशु चिकित्सक",
+  "onboardBody3": "आपात स्थिति में एक क्लिक से पास के पशु चिकित्सक को खोजें।",
+
+  "mobileNumber": "मोबाइल नंबर",
+  "mobileNumberHint": "10 अंकों का मोबाइल नंबर दर्ज करें",
+  "sendOtp": "OTP भेजें",
+  "enterOtp": "OTP दर्ज करें",
+  "otpHint": "6 अंकों का OTP",
+  "verifyOtp": "OTP सत्यापित करें",
+  "resendOtp": "OTP फिर से भेजें",
+  "resendIn": "{seconds} सेकंड में फिर भेजें",
+  "@resendIn": {
+    "placeholders": { "seconds": { "type": "int" } }
+  },
+  "otpSentTo": "{phone} पर OTP भेजा गया",
+  "@otpSentTo": {
+    "placeholders": { "phone": { "type": "String" } }
+  },
+
+  "selectRole": "मैं एक हूँ...",
+  "roleFarmer": "किसान",
+  "roleFarmerDesc": "मेरे पास जमीन है और चराई के लिए देना चाहता हूँ",
+  "roleShepherd": "चरवाहा",
+  "roleShepherdDesc": "मेरे पास जानवर हैं और चराई भूमि चाहिए",
+
+  "yourName": "आपका नाम",
+  "yourVillage": "गाँव / शहर",
+  "yourDistrict": "जिला",
+  "completeProfile": "प्रोफ़ाइल पूरी करें",
+
+  "farmerDashboard": "डैशबोर्ड",
+  "myLands": "मेरी भूमि",
+  "bookings": "बुकिंग",
+  "explore": "खोजें",
+  "profile": "प्रोफ़ाइल",
+
+  "shepherdDashboard": "डैशबोर्ड",
+  "discover": "खोजें",
+  "vets": "पशु चिकित्सक",
+
+  "addLand": "भूमि जोड़ें",
+  "landTitle": "भूमि का नाम",
+  "landArea": "भूमि क्षेत्रफल",
+  "pricePerDay": "प्रति दिन / प्रति जानवर कीमत",
+  "fodderTypes": "उपलब्ध चारा",
+  "amenities": "सुविधाएं",
+  "water": "पानी",
+  "shade": "छाया",
+  "fencing": "बाड़",
+  "vetNearby": "पास में पशु चिकित्सक",
+
+  "bookNow": "अभी बुक करें",
+  "checkIn": "चेक-इन",
+  "checkOut": "चेक-आउट",
+  "animalCount": "जानवरों की संख्या",
+  "totalAmount": "कुल राशि",
+  "advanceAmount": "अग्रिम",
+
+  "bookingPending": "लंबित",
+  "bookingConfirmed": "पुष्टि हुई",
+  "bookingActive": "सक्रिय",
+  "bookingCompleted": "पूर्ण",
+  "bookingCancelled": "रद्द",
+
+  "nearbyVets": "पास के पशु चिकित्सक",
+  "govtVet": "सरकारी पशु चिकित्सक",
+  "available24x7": "24×7 उपलब्ध",
+  "consultationFee": "परामर्श शुल्क",
+  "free": "निःशुल्क",
+  "callVet": "पशु चिकित्सक को बुलाएं",
+  "whatsappVet": "WhatsApp",
+
+  "emergency": "आपातकाल",
+  "emergencyCallVet": "निकटतम पशु चिकित्सक को बुलाएं",
+  "emergencyHelpline": "हेल्पलाइन 1962",
+
+  "voiceInputHint": "बोलने के लिए माइक दबाएं",
+  "listeningMsg": "सुन रहा हूँ...",
+  "voiceNotSupported": "इस डिवाइस पर वॉइस समर्थित नहीं है",
+
+  "rateExperience": "अपना अनुभव रेट करें",
+  "writeReview": "समीक्षा लिखें",
+  "submitReview": "समीक्षा जमा करें",
+
+  "notifications": "सूचनाएं",
+  "noNotifications": "अभी तक कोई सूचना नहीं",
+
+  "settings": "सेटिंग्स",
+  "language": "भाषा",
+  "logout": "लॉग आउट",
+  "logoutConfirm": "क्या आप वाकई लॉग आउट करना चाहते हैं?",
+
+  "distanceKm": "{km} किमी दूर",
+  "@distanceKm": {
+    "placeholders": { "km": { "type": "String" } }
+  },
+  "perDayPerAnimal": "₹{price}/दिन/जानवर",
+  "@perDayPerAnimal": {
+    "placeholders": { "price": { "type": "String" } }
+  },
+  "availableNow": "उपलब्ध",
+  "notAvailable": "उपलब्ध नहीं",
+  "acres": "{area} एकड़",
+  "@acres": {
+    "placeholders": { "area": { "type": "String" } }
+  }
+}

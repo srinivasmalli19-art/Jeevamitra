@@ -1,0 +1,139 @@
+{
+  "@@locale": "te",
+
+  "appName": "జీవమిత్ర",
+  "tagline": "మీ వ్యవసాయ మిత్రుడు",
+  "continueBtn": "కొనసాగించు",
+  "skipBtn": "దాటవేయి",
+  "backBtn": "వెనక్కు",
+  "saveBtn": "సేవ్ చేయి",
+  "cancelBtn": "రద్దు చేయి",
+  "confirmBtn": "నిర్ధారించు",
+  "deleteBtn": "తొలగించు",
+  "editBtn": "సవరించు",
+  "retryBtn": "మళ్ళీ ప్రయత్నించు",
+  "closeBtn": "మూసివేయి",
+  "doneBtn": "పూర్తయింది",
+  "nextBtn": "తదుపరి",
+  "yesBtn": "అవును",
+  "noBtn": "కాదు",
+  "searchHint": "వెతకండి...",
+  "loadingMsg": "లోడ్ అవుతోంది...",
+  "noInternetMsg": "ఇంటర్నెట్ కనెక్షన్ లేదు",
+  "errorMsg": "ఏదో తప్పు జరిగింది",
+  "noDataMsg": "డేటా లేదు",
+
+  "selectLanguage": "భాష ఎంచుకోండి",
+  "languageHint": "మీకు ఇష్టమైన భాష ఎంచుకోండి",
+
+  "onboardTitle1": "మీ భూమిని చూపించండి",
+  "onboardBody1": "రైతులు తమ పొలాన్ని నమోదు చేసి గొర్రెల కాపరులకు అందుబాటులో పెట్టవచ్చు.",
+  "onboardTitle2": "మేత భూమి వెతకండి",
+  "onboardBody2": "దగ్గర్లో అందుబాటులో ఉన్న మేత భూమిని రైతుతో నేరుగా బుక్ చేసుకోండి.",
+  "onboardTitle3": "పశు వైద్యుడు దగ్గర్లో",
+  "onboardBody3": "అత్యవసర పరిస్థితుల్లో దగ్గర్లో ఉన్న పశువైద్యుని ఒక్క క్లిక్‌లో కనుగొనండి.",
+
+  "mobileNumber": "మొబైల్ నంబర్",
+  "mobileNumberHint": "10 అంకెల మొబైల్ నంబర్ నమోదు చేయండి",
+  "sendOtp": "OTP పంపండి",
+  "enterOtp": "OTP నమోదు చేయండి",
+  "otpHint": "6 అంకెల OTP",
+  "verifyOtp": "OTP ధృవీకరించండి",
+  "resendOtp": "OTP మళ్ళీ పంపండి",
+  "resendIn": "{seconds} సెకన్లలో మళ్ళీ పంపండి",
+  "@resendIn": {
+    "placeholders": { "seconds": { "type": "int" } }
+  },
+  "otpSentTo": "{phone} కి OTP పంపబడింది",
+  "@otpSentTo": {
+    "placeholders": { "phone": { "type": "String" } }
+  },
+
+  "selectRole": "నేను ఒక...",
+  "roleFarmer": "రైతు",
+  "roleFarmerDesc": "నా దగ్గర భూమి ఉంది, మేతకు అందించాలనుకుంటున్నాను",
+  "roleShepherd": "గొర్రెల కాపరి",
+  "roleShepherdDesc": "నా దగ్గర జంతువులు ఉన్నాయి, మేత భూమి కావాలి",
+
+  "yourName": "మీ పేరు",
+  "yourVillage": "గ్రామం / పట్టణం",
+  "yourDistrict": "జిల్లా",
+  "completeProfile": "ప్రొఫైల్ పూర్తి చేయండి",
+
+  "farmerDashboard": "డాష్‌బోర్డ్",
+  "myLands": "నా భూముల",
+  "bookings": "బుకింగ్‌లు",
+  "explore": "అన్వేషించు",
+  "profile": "ప్రొఫైల్",
+
+  "shepherdDashboard": "డాష్‌బోర్డ్",
+  "discover": "కనుగొను",
+  "vets": "పశువైద్యులు",
+
+  "addLand": "భూమి జోడించు",
+  "landTitle": "భూమి పేరు",
+  "landArea": "భూమి విస్తీర్ణం",
+  "pricePerDay": "రోజుకు / జంతువుకు ధర",
+  "fodderTypes": "అందుబాటులో ఉన్న మేత",
+  "amenities": "సౌకర్యాలు",
+  "water": "నీరు",
+  "shade": "నీడ",
+  "fencing": "కంచె",
+  "vetNearby": "పశువైద్యుడు దగ్గర్లో",
+
+  "bookNow": "ఇప్పుడు బుక్ చేయి",
+  "checkIn": "చెక్-ఇన్",
+  "checkOut": "చెక్-అవుట్",
+  "animalCount": "జంతువుల సంఖ్య",
+  "totalAmount": "మొత్తం మొత్తం",
+  "advanceAmount": "అడ్వాన్స్",
+
+  "bookingPending": "పెండింగ్",
+  "bookingConfirmed": "నిర్ధారించబడింది",
+  "bookingActive": "యాక్టివ్",
+  "bookingCompleted": "పూర్తయింది",
+  "bookingCancelled": "రద్దు చేయబడింది",
+
+  "nearbyVets": "దగ్గర్లో పశువైద్యులు",
+  "govtVet": "ప్రభుత్వ పశువైద్యుడు",
+  "available24x7": "24×7 అందుబాటు",
+  "consultationFee": "కన్సల్టేషన్ ఫీజు",
+  "free": "ఉచితం",
+  "callVet": "పశువైద్యుడిని పిలవండి",
+  "whatsappVet": "WhatsApp",
+
+  "emergency": "అత్యవసరం",
+  "emergencyCallVet": "సమీప పశువైద్యుడిని పిలవండి",
+  "emergencyHelpline": "హెల్ప్‌లైన్ 1962",
+
+  "voiceInputHint": "మాట్లాడటానికి మైక్ నొక్కండి",
+  "listeningMsg": "వింటున్నాను...",
+  "voiceNotSupported": "ఈ పరికరంలో వాయిస్ మద్దతు లేదు",
+
+  "rateExperience": "మీ అనుభవాన్ని రేట్ చేయండి",
+  "writeReview": "రివ్యూ రాయండి",
+  "submitReview": "రివ్యూ సమర్పించండి",
+
+  "notifications": "నోటిఫికేషన్లు",
+  "noNotifications": "నోటిఫికేషన్లు లేవు",
+
+  "settings": "సెట్టింగ్‌లు",
+  "language": "భాష",
+  "logout": "లాగ్ అవుట్",
+  "logoutConfirm": "మీరు నిజంగా లాగ్ అవుట్ అవ్వాలనుకుంటున్నారా?",
+
+  "distanceKm": "{km} కి.మీ దూరంలో",
+  "@distanceKm": {
+    "placeholders": { "km": { "type": "String" } }
+  },
+  "perDayPerAnimal": "₹{price}/రోజు/జంతువు",
+  "@perDayPerAnimal": {
+    "placeholders": { "price": { "type": "String" } }
+  },
+  "availableNow": "అందుబాటులో",
+  "notAvailable": "అందుబాటులో లేదు",
+  "acres": "{area} ఎకరాలు",
+  "@acres": {
+    "placeholders": { "area": { "type": "String" } }
+  }
+}

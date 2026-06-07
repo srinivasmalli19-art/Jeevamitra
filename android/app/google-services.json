@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "360739375700",
+    "project_id": "jeevamitra",
+    "storage_bucket": "jeevamitra.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:360739375700:android:3bddc2ca498360b41b3bc1",
+        "android_client_info": {
+          "package_name": "com.jeevamitra.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD5jfwTsvShnTXIsY5d6BtQdQWNZnjNRNA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

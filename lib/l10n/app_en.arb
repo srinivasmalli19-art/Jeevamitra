@@ -1,0 +1,141 @@
+{
+  "@@locale": "en",
+
+  "appName": "JeevaMitra",
+  "@appName": { "description": "Application name" },
+
+  "tagline": "Your Farming Companion",
+  "continueBtn": "Continue",
+  "skipBtn": "Skip",
+  "backBtn": "Back",
+  "saveBtn": "Save",
+  "cancelBtn": "Cancel",
+  "confirmBtn": "Confirm",
+  "deleteBtn": "Delete",
+  "editBtn": "Edit",
+  "retryBtn": "Try Again",
+  "closeBtn": "Close",
+  "doneBtn": "Done",
+  "nextBtn": "Next",
+  "yesBtn": "Yes",
+  "noBtn": "No",
+  "searchHint": "Search...",
+  "loadingMsg": "Loading...",
+  "noInternetMsg": "No internet connection",
+  "errorMsg": "Something went wrong",
+  "noDataMsg": "No data found",
+
+  "selectLanguage": "Choose Language",
+  "languageHint": "Select your preferred language",
+
+  "onboardTitle1": "List Your Farm Land",
+  "onboardBody1": "Farmers can register their land and make it available for shepherds to graze.",
+  "onboardTitle2": "Find Grazing Land Nearby",
+  "onboardBody2": "Search available grazing land near you and book directly with the farmer.",
+  "onboardTitle3": "Vets Near You",
+  "onboardBody3": "Find nearby veterinarians for emergencies with a single tap.",
+
+  "mobileNumber": "Mobile Number",
+  "mobileNumberHint": "Enter 10-digit mobile number",
+  "sendOtp": "Send OTP",
+  "enterOtp": "Enter OTP",
+  "otpHint": "6-digit OTP",
+  "verifyOtp": "Verify OTP",
+  "resendOtp": "Resend OTP",
+  "resendIn": "Resend in {seconds}s",
+  "@resendIn": {
+    "placeholders": { "seconds": { "type": "int" } }
+  },
+  "otpSentTo": "OTP sent to {phone}",
+  "@otpSentTo": {
+    "placeholders": { "phone": { "type": "String" } }
+  },
+
+  "selectRole": "I am a...",
+  "roleFarmer": "Farmer",
+  "roleFarmerDesc": "I have land and want to offer it for grazing",
+  "roleShepherd": "Shepherd",
+  "roleShepherdDesc": "I have animals and need grazing land",
+
+  "yourName": "Your Name",
+  "yourVillage": "Village / Town",
+  "yourDistrict": "District",
+  "completeProfile": "Complete Profile",
+
+  "farmerDashboard": "Dashboard",
+  "myLands": "My Lands",
+  "bookings": "Bookings",
+  "explore": "Explore",
+  "profile": "Profile",
+
+  "shepherdDashboard": "Dashboard",
+  "discover": "Discover",
+  "vets": "Vets",
+
+  "addLand": "Add Land",
+  "landTitle": "Land Title",
+  "landArea": "Land Area",
+  "pricePerDay": "Price per Day / Animal",
+  "fodderTypes": "Fodder Available",
+  "amenities": "Amenities",
+  "water": "Water",
+  "shade": "Shade",
+  "fencing": "Fencing",
+  "vetNearby": "Vet Nearby",
+
+  "bookNow": "Book Now",
+  "checkIn": "Check In",
+  "checkOut": "Check Out",
+  "animalCount": "Number of Animals",
+  "totalAmount": "Total Amount",
+  "advanceAmount": "Advance",
+
+  "bookingPending": "Pending",
+  "bookingConfirmed": "Confirmed",
+  "bookingActive": "Active",
+  "bookingCompleted": "Completed",
+  "bookingCancelled": "Cancelled",
+
+  "nearbyVets": "Vets Nearby",
+  "govtVet": "Govt. Vet",
+  "available24x7": "24×7 Available",
+  "consultationFee": "Consultation Fee",
+  "free": "Free",
+  "callVet": "Call Vet",
+  "whatsappVet": "WhatsApp",
+
+  "emergency": "Emergency",
+  "emergencyCallVet": "Call Nearest Vet",
+  "emergencyHelpline": "Helpline 1962",
+
+  "voiceInputHint": "Tap mic to speak",
+  "listeningMsg": "Listening...",
+  "voiceNotSupported": "Voice not supported on this device",
+
+  "rateExperience": "Rate your experience",
+  "writeReview": "Write a review",
+  "submitReview": "Submit Review",
+
+  "notifications": "Notifications",
+  "noNotifications": "No notifications yet",
+
+  "settings": "Settings",
+  "language": "Language",
+  "logout": "Logout",
+  "logoutConfirm": "Are you sure you want to logout?",
+
+  "distanceKm": "{km} km away",
+  "@distanceKm": {
+    "placeholders": { "km": { "type": "String" } }
+  },
+  "perDayPerAnimal": "₹{price}/day/animal",
+  "@perDayPerAnimal": {
+    "placeholders": { "price": { "type": "String" } }
+  },
+  "availableNow": "Available",
+  "notAvailable": "Not Available",
+  "acres": "{area} Acres",
+  "@acres": {
+    "placeholders": { "area": { "type": "String" } }
+  }
+}
