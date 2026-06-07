@@ -155,10 +155,31 @@ class AuthNotifier extends StateNotifier<AsyncValue<void>> {
     state = const AsyncValue.data(null);
   }
 
+  // Dev-only: uses Email/Password (already enabled in Firebase Console).
+  // Creates the test account on first run, signs in on subsequent runs.
   Future<void> devSignIn({String role = 'farmer'}) async {
     state = const AsyncValue.loading();
     try {
-      final result = await FirebaseAuth.instance.signInAnonymously();
+      final email = 'dev.$role@jeevamitra.app';
+      const password = 'JeevaDev@2024';
+
+      UserCredential result;
+      try {
+        result = await FirebaseAuth.instance.signInWithEmailAndPassword(
+          email: email,
+          password: password,
+        );
+      } on FirebaseAuthException catch (e) {
+        if (e.code == 'user-not-found' || e.code == 'invalid-credential') {
+          result = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+            email: email,
+            password: password,
+          );
+        } else {
+          rethrow;
+        }
+      }
+
       final uid = result.user!.uid;
       await FirebaseFirestore.instance
           .collection(FirebaseConstants.users)

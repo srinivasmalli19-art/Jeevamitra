@@ -23,6 +23,17 @@ class _RoleSelectScreenState extends ConsumerState<RoleSelectScreen> {
     if (_selectedRole == null) return;
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
+
+    // Dev login may have already written a complete profile — don't overwrite it.
+    final existing = ref.read(currentUserDocProvider).valueOrNull;
+    if (existing != null && existing.isProfileComplete) {
+      if (!context.mounted) return;
+      context.go(existing.isFarmer
+          ? RouteConstants.farmerDashboard
+          : RouteConstants.shepherdDashboard);
+      return;
+    }
+
     await ref.read(authNotifierProvider.notifier).createUserDoc(
       uid: user.uid,
       phone: user.phoneNumber ?? '',

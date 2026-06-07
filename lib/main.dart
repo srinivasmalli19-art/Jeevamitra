@@ -46,37 +46,42 @@ void main() async {
   bool firebaseInitialized = false;
   try {
     await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-    FirebaseMessaging.onBackgroundMessage(_fcmBackgroundHandler);
 
-    // Crashlytics
-    await FirebaseCrashlytics.instance
-        .setCrashlyticsCollectionEnabled(!kDebugMode);
-    FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
-    PlatformDispatcher.instance.onError = (error, stack) {
-      FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
-      return true;
-    };
+    if (!kIsWeb) {
+      // FCM background handler — not supported on web
+      FirebaseMessaging.onBackgroundMessage(_fcmBackgroundHandler);
 
-    // Analytics
+      // Crashlytics — not supported on web
+      await FirebaseCrashlytics.instance
+          .setCrashlyticsCollectionEnabled(!kDebugMode);
+      FlutterError.onError =
+          FirebaseCrashlytics.instance.recordFlutterFatalError;
+      PlatformDispatcher.instance.onError = (error, stack) {
+        FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+        return true;
+      };
+
+      // Performance monitoring — not supported on web
+      await FirebasePerformance.instance
+          .setPerformanceCollectionEnabled(!kDebugMode);
+    }
+
+    // Analytics — works on web too
     await FirebaseAnalytics.instance
         .setAnalyticsCollectionEnabled(!kDebugMode);
 
-    // Performance monitoring
-    await FirebasePerformance.instance
-        .setPerformanceCollectionEnabled(!kDebugMode);
-
-    // Remote config — fetch defaults + server values before UI starts
+    // Remote config — works on web too
     await RemoteConfigService().init();
 
     firebaseInitialized = true;
   } catch (e) {
     debugPrint('[JeevaMitra] Firebase not configured: $e');
-    debugPrint('[JeevaMitra] Run: flutterfire configure --project=YOUR_PROJECT_ID');
   }
 
-  // Local notifications — must be initialized before runApp so the plugin
-  // is ready when FCM foreground messages arrive.
-  await LocalNotificationService().init();
+  // Local notifications — not supported on web
+  if (!kIsWeb) {
+    await LocalNotificationService().init();
+  }
 
   runApp(
     ProviderScope(

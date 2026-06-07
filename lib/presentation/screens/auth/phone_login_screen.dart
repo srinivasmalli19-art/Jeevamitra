@@ -31,6 +31,16 @@ class _PhoneLoginScreenState extends ConsumerState<PhoneLoginScreen> {
 
   Future<void> _devLogin(String role) async {
     await ref.read(authNotifierProvider.notifier).devSignIn(role: role);
+    if (!mounted) return;
+    final authState = ref.read(authNotifierProvider);
+    if (authState.hasError) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Dev login failed: ${authState.error}'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+    }
   }
 
   Future<void> _sendOtp() async {
