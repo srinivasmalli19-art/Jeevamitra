@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
@@ -9,58 +8,60 @@ class ImageUploadService {
   final _uuid = const Uuid();
 
   /// Pick one image from gallery or camera.
-  Future<File?> pickImage({ImageSource source = ImageSource.gallery}) async {
-    final picked = await _picker.pickImage(
+  Future<XFile?> pickImage({ImageSource source = ImageSource.gallery}) {
+    return _picker.pickImage(
       source: source,
       imageQuality: 75,
       maxWidth: 1280,
       maxHeight: 1280,
     );
-    if (picked == null) return null;
-    return File(picked.path);
   }
 
   /// Pick up to [maxImages] images from gallery.
-  Future<List<File>> pickMultipleImages({int maxImages = 5}) async {
-    final picked = await _picker.pickMultiImage(
+  Future<List<XFile>> pickMultipleImages({int maxImages = 5}) {
+    return _picker.pickMultiImage(
       imageQuality: 75,
       maxWidth: 1280,
       maxHeight: 1280,
       limit: maxImages,
     );
-    return picked.map((x) => File(x.path)).toList();
   }
 
-  /// Upload a single file and return its download URL.
+  /// Upload a single XFile and return its download URL.
+  /// Uses putData(bytes) so it works on both web and native.
   Future<String> uploadImage({
-    required File file,
-    required String folder, // e.g. 'farms', 'profiles'
+    required XFile file,
+    required String folder,
     String? ownerId,
   }) async {
     final id = _uuid.v4();
-    final ext = file.path.split('.').last;
-    final path = ownerId != null
+    // On web the path is a blob URL; derive extension from the name instead.
+    final name = file.name.isNotEmpty ? file.name : file.path;
+    final ext = name.contains('.') ? name.split('.').last.split('?').first : 'jpg';
+    final storagePath = ownerId != null
         ? '$folder/$ownerId/$id.$ext'
         : '$folder/$id.$ext';
 
-    final ref = _storage.ref(path);
-    final task = await ref.putFile(
-      file,
+    final bytes = await file.readAsBytes();
+    final ref = _storage.ref(storagePath);
+    final task = await ref.putData(
+      bytes,
       SettableMetadata(contentType: 'image/jpeg'),
     );
-    return await task.ref.getDownloadURL();
+    return task.ref.getDownloadURL();
   }
 
   /// Upload multiple files and return list of download URLs.
   Future<List<String>> uploadImages({
-    required List<File> files,
+    required List<XFile> files,
     required String folder,
     String? ownerId,
     void Function(int done, int total)? onProgress,
   }) async {
     final urls = <String>[];
     for (var i = 0; i < files.length; i++) {
-      final url = await uploadImage(file: files[i], folder: folder, ownerId: ownerId);
+      final url =
+          await uploadImage(file: files[i], folder: folder, ownerId: ownerId);
       urls.add(url);
       onProgress?.call(i + 1, files.length);
     }
@@ -71,8 +72,6 @@ class ImageUploadService {
   Future<void> deleteByUrl(String url) async {
     try {
       await _storage.refFromURL(url).delete();
-    } catch (_) {
-      // File may already be deleted — ignore
-    }
+    } catch (_) {}
   }
 }

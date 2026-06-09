@@ -1,10 +1,9 @@
-import 'dart:io';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../../../core/constants/route_constants.dart';
 import '../../../../core/services/image_upload_service.dart';
@@ -45,7 +44,7 @@ class _AddLandState {
   final bool hasVetNearby;
 
   // Step 4 — Photos
-  final List<File> images;
+  final List<XFile> images;
 
   const _AddLandState({
     this.title = '',
@@ -72,7 +71,7 @@ class _AddLandState {
     String? price, String? maxAnimals, double? lat, double? lng,
     String? village, String? district, String? state,
     List<String>? fodderTypes, bool? hasWater, bool? hasShade,
-    bool? hasFencing, bool? hasVetNearby, List<File>? images,
+    bool? hasFencing, bool? hasVetNearby, List<XFile>? images,
   }) => _AddLandState(
     title: title ?? this.title,
     description: description ?? this.description,
@@ -360,7 +359,7 @@ class _AddLandScreenState extends ConsumerState<AddLandScreen> {
                   images: _data.images,
                   onPickImages: _pickImages,
                   onRemove: (i) => setState(() {
-                    final list = List<File>.from(_data.images);
+                    final list = List<XFile>.from(_data.images);
                     list.removeAt(i);
                     _data = _data.copyWith(images: list);
                   }),
@@ -748,7 +747,7 @@ class _AmenityTile extends StatelessWidget {
 // ─── Step 4: Photos ───────────────────────────────────────────────────────────
 
 class _Step4Photos extends StatelessWidget {
-  final List<File> images;
+  final List<XFile> images;
   final VoidCallback onPickImages;
   final ValueChanged<int> onRemove;
 
@@ -782,7 +781,7 @@ class _Step4Photos extends StatelessWidget {
                 children: [
                   ClipRRect(
                     borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-                    child: Image.file(images[i], fit: BoxFit.cover),
+                    child: _XFileImage(xfile: images[i]),
                   ),
                   Positioned(
                     top: 4, right: 4,
@@ -813,5 +812,40 @@ class _Step4Photos extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+// ─── Cross-platform picked-image preview ──────────────────────────────────────
+// Image.file() is not supported on Flutter Web. This widget reads bytes from
+// the XFile (works on all platforms) and displays via Image.memory.
+
+class _XFileImage extends StatefulWidget {
+  final XFile xfile;
+  const _XFileImage({required this.xfile});
+
+  @override
+  State<_XFileImage> createState() => _XFileImageState();
+}
+
+class _XFileImageState extends State<_XFileImage> {
+  Uint8List? _bytes;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.xfile.readAsBytes().then((b) {
+      if (mounted) setState(() => _bytes = b);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_bytes == null) {
+      return const AspectRatio(
+        aspectRatio: 1,
+        child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+      );
+    }
+    return Image.memory(_bytes!, fit: BoxFit.cover);
   }
 }

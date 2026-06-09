@@ -58,6 +58,8 @@ class JmShimmerList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView.separated(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
       padding: const EdgeInsets.all(AppSpacing.base),
       itemCount: count,
       separatorBuilder: (_, i) => const SizedBox(height: AppSpacing.md),

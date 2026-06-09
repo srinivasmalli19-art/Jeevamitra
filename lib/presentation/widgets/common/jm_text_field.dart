@@ -59,11 +59,20 @@ class JmTextField extends StatelessWidget {
       );
     }
 
+    // Flutter asserts that multiline fields with TextInputAction.newline must
+    // use TextInputType.multiline — fix it automatically so callers don't need to.
+    final effectiveKeyboardType =
+        (textInputAction == TextInputAction.newline &&
+                keyboardType == TextInputType.text &&
+                maxLines != 1)
+            ? TextInputType.multiline
+            : keyboardType;
+
     return TextFormField(
       controller: controller,
       initialValue: initialValue,
       validator: validator,
-      keyboardType: keyboardType,
+      keyboardType: effectiveKeyboardType,
       textInputAction: textInputAction,
       obscureText: obscureText,
       enabled: enabled,

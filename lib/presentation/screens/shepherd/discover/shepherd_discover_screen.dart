@@ -223,13 +223,19 @@ class _FarmList extends ConsumerWidget {
       loading: () => const SliverFillRemaining(
         child: JmShimmerList(count: 4, cardHeight: 200),
       ),
-      error: (e, _) => SliverFillRemaining(
-        child: JmErrorState(
-          message: e.toString(),
-          onRetry: () => ref.invalidate(nearbyFarmsProvider),
-          isNetwork: true,
-        ),
-      ),
+      error: (e, _) {
+        final errStr = e.toString();
+        final isPermission = errStr.contains('permission-denied');
+        return SliverFillRemaining(
+          child: JmErrorState(
+            message: isPermission
+                ? 'Access denied. Please sign in to discover nearby lands.'
+                : errStr,
+            onRetry: () => ref.invalidate(nearbyFarmsProvider),
+            isNetwork: !isPermission,
+          ),
+        );
+      },
       data: (all) {
         final farms = filter.apply(all);
         if (farms.isEmpty) {

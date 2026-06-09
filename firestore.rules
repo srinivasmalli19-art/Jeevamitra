@@ -1,0 +1,127 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Helper functions ──────────────────────────────────────────────────────
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    // ── users ─────────────────────────────────────────────────────────────────
+    // Each user can read and write only their own document.
+
+    match /users/{userId} {
+      allow read, write: if isOwner(userId);
+    }
+
+    // ── farms ─────────────────────────────────────────────────────────────────
+    // Any authenticated user can read farms (for shepherd discovery).
+    // Only the farm owner can create / update / delete their farm.
+
+    match /farms/{farmId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && request.auth.uid == request.resource.data.ownerId;
+      allow update, delete: if isSignedIn() && request.auth.uid == resource.data.ownerId;
+    }
+
+    // ── fodder_plots ──────────────────────────────────────────────────────────
+
+    match /fodder_plots/{plotId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && request.auth.uid == request.resource.data.ownerId;
+      allow update, delete: if isSignedIn() && request.auth.uid == resource.data.ownerId;
+    }
+
+    // ── bookings ──────────────────────────────────────────────────────────────
+    // Farmer or shepherd involved in the booking can read it.
+    // Shepherd creates bookings; status updates allowed for both parties.
+
+    match /bookings/{bookingId} {
+      allow read: if isSignedIn() && (
+        request.auth.uid == resource.data.farmerId ||
+        request.auth.uid == resource.data.shepherdId
+      );
+      allow create: if isSignedIn() && request.auth.uid == request.resource.data.shepherdId;
+      allow update: if isSignedIn() && (
+        request.auth.uid == resource.data.farmerId ||
+        request.auth.uid == resource.data.shepherdId
+      );
+      allow delete: if false;
+    }
+
+    // ── reviews ───────────────────────────────────────────────────────────────
+
+    match /reviews/{reviewId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && request.auth.uid == request.resource.data.authorId;
+      allow update, delete: if isSignedIn() && request.auth.uid == resource.data.authorId;
+    }
+
+    // ── vets ──────────────────────────────────────────────────────────────────
+    // Readable by any authenticated user; writable only by the vet owner.
+
+    match /vets/{vetId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && request.auth.uid == request.resource.data.ownerId;
+      allow update, delete: if isSignedIn() && request.auth.uid == resource.data.ownerId;
+    }
+
+    // ── disease_alerts ────────────────────────────────────────────────────────
+    // Any authenticated user can read active alerts.
+    // Any authenticated user can report an alert (community reporting).
+
+    match /disease_alerts/{alertId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn();
+      allow update, delete: if isSignedIn() && request.auth.uid == resource.data.reportedBy;
+    }
+
+    // ── notifications ─────────────────────────────────────────────────────────
+
+    match /notifications/{notifId} {
+      allow read, update: if isOwner(resource.data.userId);
+      allow create: if isSignedIn();
+      allow delete: if isOwner(resource.data.userId);
+    }
+
+    // ── blocked_periods ───────────────────────────────────────────────────────
+
+    match /blocked_periods/{periodId} {
+      allow read: if isSignedIn();
+      allow write: if isSignedIn() && request.auth.uid == resource.data.ownerId;
+    }
+
+    // ── conversations & messages ──────────────────────────────────────────────
+
+    match /conversations/{convId} {
+      allow read, write: if isSignedIn() && (
+        request.auth.uid == resource.data.farmerId ||
+        request.auth.uid == resource.data.shepherdId
+      );
+
+      match /messages/{msgId} {
+        allow read: if isSignedIn();
+        allow create: if isSignedIn() && request.auth.uid == request.resource.data.senderId;
+      }
+    }
+
+    // ── emergency_contacts ────────────────────────────────────────────────────
+
+    match /emergency_contacts/{contactId} {
+      allow read: if isSignedIn();
+    }
+
+    // ── analytics ─────────────────────────────────────────────────────────────
+
+    match /analytics/{docId} {
+      allow read: if false;
+      allow write: if isSignedIn();
+    }
+  }
+}

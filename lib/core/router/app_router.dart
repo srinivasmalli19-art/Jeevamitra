@@ -52,6 +52,13 @@ class _RouterNotifier extends ChangeNotifier {
 String? _redirect(Ref ref, GoRouterState state) {
   final loc = state.matchedLocation;
 
+  // Declare location flags early so they are available in every branch below.
+  final isOnSplash = loc == RouteConstants.splash;
+  final isOnOnboarding = loc.startsWith('/onboarding');
+  final isOnAuth = loc.startsWith('/auth');
+  final isOnFarmer = loc.startsWith('/farmer');
+  final isOnShepherd = loc.startsWith('/shepherd');
+
   final firebaseReady = ref.read(firebaseInitializedProvider);
   if (!firebaseReady) return null; // stays on splash showing setup screen
 
@@ -59,20 +66,21 @@ String? _redirect(Ref ref, GoRouterState state) {
   final userDocAsync = ref.read(currentUserDocProvider);
 
   final isLoading = authAsync.isLoading || userDocAsync.isLoading;
-  if (isLoading) return null;
+  if (isLoading) {
+    // While auth is resolving, keep protected routes on splash to prevent
+    // unauthenticated Firestore queries from firing.
+    if (isOnFarmer || isOnShepherd) return RouteConstants.splash;
+    return null;
+  }
 
   final user = authAsync.valueOrNull;
   final doc = userDocAsync.valueOrNull;
 
-  final isOnSplash = loc == RouteConstants.splash;
-  final isOnOnboarding = loc.startsWith('/onboarding');
-  final isOnAuth = loc.startsWith('/auth');
-  final isOnFarmer = loc.startsWith('/farmer');
-  final isOnShepherd = loc.startsWith('/shepherd');
-
-  // Not logged in
+  // Not logged in — also redirect from splash so sign-out doesn't leave user
+  // stuck on a blank splash screen (happens when loading guard briefly parks
+  // the user there and auth then settles to null).
   if (user == null) {
-    if (isOnFarmer || isOnShepherd) return RouteConstants.phoneLogin;
+    if (isOnFarmer || isOnShepherd || isOnSplash) return RouteConstants.phoneLogin;
     return null;
   }
 

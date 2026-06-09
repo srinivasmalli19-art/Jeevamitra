@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../data/models/farm_model.dart';
 import '../../../data/repositories/farm_repository.dart';
+import '../auth/auth_provider.dart';
 
 // ─── Repository singleton ─────────────────────────────────────────────────────
 
@@ -30,6 +31,8 @@ final farmDetailProvider =
 final nearbyFarmsProvider =
     StreamProvider.family<List<FarmModel>, ({double lat, double lng, double radiusKm})>(
         (ref, params) {
+  final user = ref.watch(authStateProvider).valueOrNull;
+  if (user == null) return Stream.value([]);
   final repo = ref.watch(farmRepositoryProvider);
   return repo.watchNearby(
     lat: params.lat,

@@ -220,13 +220,19 @@ class _VetList extends ConsumerWidget {
       loading: () => const SliverFillRemaining(
         child: JmShimmerList(count: 4, cardHeight: 120),
       ),
-      error: (e, _) => SliverFillRemaining(
-        child: JmErrorState(
-          message: e.toString(),
-          onRetry: () => ref.invalidate(nearbyVetsProvider),
-          isNetwork: true,
-        ),
-      ),
+      error: (e, _) {
+        final errStr = e.toString();
+        final isPermission = errStr.contains('permission-denied');
+        return SliverFillRemaining(
+          child: JmErrorState(
+            message: isPermission
+                ? 'Access denied. Please sign in to find nearby vets.'
+                : errStr,
+            onRetry: () => ref.invalidate(nearbyVetsProvider),
+            isNetwork: !isPermission,
+          ),
+        );
+      },
       data: (all) {
         final vets = filter.apply(all);
         if (vets.isEmpty) {
