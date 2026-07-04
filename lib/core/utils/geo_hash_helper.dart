@@ -59,11 +59,26 @@ class GeoHashHelper {
   ///      .where('geohash', isLessThanOrEqualTo: upper)
   static (String lower, String upper) queryRange(double lat, double lng, {int precision = 5}) {
     final hash = encode(lat, lng, precision: precision);
-    final upper = hash.substring(0, hash.length - 1) +
-        _base32[_base32.indexOf(hash[hash.length - 1]) + 1 < _base32.length
-            ? _base32.indexOf(hash[hash.length - 1]) + 1
-            : _base32.length - 1];
-    return (hash, upper);
+    return (hash, _nextHash(hash));
+  }
+
+  /// Next base32 string after [hash] in lexicographic order, carrying the
+  /// increment through preceding characters (e.g. "...z" -> "...z" + 1 in the
+  /// second-to-last place, not a no-op clamp). Used as the inclusive upper
+  /// bound of a geohash prefix range query.
+  static String _nextHash(String hash) {
+    final chars = hash.split('');
+    for (int i = chars.length - 1; i >= 0; i--) {
+      final idx = _base32.indexOf(chars[i]);
+      if (idx < _base32.length - 1) {
+        chars[i] = _base32[idx + 1];
+        return chars.join();
+      }
+      chars[i] = _base32[0];
+    }
+    // Every character was already the maximum symbol — this hash is already
+    // the largest possible value of this length, so it is its own upper bound.
+    return hash;
   }
 
   /// Haversine distance in km between two coordinates.

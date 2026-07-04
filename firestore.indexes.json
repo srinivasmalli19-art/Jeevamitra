@@ -12,16 +12,8 @@
       "collectionGroup": "farms",
       "queryScope": "COLLECTION",
       "fields": [
-        { "fieldPath": "geohash", "order": "ASCENDING" },
-        { "fieldPath": "isAvailable", "order": "ASCENDING" }
-      ]
-    },
-    {
-      "collectionGroup": "vets",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "geohash", "order": "ASCENDING" },
-        { "fieldPath": "isActive", "order": "ASCENDING" }
+        { "fieldPath": "isAvailable", "order": "ASCENDING" },
+        { "fieldPath": "geohash", "order": "ASCENDING" }
       ]
     },
     {
@@ -44,8 +36,25 @@
       "collectionGroup": "disease_alerts",
       "queryScope": "COLLECTION",
       "fields": [
-        { "fieldPath": "geohash", "order": "ASCENDING" },
-        { "fieldPath": "isActive", "order": "ASCENDING" }
+        { "fieldPath": "isActive", "order": "ASCENDING" },
+        { "fieldPath": "geohash", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "disease_alerts",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "isActive", "order": "ASCENDING" },
+        { "fieldPath": "district", "order": "ASCENDING" },
+        { "fieldPath": "issuedAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "notifications",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "userId", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
       ]
     }
   ],
