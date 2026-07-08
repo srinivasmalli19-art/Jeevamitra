@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/constants/route_constants.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../../generated/l10n/app_localizations.dart';
 import '../../providers/auth/auth_provider.dart';
 import '../../widgets/common/jm_button.dart';
 
@@ -43,8 +44,8 @@ class _RoleSelectScreenState extends ConsumerState<RoleSelectScreen> {
     if (!context.mounted) return;
     if (!created) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Something went wrong. Please try again.'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context).genericErrorRetryMsg),
           backgroundColor: AppColors.error,
         ),
       );
@@ -56,6 +57,7 @@ class _RoleSelectScreenState extends ConsumerState<RoleSelectScreen> {
   @override
   Widget build(BuildContext context) {
     final isLoading = ref.watch(authNotifierProvider).isLoading;
+    final loc = AppLocalizations.of(context);
 
     return Scaffold(
       body: SafeArea(
@@ -65,16 +67,15 @@ class _RoleSelectScreenState extends ConsumerState<RoleSelectScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: AppSpacing.xxxl),
-              Text('మీరు ఎవరు?', style: Theme.of(context).textTheme.headlineMedium),
+              Text(loc.selectRoleTitle, style: Theme.of(context).textTheme.headlineMedium),
               const SizedBox(height: AppSpacing.xs),
-              Text('I am a...', style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary)),
+              Text(loc.selectRole, style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary)),
               const SizedBox(height: AppSpacing.xxl),
               _RoleTile(
                 role: 'farmer',
                 icon: Icons.agriculture_rounded,
-                title: 'రైతు',
-                titleEn: 'Farmer',
-                description: 'మీ దగ్గర భూమి ఉంది, మేతకు అందించాలనుకుంటున్నారు',
+                title: loc.roleFarmer,
+                description: loc.roleFarmerDesc,
                 color: AppColors.primary,
                 isSelected: _selectedRole == 'farmer',
                 onTap: () => setState(() => _selectedRole = 'farmer'),
@@ -83,16 +84,15 @@ class _RoleSelectScreenState extends ConsumerState<RoleSelectScreen> {
               _RoleTile(
                 role: 'shepherd',
                 icon: Icons.groups_rounded,
-                title: 'గొర్రెల కాపరి',
-                titleEn: 'Shepherd',
-                description: 'మీ దగ్గర జంతువులు ఉన్నాయి, మేత భూమి కావాలి',
+                title: loc.roleShepherd,
+                description: loc.roleShepherdDesc,
                 color: AppColors.secondary,
                 isSelected: _selectedRole == 'shepherd',
                 onTap: () => setState(() => _selectedRole = 'shepherd'),
               ),
               const Spacer(),
               JmButton(
-                label: 'Continue',
+                label: loc.continueBtn,
                 onPressed: _selectedRole == null || isLoading ? null : _proceed,
                 isLoading: isLoading,
               ),
@@ -109,7 +109,6 @@ class _RoleTile extends StatelessWidget {
   final String role;
   final IconData icon;
   final String title;
-  final String titleEn;
   final String description;
   final Color color;
   final bool isSelected;
@@ -119,7 +118,6 @@ class _RoleTile extends StatelessWidget {
     required this.role,
     required this.icon,
     required this.title,
-    required this.titleEn,
     required this.description,
     required this.color,
     required this.isSelected,
@@ -157,7 +155,6 @@ class _RoleTile extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(title, style: Theme.of(context).textTheme.titleMedium),
-                    Text(titleEn, style: Theme.of(context).textTheme.labelSmall?.copyWith(color: color)),
                     const SizedBox(height: AppSpacing.xs),
                     Text(description, style: Theme.of(context).textTheme.bodySmall),
                   ],

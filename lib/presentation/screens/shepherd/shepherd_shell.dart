@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/constants/route_constants.dart';
+import '../../../generated/l10n/app_localizations.dart';
 import '../../widgets/common/emergency_fab.dart';
 
 class ShepherdShell extends StatelessWidget {
@@ -9,13 +10,13 @@ class ShepherdShell extends StatelessWidget {
 
   const ShepherdShell({super.key, required this.navigationShell});
 
-  static const _tabs = [
-    _TabItem(icon: Icons.home_rounded, label: 'Home', route: RouteConstants.shepherdDashboard),
-    _TabItem(icon: Icons.travel_explore_rounded, label: 'Discover', route: RouteConstants.shepherdDiscover),
-    _TabItem(icon: Icons.calendar_month_rounded, label: 'Bookings', route: RouteConstants.shepherdBookings),
-    _TabItem(icon: Icons.medical_services_rounded, label: 'Vets', route: RouteConstants.shepherdVets),
-    _TabItem(icon: Icons.person_rounded, label: 'Profile', route: RouteConstants.shepherdProfile),
-  ];
+  List<_TabItem> _tabs(AppLocalizations loc) => [
+        _TabItem(icon: Icons.home_rounded, label: loc.homeTab, route: RouteConstants.shepherdDashboard),
+        _TabItem(icon: Icons.travel_explore_rounded, label: loc.discover, route: RouteConstants.shepherdDiscover),
+        _TabItem(icon: Icons.calendar_month_rounded, label: loc.bookings, route: RouteConstants.shepherdBookings),
+        _TabItem(icon: Icons.medical_services_rounded, label: loc.vets, route: RouteConstants.shepherdVets),
+        _TabItem(icon: Icons.person_rounded, label: loc.profile, route: RouteConstants.shepherdProfile),
+      ];
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +30,7 @@ class ShepherdShell extends StatelessWidget {
           i,
           initialLocation: i == navigationShell.currentIndex,
         ),
-        destinations: _tabs
+        destinations: _tabs(AppLocalizations.of(context))
             .map((t) => NavigationDestination(icon: Icon(t.icon), label: t.label))
             .toList(),
       ),

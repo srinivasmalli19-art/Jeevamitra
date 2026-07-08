@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/constants/route_constants.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../../generated/l10n/app_localizations.dart';
 import '../../widgets/common/jm_button.dart';
 
 class OnboardingScreen extends StatefulWidget {
@@ -17,29 +18,26 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   final _controller = PageController();
   int _page = 0;
 
-  static const _pages = [
-    _OnboardPage(
-      icon: Icons.agriculture_rounded,
-      title: 'మీ భూమిని చూపించండి',
-      titleEn: 'List Your Farm Land',
-      body: 'మీ పొలం, మేత భూమిని రైతులు నమోదు చేసి గొర్రెల కాపరులకు అందుబాటులో పెట్టవచ్చు.',
-      color: AppColors.primary,
-    ),
-    _OnboardPage(
-      icon: Icons.search_rounded,
-      title: 'మేత భూమి వెతకండి',
-      titleEn: 'Find Grazing Land Nearby',
-      body: 'మీ దగ్గర్లో అందుబాటులో ఉన్న మేత భూమిని, ధర తో నేరుగా రైతుతో బుక్ చేసుకోండి.',
-      color: AppColors.secondary,
-    ),
-    _OnboardPage(
-      icon: Icons.local_hospital_rounded,
-      title: 'పశు వైద్యుడు దగ్గర్లో',
-      titleEn: 'Vets Near You',
-      body: 'అత్యవసర పరిస్థితుల్లో దగ్గర్లో ఉన్న పశువైద్యులను ఒక్క క్లిక్‌తో సంప్రదించండి.',
-      color: AppColors.info,
-    ),
-  ];
+  List<_OnboardPage> _pages(AppLocalizations loc) => [
+        _OnboardPage(
+          icon: Icons.agriculture_rounded,
+          title: loc.onboardTitle1,
+          body: loc.onboardBody1,
+          color: AppColors.primary,
+        ),
+        _OnboardPage(
+          icon: Icons.search_rounded,
+          title: loc.onboardTitle2,
+          body: loc.onboardBody2,
+          color: AppColors.secondary,
+        ),
+        _OnboardPage(
+          icon: Icons.local_hospital_rounded,
+          title: loc.onboardTitle3,
+          body: loc.onboardBody3,
+          color: AppColors.info,
+        ),
+      ];
 
   @override
   void dispose() {
@@ -49,6 +47,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
+    final pages = _pages(loc);
     return Scaffold(
       body: SafeArea(
         child: Column(
@@ -56,9 +56,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             Expanded(
               child: PageView.builder(
                 controller: _controller,
-                itemCount: _pages.length,
+                itemCount: pages.length,
                 onPageChanged: (i) => setState(() => _page = i),
-                itemBuilder: (_, i) => _pages[i],
+                itemBuilder: (_, i) => pages[i],
               ),
             ),
             Padding(
@@ -68,7 +68,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: List.generate(
-                      _pages.length,
+                      pages.length,
                       (i) => AnimatedContainer(
                         duration: const Duration(milliseconds: 300),
                         margin: const EdgeInsets.symmetric(horizontal: 4),
@@ -82,12 +82,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     ),
                   ),
                   const SizedBox(height: AppSpacing.xl),
-                  if (_page < _pages.length - 1)
+                  if (_page < pages.length - 1)
                     Row(
                       children: [
                         Expanded(
                           child: JmButton(
-                            label: 'Skip',
+                            label: loc.skipBtn,
                             onPressed: () => context.go(RouteConstants.phoneLogin),
                             variant: JmButtonVariant.ghost,
                           ),
@@ -95,7 +95,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         const SizedBox(width: AppSpacing.md),
                         Expanded(
                           child: JmButton(
-                            label: 'Next →',
+                            label: '${loc.nextBtn} →',
                             onPressed: () => _controller.nextPage(
                               duration: const Duration(milliseconds: 350),
                               curve: Curves.easeInOut,
@@ -106,7 +106,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     )
                   else
                     JmButton(
-                      label: 'Get Started',
+                      label: loc.getStartedBtn,
                       onPressed: () => context.go(RouteConstants.phoneLogin),
                       leadingIcon: Icons.arrow_forward_rounded,
                     ),
@@ -124,14 +124,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 class _OnboardPage extends StatelessWidget {
   final IconData icon;
   final String title;
-  final String titleEn;
   final String body;
   final Color color;
 
   const _OnboardPage({
     required this.icon,
     required this.title,
-    required this.titleEn,
     required this.body,
     required this.color,
   });
@@ -154,8 +152,6 @@ class _OnboardPage extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.xl),
           Text(title, style: Theme.of(context).textTheme.headlineMedium, textAlign: TextAlign.center),
-          const SizedBox(height: AppSpacing.xs),
-          Text(titleEn, style: Theme.of(context).textTheme.bodySmall, textAlign: TextAlign.center),
           const SizedBox(height: AppSpacing.base),
           Text(body, style: Theme.of(context).textTheme.bodyMedium, textAlign: TextAlign.center),
         ],

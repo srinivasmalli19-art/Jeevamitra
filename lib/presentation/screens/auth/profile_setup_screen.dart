@@ -7,6 +7,7 @@ import '../../../core/constants/route_constants.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/utils/validators.dart';
+import '../../../generated/l10n/app_localizations.dart';
 import '../../providers/auth/auth_provider.dart';
 import '../../widgets/common/jm_button.dart';
 import '../../widgets/common/jm_text_field.dart';
@@ -51,8 +52,8 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
     if (!context.mounted) return;
     if (!saved) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Could not save your profile. Please try again.'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context).saveProfileFailedMsg),
           backgroundColor: AppColors.error,
         ),
       );
@@ -69,8 +70,7 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
   @override
   Widget build(BuildContext context) {
     final isLoading = ref.watch(authNotifierProvider).isLoading;
-    final userDoc = ref.watch(currentUserDocProvider).valueOrNull;
-    final isFarmer = userDoc?.isFarmer ?? true;
+    final loc = AppLocalizations.of(context);
 
     return Scaffold(
       body: SafeArea(
@@ -83,44 +83,44 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
               children: [
                 const SizedBox(height: AppSpacing.xxxl),
                 Text(
-                  isFarmer ? 'రైతు ప్రొఫైల్' : 'కాపరి ప్రొఫైల్',
+                  loc.completeProfile,
                   style: Theme.of(context).textTheme.headlineMedium,
                 ),
                 const SizedBox(height: AppSpacing.xs),
                 Text(
-                  'Complete your profile to get started',
+                  loc.completeProfileSubtitle,
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
                 const SizedBox(height: AppSpacing.xxl),
                 JmTextField(
-                  label: 'Your Name',
-                  hint: 'Enter your full name',
+                  label: loc.yourName,
+                  hint: loc.yourNameHint,
                   controller: _nameCtrl,
-                  validator: Validators.name,
+                  validator: (v) => Validators.name(v, loc),
                   textInputAction: TextInputAction.next,
                   prefixIcon: const Icon(Icons.person_outline_rounded),
                 ),
                 const SizedBox(height: AppSpacing.base),
                 JmTextField(
-                  label: 'Village / Town',
-                  hint: 'Your village or town name',
+                  label: loc.yourVillage,
+                  hint: loc.yourVillageHint,
                   controller: _villageCtrl,
-                  validator: Validators.village,
+                  validator: (v) => Validators.village(v, loc),
                   textInputAction: TextInputAction.next,
                   prefixIcon: const Icon(Icons.location_on_outlined),
                 ),
                 const SizedBox(height: AppSpacing.base),
                 JmTextField(
-                  label: 'District',
-                  hint: 'Your district',
+                  label: loc.yourDistrict,
+                  hint: loc.yourDistrict,
                   controller: _districtCtrl,
-                  validator: (v) => Validators.required(v, 'District'),
+                  validator: (v) => Validators.district(v, loc),
                   textInputAction: TextInputAction.done,
                   prefixIcon: const Icon(Icons.map_outlined),
                 ),
                 const SizedBox(height: AppSpacing.xxl),
                 JmButton(
-                  label: 'Save & Continue',
+                  label: loc.saveContinueBtn,
                   onPressed: isLoading ? null : _save,
                   isLoading: isLoading,
                   leadingIcon: Icons.check_rounded,

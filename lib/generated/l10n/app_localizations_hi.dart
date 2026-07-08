@@ -329,4 +329,192 @@ class AppLocalizationsHi extends AppLocalizations {
   String acres(String area) {
     return '$area एकड़';
   }
+
+  @override
+  String get mobileNumberSubtitle =>
+      'OTP प्राप्त करने के लिए अपना मोबाइल नंबर दर्ज करें';
+
+  @override
+  String get termsAgreement =>
+      'जारी रखकर, आप हमारी शर्तों और गोपनीयता नीति से सहमत होते हैं';
+
+  @override
+  String get otpNotReceivedMsg => 'OTP प्राप्त नहीं हुआ?';
+
+  @override
+  String get selectRoleTitle => 'आप कौन हैं?';
+
+  @override
+  String get genericErrorRetryMsg => 'कुछ गलत हो गया। कृपया पुनः प्रयास करें।';
+
+  @override
+  String get invalidOtpMsg => 'अमान्य OTP। कृपया पुनः प्रयास करें।';
+
+  @override
+  String get genericSaveFailedMsg => 'सहेजने में विफल। कृपया पुनः प्रयास करें।';
+
+  @override
+  String get completeProfileSubtitle =>
+      'शुरू करने के लिए अपनी प्रोफ़ाइल पूरी करें';
+
+  @override
+  String get yourNameHint => 'अपना पूरा नाम दर्ज करें';
+
+  @override
+  String get yourVillageHint => 'आपके गाँव या शहर का नाम';
+
+  @override
+  String get saveContinueBtn => 'सहेजें और जारी रखें';
+
+  @override
+  String get saveProfileFailedMsg =>
+      'आपकी प्रोफ़ाइल सहेजी नहीं जा सकी। कृपया पुनः प्रयास करें।';
+
+  @override
+  String get getStartedBtn => 'शुरू करें';
+
+  @override
+  String get homeTab => 'होम';
+
+  @override
+  String greetingName(String name) {
+    return 'नमस्ते, $name!';
+  }
+
+  @override
+  String get voiceAssistantTooltip => 'वॉइस असिस्टेंट';
+
+  @override
+  String get alertsLabel => 'अलर्ट';
+
+  @override
+  String get overviewLabel => 'अवलोकन';
+
+  @override
+  String get earningsLabel => 'कमाई';
+
+  @override
+  String get recentBookingsLabel => 'हाल की बुकिंग';
+
+  @override
+  String get viewAllBtn => 'सभी देखें';
+
+  @override
+  String get noBookingsYetTitle => 'अभी तक कोई बुकिंग नहीं';
+
+  @override
+  String get noBookingsYetSubtitle => 'चरवाहों की बुकिंग यहाँ दिखाई देंगी';
+
+  @override
+  String pendingApprovalMsg(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count बुकिंग आपकी स्वीकृति की प्रतीक्षा में हैं',
+      one: '1 बुकिंग आपकी स्वीकृति की प्रतीक्षा में है',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get tapToReviewMsg => 'समीक्षा करने और स्वीकार करने के लिए टैप करें';
+
+  @override
+  String bookingSummaryMsg(int count, String date, String amount) {
+    return '$count जानवर · $date · ₹$amount';
+  }
+
+  @override
+  String get upcomingLabel => 'आगामी';
+
+  @override
+  String get tripsDoneLabel => 'पूरी यात्राएं';
+
+  @override
+  String get spentLabel => 'खर्च';
+
+  @override
+  String get findLandLabel => 'भूमि खोजें';
+
+  @override
+  String get findVetLabel => 'पशु चिकित्सक खोजें';
+
+  @override
+  String get myTripsLabel => 'मेरी यात्राएं';
+
+  @override
+  String get noTripsYetTitle => 'अभी तक कोई यात्रा नहीं';
+
+  @override
+  String get noTripsYetSubtitle =>
+      'अपनी पहली यात्रा शुरू करने के लिए भूमि बुक करें';
+
+  @override
+  String get discoverLandsBtn => 'भूमि खोजें';
+
+  @override
+  String activeTripMsg(String title) {
+    return 'सक्रिय यात्रा: $title';
+  }
+
+  @override
+  String tripEndsMsg(int count, String date) {
+    return '$count जानवर · $date को समाप्त';
+  }
+
+  @override
+  String get editProfileTitle => 'प्रोफ़ाइल संपादित करें';
+
+  @override
+  String get profileInfoLabel => 'प्रोफ़ाइल जानकारी';
+
+  @override
+  String get accountLabel => 'खाता';
+
+  @override
+  String get deleteAccountTitle => 'खाता हटाएं';
+
+  @override
+  String get deleteAccountBody =>
+      'इससे आपका खाता और आपका सारा डेटा स्थायी रूप से हट जाएगा। इसे वापस नहीं लाया जा सकता।';
+
+  @override
+  String get deleteAccountSubtitle =>
+      'आपका सारा डेटा स्थायी रूप से हटा देता है';
+
+  @override
+  String get landsLabel => 'भूमियाँ';
+
+  @override
+  String get totalTripsLabel => 'कुल यात्राएं';
+
+  @override
+  String get phoneRequiredMsg => 'फ़ोन नंबर आवश्यक है';
+
+  @override
+  String get phoneInvalidMsg => 'मान्य 10 अंकों का मोबाइल नंबर दर्ज करें';
+
+  @override
+  String get nameRequiredMsg => 'नाम आवश्यक है';
+
+  @override
+  String get nameTooShortMsg => 'नाम कम से कम 2 अक्षर का होना चाहिए';
+
+  @override
+  String get nameTooLongMsg => 'नाम बहुत लंबा है';
+
+  @override
+  String get villageRequiredMsg => 'गाँव/शहर आवश्यक है';
+
+  @override
+  String get villageInvalidMsg => 'मान्य स्थान दर्ज करें';
+
+  @override
+  String get otpRequiredMsg => 'OTP आवश्यक है';
+
+  @override
+  String get otpInvalidMsg => '6 अंकों का OTP दर्ज करें';
+
+  @override
+  String get districtRequiredMsg => 'जिला आवश्यक है';
 }

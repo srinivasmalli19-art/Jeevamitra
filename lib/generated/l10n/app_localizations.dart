@@ -717,6 +717,336 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{area} Acres'**
   String acres(String area);
+
+  /// No description provided for @mobileNumberSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your mobile number to receive OTP'**
+  String get mobileNumberSubtitle;
+
+  /// No description provided for @termsAgreement.
+  ///
+  /// In en, this message translates to:
+  /// **'By continuing, you agree to our Terms & Privacy Policy'**
+  String get termsAgreement;
+
+  /// No description provided for @otpNotReceivedMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Didn\'t receive OTP?'**
+  String get otpNotReceivedMsg;
+
+  /// No description provided for @selectRoleTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Who are you?'**
+  String get selectRoleTitle;
+
+  /// No description provided for @genericErrorRetryMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong. Please try again.'**
+  String get genericErrorRetryMsg;
+
+  /// No description provided for @invalidOtpMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid OTP. Please try again.'**
+  String get invalidOtpMsg;
+
+  /// No description provided for @genericSaveFailedMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to save. Please try again.'**
+  String get genericSaveFailedMsg;
+
+  /// No description provided for @completeProfileSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete your profile to get started'**
+  String get completeProfileSubtitle;
+
+  /// No description provided for @yourNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your full name'**
+  String get yourNameHint;
+
+  /// No description provided for @yourVillageHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Your village or town name'**
+  String get yourVillageHint;
+
+  /// No description provided for @saveContinueBtn.
+  ///
+  /// In en, this message translates to:
+  /// **'Save & Continue'**
+  String get saveContinueBtn;
+
+  /// No description provided for @saveProfileFailedMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save your profile. Please try again.'**
+  String get saveProfileFailedMsg;
+
+  /// No description provided for @getStartedBtn.
+  ///
+  /// In en, this message translates to:
+  /// **'Get Started'**
+  String get getStartedBtn;
+
+  /// No description provided for @homeTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Home'**
+  String get homeTab;
+
+  /// No description provided for @greetingName.
+  ///
+  /// In en, this message translates to:
+  /// **'Hello, {name}!'**
+  String greetingName(String name);
+
+  /// No description provided for @voiceAssistantTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Voice Assistant'**
+  String get voiceAssistantTooltip;
+
+  /// No description provided for @alertsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Alerts'**
+  String get alertsLabel;
+
+  /// No description provided for @overviewLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Overview'**
+  String get overviewLabel;
+
+  /// No description provided for @earningsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Earnings'**
+  String get earningsLabel;
+
+  /// No description provided for @recentBookingsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent Bookings'**
+  String get recentBookingsLabel;
+
+  /// No description provided for @viewAllBtn.
+  ///
+  /// In en, this message translates to:
+  /// **'View all'**
+  String get viewAllBtn;
+
+  /// No description provided for @noBookingsYetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No bookings yet'**
+  String get noBookingsYetTitle;
+
+  /// No description provided for @noBookingsYetSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Bookings from shepherds will appear here'**
+  String get noBookingsYetSubtitle;
+
+  /// No description provided for @pendingApprovalMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 booking awaiting your approval} other{{count} bookings awaiting your approval}}'**
+  String pendingApprovalMsg(int count);
+
+  /// No description provided for @tapToReviewMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to review and accept'**
+  String get tapToReviewMsg;
+
+  /// No description provided for @bookingSummaryMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} animals · {date} · ₹{amount}'**
+  String bookingSummaryMsg(int count, String date, String amount);
+
+  /// No description provided for @upcomingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming'**
+  String get upcomingLabel;
+
+  /// No description provided for @tripsDoneLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Trips Done'**
+  String get tripsDoneLabel;
+
+  /// No description provided for @spentLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Spent'**
+  String get spentLabel;
+
+  /// No description provided for @findLandLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Find Land'**
+  String get findLandLabel;
+
+  /// No description provided for @findVetLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Find Vet'**
+  String get findVetLabel;
+
+  /// No description provided for @myTripsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'My Trips'**
+  String get myTripsLabel;
+
+  /// No description provided for @noTripsYetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No trips yet'**
+  String get noTripsYetTitle;
+
+  /// No description provided for @noTripsYetSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Book a land to start your first trip'**
+  String get noTripsYetSubtitle;
+
+  /// No description provided for @discoverLandsBtn.
+  ///
+  /// In en, this message translates to:
+  /// **'Discover Lands'**
+  String get discoverLandsBtn;
+
+  /// No description provided for @activeTripMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Active trip: {title}'**
+  String activeTripMsg(String title);
+
+  /// No description provided for @tripEndsMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} animals · ends {date}'**
+  String tripEndsMsg(int count, String date);
+
+  /// No description provided for @editProfileTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Profile'**
+  String get editProfileTitle;
+
+  /// No description provided for @profileInfoLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile Info'**
+  String get profileInfoLabel;
+
+  /// No description provided for @accountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Account'**
+  String get accountLabel;
+
+  /// No description provided for @deleteAccountTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Account'**
+  String get deleteAccountTitle;
+
+  /// No description provided for @deleteAccountBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This will permanently delete your account and all your data. This cannot be undone.'**
+  String get deleteAccountBody;
+
+  /// No description provided for @deleteAccountSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Permanently removes all your data'**
+  String get deleteAccountSubtitle;
+
+  /// No description provided for @landsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Lands'**
+  String get landsLabel;
+
+  /// No description provided for @totalTripsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Trips'**
+  String get totalTripsLabel;
+
+  /// No description provided for @phoneRequiredMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone number required'**
+  String get phoneRequiredMsg;
+
+  /// No description provided for @phoneInvalidMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter valid 10-digit mobile number'**
+  String get phoneInvalidMsg;
+
+  /// No description provided for @nameRequiredMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Name required'**
+  String get nameRequiredMsg;
+
+  /// No description provided for @nameTooShortMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Name must be at least 2 characters'**
+  String get nameTooShortMsg;
+
+  /// No description provided for @nameTooLongMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Name too long'**
+  String get nameTooLongMsg;
+
+  /// No description provided for @villageRequiredMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Village/town required'**
+  String get villageRequiredMsg;
+
+  /// No description provided for @villageInvalidMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid location'**
+  String get villageInvalidMsg;
+
+  /// No description provided for @otpRequiredMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'OTP required'**
+  String get otpRequiredMsg;
+
+  /// No description provided for @otpInvalidMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter 6-digit OTP'**
+  String get otpInvalidMsg;
+
+  /// No description provided for @districtRequiredMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'District required'**
+  String get districtRequiredMsg;
 }
 
 class _AppLocalizationsDelegate

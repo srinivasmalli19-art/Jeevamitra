@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../../generated/l10n/app_localizations.dart';
 import 'jm_button.dart';
 
 class JmErrorState extends StatelessWidget {
@@ -17,6 +18,7 @@ class JmErrorState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.xxxl),
@@ -30,7 +32,7 @@ class JmErrorState extends StatelessWidget {
             ),
             const SizedBox(height: AppSpacing.base),
             Text(
-              isNetwork ? 'No Internet' : 'Something went wrong',
+              isNetwork ? loc.noInternetMsg : loc.errorMsg,
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: AppSpacing.sm),
@@ -42,7 +44,7 @@ class JmErrorState extends StatelessWidget {
             if (onRetry != null) ...[
               const SizedBox(height: AppSpacing.xl),
               JmButton(
-                label: 'Try Again',
+                label: loc.retryBtn,
                 onPressed: onRetry,
                 fullWidth: false,
                 leadingIcon: Icons.refresh_rounded,

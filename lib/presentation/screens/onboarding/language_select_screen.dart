@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/constants/route_constants.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../../generated/l10n/app_localizations.dart';
 import '../../providers/locale_provider.dart';
 import '../../widgets/common/jm_button.dart';
 
@@ -26,6 +27,7 @@ class _LanguageSelectScreenState extends ConsumerState<LanguageSelectScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
     return Scaffold(
       body: SafeArea(
         child: Padding(
@@ -34,9 +36,9 @@ class _LanguageSelectScreenState extends ConsumerState<LanguageSelectScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: AppSpacing.xxxl),
-              Text('భాష ఎంచుకోండి', style: Theme.of(context).textTheme.headlineMedium),
+              Text(loc.selectLanguage, style: Theme.of(context).textTheme.headlineMedium),
               const SizedBox(height: AppSpacing.xs),
-              Text('Choose your language', style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary)),
+              Text(loc.languageHint, style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary)),
               const SizedBox(height: AppSpacing.xxl),
               ...(_languages.map((lang) => _LanguageTile(
                 code: lang.$1,
@@ -48,7 +50,7 @@ class _LanguageSelectScreenState extends ConsumerState<LanguageSelectScreen> {
               ))),
               const Spacer(),
               JmButton(
-                label: 'Continue  →',
+                label: '${loc.continueBtn}  →',
                 onPressed: () async {
                   await ref.read(localeProvider.notifier).setLanguage(_selected);
                   if (!context.mounted) return;

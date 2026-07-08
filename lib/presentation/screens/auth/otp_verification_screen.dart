@@ -10,6 +10,7 @@ import '../../../core/constants/route_constants.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/utils/validators.dart';
+import '../../../generated/l10n/app_localizations.dart';
 import '../../providers/auth/auth_provider.dart';
 import '../../widgets/common/jm_button.dart';
 import '../../widgets/common/jm_text_field.dart';
@@ -59,7 +60,7 @@ class _OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen> {
     if (!context.mounted) return;
     if (!ok) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Invalid OTP. Please try again.'), backgroundColor: AppColors.error),
+        SnackBar(content: Text(AppLocalizations.of(context).invalidOtpMsg), backgroundColor: AppColors.error),
       );
       return;
     }
@@ -71,6 +72,7 @@ class _OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen> {
   Widget build(BuildContext context) {
     final isLoading = ref.watch(authNotifierProvider).isLoading;
     final canResend = _seconds == 0;
+    final loc = AppLocalizations.of(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -91,29 +93,29 @@ class _OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: AppSpacing.xl),
-                Text('OTP నమోదు చేయండి', style: Theme.of(context).textTheme.headlineMedium),
+                Text(loc.enterOtp, style: Theme.of(context).textTheme.headlineMedium),
                 const SizedBox(height: AppSpacing.xs),
                 Text(
-                  'Enter the 6-digit OTP sent to ${widget.phone}',
+                  loc.otpSentTo(widget.phone),
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
                 ),
                 const SizedBox(height: AppSpacing.xxl),
                 JmTextField(
-                  label: 'OTP',
-                  hint: '• • • • • •',
+                  label: loc.enterOtp,
+                  hint: loc.otpHint,
                   controller: _otpCtrl,
                   keyboardType: TextInputType.number,
                   textInputAction: TextInputAction.done,
                   maxLength: AppConstants.otpLength,
                   inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                  validator: Validators.otp,
+                  validator: (v) => Validators.otp(v, loc),
                   autofocus: true,
                 ),
                 const SizedBox(height: AppSpacing.base),
                 Row(
                   children: [
                     Text(
-                      canResend ? 'Didn\'t receive OTP?' : 'Resend OTP in ${_seconds}s',
+                      canResend ? loc.otpNotReceivedMsg : loc.resendIn(_seconds),
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
                     if (canResend) ...[
@@ -131,14 +133,14 @@ class _OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen> {
                             );
                           }
                         },
-                        child: const Text('Resend'),
+                        child: Text(loc.resendOtp),
                       ),
                     ],
                   ],
                 ),
                 const SizedBox(height: AppSpacing.xxl),
                 JmButton(
-                  label: 'Verify OTP',
+                  label: loc.verifyOtp,
                   onPressed: isLoading ? null : _verify,
                   isLoading: isLoading,
                   leadingIcon: Icons.verified_rounded,

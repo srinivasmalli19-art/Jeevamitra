@@ -137,5 +137,88 @@
   "acres": "{area} Acres",
   "@acres": {
     "placeholders": { "area": { "type": "String" } }
-  }
+  },
+
+  "mobileNumberSubtitle": "Enter your mobile number to receive OTP",
+  "termsAgreement": "By continuing, you agree to our Terms & Privacy Policy",
+  "otpNotReceivedMsg": "Didn't receive OTP?",
+  "selectRoleTitle": "Who are you?",
+  "genericErrorRetryMsg": "Something went wrong. Please try again.",
+  "invalidOtpMsg": "Invalid OTP. Please try again.",
+  "genericSaveFailedMsg": "Failed to save. Please try again.",
+  "completeProfileSubtitle": "Complete your profile to get started",
+  "yourNameHint": "Enter your full name",
+  "yourVillageHint": "Your village or town name",
+  "saveContinueBtn": "Save & Continue",
+  "saveProfileFailedMsg": "Could not save your profile. Please try again.",
+
+  "getStartedBtn": "Get Started",
+
+  "homeTab": "Home",
+
+  "greetingName": "Hello, {name}!",
+  "@greetingName": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "voiceAssistantTooltip": "Voice Assistant",
+  "alertsLabel": "Alerts",
+  "overviewLabel": "Overview",
+  "earningsLabel": "Earnings",
+  "recentBookingsLabel": "Recent Bookings",
+  "viewAllBtn": "View all",
+  "noBookingsYetTitle": "No bookings yet",
+  "noBookingsYetSubtitle": "Bookings from shepherds will appear here",
+  "pendingApprovalMsg": "{count, plural, one{1 booking awaiting your approval} other{{count} bookings awaiting your approval}}",
+  "@pendingApprovalMsg": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "tapToReviewMsg": "Tap to review and accept",
+  "bookingSummaryMsg": "{count} animals · {date} · ₹{amount}",
+  "@bookingSummaryMsg": {
+    "placeholders": {
+      "count": { "type": "int" },
+      "date": { "type": "String" },
+      "amount": { "type": "String" }
+    }
+  },
+  "upcomingLabel": "Upcoming",
+  "tripsDoneLabel": "Trips Done",
+  "spentLabel": "Spent",
+  "findLandLabel": "Find Land",
+  "findVetLabel": "Find Vet",
+  "myTripsLabel": "My Trips",
+  "noTripsYetTitle": "No trips yet",
+  "noTripsYetSubtitle": "Book a land to start your first trip",
+  "discoverLandsBtn": "Discover Lands",
+  "activeTripMsg": "Active trip: {title}",
+  "@activeTripMsg": {
+    "placeholders": { "title": { "type": "String" } }
+  },
+  "tripEndsMsg": "{count} animals · ends {date}",
+  "@tripEndsMsg": {
+    "placeholders": {
+      "count": { "type": "int" },
+      "date": { "type": "String" }
+    }
+  },
+
+  "editProfileTitle": "Edit Profile",
+  "profileInfoLabel": "Profile Info",
+  "accountLabel": "Account",
+  "deleteAccountTitle": "Delete Account",
+  "deleteAccountBody": "This will permanently delete your account and all your data. This cannot be undone.",
+  "deleteAccountSubtitle": "Permanently removes all your data",
+  "landsLabel": "Lands",
+  "totalTripsLabel": "Total Trips",
+
+  "phoneRequiredMsg": "Phone number required",
+  "phoneInvalidMsg": "Enter valid 10-digit mobile number",
+  "nameRequiredMsg": "Name required",
+  "nameTooShortMsg": "Name must be at least 2 characters",
+  "nameTooLongMsg": "Name too long",
+  "villageRequiredMsg": "Village/town required",
+  "villageInvalidMsg": "Enter a valid location",
+  "otpRequiredMsg": "OTP required",
+  "otpInvalidMsg": "Enter 6-digit OTP",
+  "districtRequiredMsg": "District required"
 }

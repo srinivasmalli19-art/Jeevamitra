@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/router/app_router.dart';
 import '../../core/theme/app_theme.dart';
+import '../../generated/l10n/app_localizations.dart';
 import '../providers/locale_provider.dart';
 import '../providers/notifications/notification_providers.dart';
 import '../providers/notifications/notification_tap_provider.dart';
@@ -41,6 +42,7 @@ class JeevaMitraApp extends ConsumerWidget {
         Locale('en', 'IN'),
       ],
       localizationsDelegates: const [
+        AppLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,

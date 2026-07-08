@@ -8,6 +8,7 @@ import '../../../core/constants/route_constants.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/utils/validators.dart';
+import '../../../generated/l10n/app_localizations.dart';
 import '../../providers/auth/auth_provider.dart';
 import '../../widgets/common/jm_button.dart';
 import '../../widgets/common/jm_text_field.dart';
@@ -61,6 +62,7 @@ class _PhoneLoginScreenState extends ConsumerState<PhoneLoginScreen> {
   Widget build(BuildContext context) {
     final authState = ref.watch(authNotifierProvider);
     final isLoading = authState.isLoading;
+    final loc = AppLocalizations.of(context);
 
     return Scaffold(
       body: SafeArea(
@@ -82,10 +84,10 @@ class _PhoneLoginScreenState extends ConsumerState<PhoneLoginScreen> {
                   child: const Icon(Icons.phone_android_rounded, color: AppColors.primary, size: 32),
                 ),
                 const SizedBox(height: AppSpacing.xl),
-                Text('మీ మొబైల్ నంబర్', style: Theme.of(context).textTheme.headlineMedium),
+                Text(loc.mobileNumber, style: Theme.of(context).textTheme.headlineMedium),
                 const SizedBox(height: AppSpacing.xs),
                 Text(
-                  'Enter your mobile number to receive OTP',
+                  loc.mobileNumberSubtitle,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
                 ),
                 const SizedBox(height: AppSpacing.xxl),
@@ -107,21 +109,21 @@ class _PhoneLoginScreenState extends ConsumerState<PhoneLoginScreen> {
                     const SizedBox(width: AppSpacing.sm),
                     Expanded(
                       child: JmTextField(
-                        label: 'Mobile Number',
-                        hint: '9876543210',
+                        label: loc.mobileNumber,
+                        hint: loc.mobileNumberHint,
                         controller: _phoneCtrl,
                         keyboardType: TextInputType.phone,
                         textInputAction: TextInputAction.done,
                         maxLength: 10,
                         inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                        validator: Validators.phone,
+                        validator: (v) => Validators.phone(v, loc),
                       ),
                     ),
                   ],
                 ),
                 const SizedBox(height: AppSpacing.xxl),
                 JmButton(
-                  label: 'Send OTP',
+                  label: loc.sendOtp,
                   onPressed: isLoading ? null : _sendOtp,
                   isLoading: isLoading,
                   leadingIcon: Icons.send_rounded,
@@ -129,7 +131,7 @@ class _PhoneLoginScreenState extends ConsumerState<PhoneLoginScreen> {
                 const SizedBox(height: AppSpacing.base),
                 Center(
                   child: Text(
-                    'By continuing, you agree to our Terms & Privacy Policy',
+                    loc.termsAgreement,
                     style: Theme.of(context).textTheme.bodySmall,
                     textAlign: TextAlign.center,
                   ),

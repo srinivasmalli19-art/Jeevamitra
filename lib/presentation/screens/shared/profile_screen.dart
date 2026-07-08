@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/constants/route_constants.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../../generated/l10n/app_localizations.dart';
 import '../../providers/auth/auth_provider.dart';
 import '../../providers/booking/booking_providers.dart';
 import '../../providers/farm/farm_providers.dart';
@@ -60,18 +61,20 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       if (ok) _editing = false;
     });
     if (mounted && !ok) {
+      final loc = AppLocalizations.of(context);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Failed to save. Please try again.')),
+        SnackBar(content: Text(loc.genericSaveFailedMsg)),
       );
     }
   }
 
   Future<void> _signOut() async {
+    final loc = AppLocalizations.of(context);
     final confirmed = await _confirmDialog(
       context,
-      title: 'Sign Out',
-      body: 'Are you sure you want to sign out?',
-      confirmLabel: 'Sign Out',
+      title: loc.logout,
+      body: loc.logoutConfirm,
+      confirmLabel: loc.logout,
       destructive: false,
     );
     if (confirmed != true) return;
@@ -80,12 +83,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }
 
   Future<void> _deleteAccount(String uid) async {
+    final loc = AppLocalizations.of(context);
     final confirmed = await _confirmDialog(
       context,
-      title: 'Delete Account',
-      body:
-          'This will permanently delete your account and all your data. This cannot be undone.',
-      confirmLabel: 'Delete',
+      title: loc.deleteAccountTitle,
+      body: loc.deleteAccountBody,
+      confirmLabel: loc.deleteBtn,
       destructive: true,
     );
     if (confirmed != true) return;
@@ -106,21 +109,22 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final userDoc = ref.watch(currentUserDocProvider).valueOrNull;
     final locale = ref.watch(localeProvider);
     final uid = FirebaseAuth.instance.currentUser?.uid ?? '';
+    final loc = AppLocalizations.of(context);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Profile'),
+        title: Text(loc.profile),
         actions: [
           if (!_editing)
             IconButton(
               icon: const Icon(Icons.edit_rounded),
-              tooltip: 'Edit',
+              tooltip: loc.editBtn,
               onPressed: () => _startEdit(userDoc),
             ),
           if (_editing)
             TextButton(
               onPressed: _saving ? null : () => setState(() => _editing = false),
-              child: const Text('Cancel'),
+              child: Text(loc.cancelBtn),
             ),
         ],
       ),
@@ -170,7 +174,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                             BorderRadius.circular(AppSpacing.radiusFull),
                       ),
                       child: Text(
-                        widget.role == 'farmer' ? '🌾 Farmer' : '🐑 Shepherd',
+                        widget.role == 'farmer' ? '🌾 ${loc.roleFarmer}' : '🐑 ${loc.roleShepherd}',
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
@@ -199,30 +203,30 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           const SizedBox(height: AppSpacing.xl),
           // ── Edit form ────────────────────────────────────────────────────
           if (_editing) ...[
-            _SectionHeader('Edit Profile'),
+            _SectionHeader(loc.editProfileTitle),
             const SizedBox(height: AppSpacing.sm),
             TextField(
               controller: _nameCtrl,
-              decoration: const InputDecoration(
-                labelText: 'Full Name',
-                prefixIcon: Icon(Icons.person_rounded),
+              decoration: InputDecoration(
+                labelText: loc.yourName,
+                prefixIcon: const Icon(Icons.person_rounded),
               ),
               textCapitalization: TextCapitalization.words,
             ),
             const SizedBox(height: AppSpacing.md),
             TextField(
               controller: _villageCtrl,
-              decoration: const InputDecoration(
-                labelText: 'Village / Town',
-                prefixIcon: Icon(Icons.location_city_rounded),
+              decoration: InputDecoration(
+                labelText: loc.yourVillage,
+                prefixIcon: const Icon(Icons.location_city_rounded),
               ),
             ),
             const SizedBox(height: AppSpacing.md),
             TextField(
               controller: _districtCtrl,
-              decoration: const InputDecoration(
-                labelText: 'District',
-                prefixIcon: Icon(Icons.map_rounded),
+              decoration: InputDecoration(
+                labelText: loc.yourDistrict,
+                prefixIcon: const Icon(Icons.map_rounded),
               ),
             ),
             const SizedBox(height: AppSpacing.base),
@@ -235,7 +239,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       child: CircularProgressIndicator(
                           strokeWidth: 2, color: Colors.white))
                   : const Icon(Icons.save_rounded),
-              label: const Text('Save Changes'),
+              label: Text(loc.saveBtn),
               style: FilledButton.styleFrom(
                 minimumSize: const Size(double.infinity, AppSpacing.buttonHeight),
               ),
@@ -243,20 +247,20 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             const SizedBox(height: AppSpacing.xl),
           ] else ...[
             // Read-only info
-            _SectionHeader('Profile Info'),
+            _SectionHeader(loc.profileInfoLabel),
             const SizedBox(height: AppSpacing.sm),
             _InfoCard(children: [
-              _InfoRow(Icons.person_rounded, 'Name', userDoc?.name ?? '—'),
-              _InfoRow(Icons.phone_rounded, 'Phone', userDoc?.phone ?? '—'),
-              _InfoRow(Icons.location_city_rounded, 'Village',
+              _InfoRow(Icons.person_rounded, loc.yourName, userDoc?.name ?? '—'),
+              _InfoRow(Icons.phone_rounded, loc.mobileNumber, userDoc?.phone ?? '—'),
+              _InfoRow(Icons.location_city_rounded, loc.yourVillage,
                   userDoc?.village ?? '—'),
-              _InfoRow(Icons.map_rounded, 'District',
+              _InfoRow(Icons.map_rounded, loc.yourDistrict,
                   userDoc?.district ?? '—'),
             ]),
             const SizedBox(height: AppSpacing.xl),
           ],
           // ── Language preference ──────────────────────────────────────────
-          _SectionHeader('Language'),
+          _SectionHeader(loc.language),
           const SizedBox(height: AppSpacing.sm),
           _LanguageSelector(
             selected: locale.languageCode,
@@ -277,13 +281,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           ),
           const SizedBox(height: AppSpacing.xl),
           // ── Account actions ──────────────────────────────────────────────
-          _SectionHeader('Account'),
+          _SectionHeader(loc.accountLabel),
           const SizedBox(height: AppSpacing.sm),
           ListTile(
             contentPadding: EdgeInsets.zero,
             leading:
                 const Icon(Icons.logout_rounded, color: AppColors.textSecondary),
-            title: const Text('Sign Out'),
+            title: Text(loc.logout),
             trailing: const Icon(Icons.chevron_right_rounded,
                 color: AppColors.textDisabled),
             onTap: _signOut,
@@ -293,9 +297,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             contentPadding: EdgeInsets.zero,
             leading: const Icon(Icons.delete_forever_rounded,
                 color: AppColors.error),
-            title: const Text('Delete Account',
-                style: TextStyle(color: AppColors.error)),
-            subtitle: const Text('Permanently removes all your data'),
+            title: Text(loc.deleteAccountTitle,
+                style: const TextStyle(color: AppColors.error)),
+            subtitle: Text(loc.deleteAccountSubtitle),
             trailing: const Icon(Icons.chevron_right_rounded,
                 color: AppColors.textDisabled),
             onTap: () => _deleteAccount(uid),
@@ -353,28 +357,29 @@ class _StatsRow extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final loc = AppLocalizations.of(context);
     if (role == 'farmer') {
       final farms = ref.watch(myFarmsProvider).valueOrNull ?? [];
       final bookings = ref.watch(farmerBookingsProvider).valueOrNull ?? [];
       final pending = bookings.where((b) => b.isPending).length;
       final completed = bookings.where((b) => b.isCompleted).length;
       return Row(children: [
-        _StatChip(value: '${farms.length}', label: 'Lands'),
+        _StatChip(value: '${farms.length}', label: loc.landsLabel),
         const SizedBox(width: AppSpacing.sm),
-        _StatChip(value: '$pending', label: 'Pending'),
+        _StatChip(value: '$pending', label: loc.bookingPending),
         const SizedBox(width: AppSpacing.sm),
-        _StatChip(value: '$completed', label: 'Completed'),
+        _StatChip(value: '$completed', label: loc.bookingCompleted),
       ]);
     } else {
       final bookings = ref.watch(shepherdBookingsProvider).valueOrNull ?? [];
       final active = bookings.where((b) => b.isActive || b.isConfirmed).length;
       final completed = bookings.where((b) => b.isCompleted).length;
       return Row(children: [
-        _StatChip(value: '${bookings.length}', label: 'Total Trips'),
+        _StatChip(value: '${bookings.length}', label: loc.totalTripsLabel),
         const SizedBox(width: AppSpacing.sm),
-        _StatChip(value: '$active', label: 'Active'),
+        _StatChip(value: '$active', label: loc.bookingActive),
         const SizedBox(width: AppSpacing.sm),
-        _StatChip(value: '$completed', label: 'Completed'),
+        _StatChip(value: '$completed', label: loc.bookingCompleted),
       ]);
     }
   }

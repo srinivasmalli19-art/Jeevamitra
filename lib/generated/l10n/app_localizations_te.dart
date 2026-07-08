@@ -330,4 +330,194 @@ class AppLocalizationsTe extends AppLocalizations {
   String acres(String area) {
     return '$area ఎకరాలు';
   }
+
+  @override
+  String get mobileNumberSubtitle =>
+      'OTP పొందడానికి మీ మొబైల్ నంబర్ నమోదు చేయండి';
+
+  @override
+  String get termsAgreement =>
+      'కొనసాగించడం ద్వారా, మీరు మా నిబంధనలు & గోప్యతా విధానానికి అంగీకరిస్తున్నారు';
+
+  @override
+  String get otpNotReceivedMsg => 'OTP రాలేదా?';
+
+  @override
+  String get selectRoleTitle => 'మీరు ఎవరు?';
+
+  @override
+  String get genericErrorRetryMsg =>
+      'ఏదో తప్పు జరిగింది. దయచేసి మళ్ళీ ప్రయత్నించండి.';
+
+  @override
+  String get invalidOtpMsg => 'చెల్లని OTP. దయచేసి మళ్ళీ ప్రయత్నించండి.';
+
+  @override
+  String get genericSaveFailedMsg =>
+      'సేవ్ చేయడంలో విఫలమైంది. దయచేసి మళ్ళీ ప్రయత్నించండి.';
+
+  @override
+  String get completeProfileSubtitle =>
+      'ప్రారంభించడానికి మీ ప్రొఫైల్‌ను పూర్తి చేయండి';
+
+  @override
+  String get yourNameHint => 'మీ పూర్తి పేరు నమోదు చేయండి';
+
+  @override
+  String get yourVillageHint => 'మీ గ్రామం లేదా పట్టణం పేరు';
+
+  @override
+  String get saveContinueBtn => 'సేవ్ చేసి కొనసాగించు';
+
+  @override
+  String get saveProfileFailedMsg =>
+      'మీ ప్రొఫైల్‌ను సేవ్ చేయలేకపోయాము. దయచేసి మళ్ళీ ప్రయత్నించండి.';
+
+  @override
+  String get getStartedBtn => 'ప్రారంభించండి';
+
+  @override
+  String get homeTab => 'హోమ్';
+
+  @override
+  String greetingName(String name) {
+    return 'నమస్తే, $name!';
+  }
+
+  @override
+  String get voiceAssistantTooltip => 'వాయిస్ అసిస్టెంట్';
+
+  @override
+  String get alertsLabel => 'అలర్ట్‌లు';
+
+  @override
+  String get overviewLabel => 'అవలోకనం';
+
+  @override
+  String get earningsLabel => 'సంపాదన';
+
+  @override
+  String get recentBookingsLabel => 'ఇటీవలి బుకింగ్‌లు';
+
+  @override
+  String get viewAllBtn => 'అన్నీ చూడండి';
+
+  @override
+  String get noBookingsYetTitle => 'ఇంకా బుకింగ్‌లు లేవు';
+
+  @override
+  String get noBookingsYetSubtitle =>
+      'గొర్రెల కాపరుల నుండి బుకింగ్‌లు ఇక్కడ కనిపిస్తాయి';
+
+  @override
+  String pendingApprovalMsg(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count బుకింగ్‌లు మీ ఆమోదం కోసం ఎదురుచూస్తున్నాయి',
+      one: '1 బుకింగ్ మీ ఆమోదం కోసం ఎదురుచూస్తోంది',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get tapToReviewMsg => 'సమీక్షించి ఆమోదించడానికి నొక్కండి';
+
+  @override
+  String bookingSummaryMsg(int count, String date, String amount) {
+    return '$count జంతువులు · $date · ₹$amount';
+  }
+
+  @override
+  String get upcomingLabel => 'రాబోయే';
+
+  @override
+  String get tripsDoneLabel => 'పూర్తయిన ట్రిప్‌లు';
+
+  @override
+  String get spentLabel => 'ఖర్చు';
+
+  @override
+  String get findLandLabel => 'భూమి వెతకండి';
+
+  @override
+  String get findVetLabel => 'పశువైద్యుడిని వెతకండి';
+
+  @override
+  String get myTripsLabel => 'నా ట్రిప్‌లు';
+
+  @override
+  String get noTripsYetTitle => 'ఇంకా ట్రిప్‌లు లేవు';
+
+  @override
+  String get noTripsYetSubtitle =>
+      'మీ మొదటి ట్రిప్ ప్రారంభించడానికి భూమిని బుక్ చేయండి';
+
+  @override
+  String get discoverLandsBtn => 'భూములను కనుగొనండి';
+
+  @override
+  String activeTripMsg(String title) {
+    return 'యాక్టివ్ ట్రిప్: $title';
+  }
+
+  @override
+  String tripEndsMsg(int count, String date) {
+    return '$count జంతువులు · $date న ముగుస్తుంది';
+  }
+
+  @override
+  String get editProfileTitle => 'ప్రొఫైల్ సవరించు';
+
+  @override
+  String get profileInfoLabel => 'ప్రొఫైల్ సమాచారం';
+
+  @override
+  String get accountLabel => 'ఖాతా';
+
+  @override
+  String get deleteAccountTitle => 'ఖాతాను తొలగించు';
+
+  @override
+  String get deleteAccountBody =>
+      'ఇది మీ ఖాతాను మరియు మీ మొత్తం డేటాను శాశ్వతంగా తొలగిస్తుంది. దీన్ని రద్దు చేయలేరు.';
+
+  @override
+  String get deleteAccountSubtitle => 'మీ మొత్తం డేటాను శాశ్వతంగా తొలగిస్తుంది';
+
+  @override
+  String get landsLabel => 'భూములు';
+
+  @override
+  String get totalTripsLabel => 'మొత్తం ట్రిప్‌లు';
+
+  @override
+  String get phoneRequiredMsg => 'ఫోన్ నంబర్ అవసరం';
+
+  @override
+  String get phoneInvalidMsg => 'సరైన 10 అంకెల మొబైల్ నంబర్ నమోదు చేయండి';
+
+  @override
+  String get nameRequiredMsg => 'పేరు అవసరం';
+
+  @override
+  String get nameTooShortMsg => 'పేరు కనీసం 2 అక్షరాలు ఉండాలి';
+
+  @override
+  String get nameTooLongMsg => 'పేరు చాలా పొడవుగా ఉంది';
+
+  @override
+  String get villageRequiredMsg => 'గ్రామం/పట్టణం అవసరం';
+
+  @override
+  String get villageInvalidMsg => 'సరైన ప్రదేశాన్ని నమోదు చేయండి';
+
+  @override
+  String get otpRequiredMsg => 'OTP అవసరం';
+
+  @override
+  String get otpInvalidMsg => '6 అంకెల OTP నమోదు చేయండి';
+
+  @override
+  String get districtRequiredMsg => 'జిల్లా అవసరం';
 }
