@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/constants/route_constants.dart';
+import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/utils/validators.dart';
 import '../../providers/auth/auth_provider.dart';
@@ -39,14 +40,24 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
     final userDocAsync = ref.read(currentUserDocProvider);
     final role = userDocAsync.valueOrNull?.role ?? 'farmer';
 
-    await ref.read(authNotifierProvider.notifier).createUserDoc(
+    final saved = await ref.read(authNotifierProvider.notifier).createUserDoc(
       uid: user.uid,
       phone: user.phoneNumber ?? '',
       role: role,
       name: _nameCtrl.text.trim(),
       village: _villageCtrl.text.trim(),
+      district: _districtCtrl.text.trim(),
     );
     if (!context.mounted) return;
+    if (!saved) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Could not save your profile. Please try again.'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+      return;
+    }
 
     if (role == 'farmer') {
       context.go(RouteConstants.farmerDashboard);

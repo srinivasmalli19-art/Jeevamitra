@@ -89,15 +89,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       destructive: true,
     );
     if (confirmed != true) return;
-    final ok =
+    final error =
         await ref.read(authNotifierProvider.notifier).deleteAccount(uid);
     if (!mounted) return;
-    if (ok) {
+    if (error == null) {
       context.go(RouteConstants.phoneLogin);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text('Could not delete account. Please re-login first.')),
+        SnackBar(content: Text(error)),
       );
     }
   }

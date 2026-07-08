@@ -34,13 +34,22 @@ class _RoleSelectScreenState extends ConsumerState<RoleSelectScreen> {
       return;
     }
 
-    await ref.read(authNotifierProvider.notifier).createUserDoc(
+    final created = await ref.read(authNotifierProvider.notifier).createUserDoc(
       uid: user.uid,
       phone: user.phoneNumber ?? '',
       role: _selectedRole!,
       name: '',
     );
     if (!context.mounted) return;
+    if (!created) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Something went wrong. Please try again.'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+      return;
+    }
     context.go(RouteConstants.profileSetup);
   }
 

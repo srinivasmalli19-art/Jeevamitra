@@ -119,9 +119,17 @@ class _OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen> {
                     if (canResend) ...[
                       const SizedBox(width: AppSpacing.xs),
                       TextButton(
-                        onPressed: () {
+                        onPressed: () async {
                           _startTimer();
-                          ref.read(authNotifierProvider.notifier).sendOtp(widget.phone);
+                          final error = await ref
+                              .read(authNotifierProvider.notifier)
+                              .sendOtp(widget.phone);
+                          if (!context.mounted) return;
+                          if (error != null) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text(error), backgroundColor: AppColors.error),
+                            );
+                          }
                         },
                         child: const Text('Resend'),
                       ),
