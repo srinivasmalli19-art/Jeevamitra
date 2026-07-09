@@ -230,60 +230,71 @@ class _AddLandScreenState extends ConsumerState<AddLandScreen> {
     if (_submitting) return;
     setState(() => _submitting = true);
 
-    final uid = FirebaseAuth.instance.currentUser?.uid ?? '';
-    final userDoc = ref.read(currentUserDocProvider).valueOrNull;
+    try {
+      final uid = FirebaseAuth.instance.currentUser?.uid ?? '';
+      final userDoc = ref.read(currentUserDocProvider).valueOrNull;
 
-    // Upload images
-    List<String> imageUrls = [];
-    if (_data.images.isNotEmpty) {
-      imageUrls = await _imgService.uploadImages(
-        files: _data.images,
-        folder: 'farms',
+      // Upload images
+      List<String> imageUrls = [];
+      if (_data.images.isNotEmpty) {
+        imageUrls = await _imgService.uploadImages(
+          files: _data.images,
+          folder: 'farms',
+          ownerId: uid,
+        );
+      }
+
+      final areaSqMeters = _areaToSqMeters(_areaCtrl.text.trim(), _data.areaUnit);
+      final geohash = GeoHashHelper.encode(_data.lat!, _data.lng!);
+
+      final farm = FarmModel(
+        id: '',
         ownerId: uid,
+        ownerName: userDoc?.name ?? '',
+        title: _titleCtrl.text.trim(),
+        description: _descCtrl.text.trim(),
+        lat: _data.lat!,
+        lng: _data.lng!,
+        geohash: geohash,
+        village: _villageCtrl.text.trim(),
+        district: _districtCtrl.text.trim(),
+        state: _stateCtrl.text.trim(),
+        areaSqMeters: areaSqMeters,
+        areaUnit: _data.areaUnit,
+        fodderTypes: _data.fodderTypes,
+        pricePerDayPerAnimal: double.tryParse(_priceCtrl.text.trim()) ?? 0,
+        maxAnimals: int.tryParse(_maxAnimalsCtrl.text.trim()) ?? 0,
+        hasWater: _data.hasWater,
+        hasShade: _data.hasShade,
+        hasFencing: _data.hasFencing,
+        hasVetNearby: _data.hasVetNearby,
+        imageUrls: imageUrls,
+        createdAt: DateTime.now(),
       );
-    }
 
-    final areaSqMeters = _areaToSqMeters(_areaCtrl.text.trim(), _data.areaUnit);
-    final geohash = GeoHashHelper.encode(_data.lat!, _data.lng!);
+      final id = await ref.read(addFarmProvider.notifier).addFarm(farm);
 
-    final farm = FarmModel(
-      id: '',
-      ownerId: uid,
-      ownerName: userDoc?.name ?? '',
-      title: _titleCtrl.text.trim(),
-      description: _descCtrl.text.trim(),
-      lat: _data.lat!,
-      lng: _data.lng!,
-      geohash: geohash,
-      village: _villageCtrl.text.trim(),
-      district: _districtCtrl.text.trim(),
-      state: _stateCtrl.text.trim(),
-      areaSqMeters: areaSqMeters,
-      areaUnit: _data.areaUnit,
-      fodderTypes: _data.fodderTypes,
-      pricePerDayPerAnimal: double.tryParse(_priceCtrl.text.trim()) ?? 0,
-      maxAnimals: int.tryParse(_maxAnimalsCtrl.text.trim()) ?? 0,
-      hasWater: _data.hasWater,
-      hasShade: _data.hasShade,
-      hasFencing: _data.hasFencing,
-      hasVetNearby: _data.hasVetNearby,
-      imageUrls: imageUrls,
-      createdAt: DateTime.now(),
-    );
-
-    final id = await ref.read(addFarmProvider.notifier).addFarm(farm);
-    setState(() => _submitting = false);
-
-    if (!mounted) return;
-    if (id != null) {
+      if (!mounted) return;
+      if (id != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Land added successfully!')),
+        );
+        context.go(RouteConstants.farmerLands);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to save. Please try again.'), backgroundColor: AppColors.error),
+        );
+      }
+    } catch (_) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Land added successfully!')),
+        const SnackBar(
+          content: Text('Could not upload photos. Check your connection and try again, or remove photos and add the land without them for now.'),
+          backgroundColor: AppColors.error,
+        ),
       );
-      context.go(RouteConstants.farmerLands);
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Failed to save. Please try again.'), backgroundColor: AppColors.error),
-      );
+    } finally {
+      if (mounted) setState(() => _submitting = false);
     }
   }
 
