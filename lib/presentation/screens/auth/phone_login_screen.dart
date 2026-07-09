@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -28,20 +27,6 @@ class _PhoneLoginScreenState extends ConsumerState<PhoneLoginScreen> {
   void dispose() {
     _phoneCtrl.dispose();
     super.dispose();
-  }
-
-  Future<void> _devLogin(String role) async {
-    await ref.read(authNotifierProvider.notifier).devSignIn(role: role);
-    if (!mounted) return;
-    final authState = ref.read(authNotifierProvider);
-    if (authState.hasError) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Dev login failed: ${authState.error}'),
-          backgroundColor: AppColors.error,
-        ),
-      );
-    }
   }
 
   Future<void> _sendOtp() async {
@@ -136,55 +121,6 @@ class _PhoneLoginScreenState extends ConsumerState<PhoneLoginScreen> {
                     textAlign: TextAlign.center,
                   ),
                 ),
-
-                // ── Debug-only bypass (invisible in release builds) ──────────
-                if (kDebugMode) ...[
-                  const SizedBox(height: AppSpacing.xxl),
-                  Row(children: [
-                    const Expanded(child: Divider()),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-                      child: Text(
-                        'DEBUG ONLY',
-                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                              color: Colors.orange.shade700,
-                              fontWeight: FontWeight.w700,
-                              letterSpacing: 1.2,
-                            ),
-                      ),
-                    ),
-                    const Expanded(child: Divider()),
-                  ]),
-                  const SizedBox(height: AppSpacing.md),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: isLoading ? null : () => _devLogin('farmer'),
-                          icon: const Icon(Icons.agriculture_rounded, size: 18),
-                          label: const Text('As Farmer'),
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: Colors.orange.shade800,
-                            side: BorderSide(color: Colors.orange.shade400),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: AppSpacing.sm),
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: isLoading ? null : () => _devLogin('shepherd'),
-                          icon: const Icon(Icons.pets_rounded, size: 18),
-                          label: const Text('As Shepherd'),
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: Colors.orange.shade800,
-                            side: BorderSide(color: Colors.orange.shade400),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: AppSpacing.sm),
-                ],
               ],
             ),
           ),

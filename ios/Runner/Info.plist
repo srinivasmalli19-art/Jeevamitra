@@ -26,6 +26,12 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>JeevaMitra uses your location to show nearby grazing land, vets, and disease alerts, and to pin your land's location when you list it.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>JeevaMitra uses the microphone for the voice assistant so you can navigate the app by speaking.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>JeevaMitra needs access to your photos so you can add pictures of your land when listing it.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

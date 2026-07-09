@@ -61,11 +61,39 @@ service cloud.firestore {
         request.auth.uid == resource.data.farmerId ||
         request.auth.uid == resource.data.shepherdId
       );
-      allow create: if isSignedIn() && request.auth.uid == request.resource.data.shepherdId;
+
+      // Shepherd creates the booking. Basic shape/positivity checks stop a
+      // client from writing a negative, non-numeric, or already-decided deal.
+      allow create: if isSignedIn() &&
+          request.auth.uid == request.resource.data.shepherdId &&
+          request.resource.data.status == 'pending' &&
+          request.resource.data.animalCount is int &&
+          request.resource.data.animalCount > 0 &&
+          request.resource.data.totalAmount is number &&
+          request.resource.data.totalAmount > 0 &&
+          request.resource.data.advanceAmount is number &&
+          request.resource.data.advanceAmount >= 0 &&
+          request.resource.data.checkIn is timestamp &&
+          request.resource.data.checkOut is timestamp &&
+          request.resource.data.checkOut > request.resource.data.checkIn;
+
+      // Either party may update status/cancellation/review fields, but the
+      // deal terms agreed at creation (who, which land, dates, amounts) are
+      // immutable on update — previously a client could silently rewrite
+      // the price after the farmer had already accepted it.
       allow update: if isSignedIn() && (
         request.auth.uid == resource.data.farmerId ||
         request.auth.uid == resource.data.shepherdId
-      );
+      ) &&
+          request.resource.data.farmId == resource.data.farmId &&
+          request.resource.data.farmerId == resource.data.farmerId &&
+          request.resource.data.shepherdId == resource.data.shepherdId &&
+          request.resource.data.animalCount == resource.data.animalCount &&
+          request.resource.data.checkIn == resource.data.checkIn &&
+          request.resource.data.checkOut == resource.data.checkOut &&
+          request.resource.data.totalAmount == resource.data.totalAmount &&
+          request.resource.data.advanceAmount == resource.data.advanceAmount;
+
       allow delete: if false;
     }
 

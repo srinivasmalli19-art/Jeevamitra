@@ -28,7 +28,7 @@ class RemoteConfigService {
     try {
       await _rc.fetchAndActivate();
     } catch (e) {
-      debugPrint('[RemoteConfig] fetch error: $e');
+      if (kDebugMode) debugPrint('[RemoteConfig] fetch error: $e');
     }
   }
 

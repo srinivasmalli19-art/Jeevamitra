@@ -1,0 +1,34 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // ── farms/{ownerId}/{fileName} ──────────────────────────────────────────
+    // Land listing photos, uploaded by ImageUploadService as
+    // "farms/{currentUserUid}/{imageId}.{ext}" (see add_land_screen.dart).
+    // Read: any signed-in user, since farm photos are shown to shepherds
+    // browsing listings (matches the Firestore `farms` collection's own
+    // isSignedIn()-readable rule).
+    // Write: only the owner whose uid matches the path segment, capped at
+    // 10MB and restricted to image content types.
+    match /farms/{ownerId}/{fileName} {
+      allow read: if isSignedIn();
+      allow write: if isSignedIn() &&
+          request.auth.uid == ownerId &&
+          request.resource.size < 10 * 1024 * 1024 &&
+          request.resource.contentType.matches('image/.*');
+    }
+
+    // No other upload path is used by the app today (no profile-picture or
+    // vet-photo upload feature exists yet — see Batch 4 report). Default
+    // deny everything else rather than leaving it to whatever was last set
+    // in the Firebase Console.
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

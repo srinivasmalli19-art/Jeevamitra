@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/constants/firebase_constants.dart';
@@ -187,62 +186,6 @@ class AuthNotifier extends StateNotifier<AsyncValue<void>> {
   Future<void> signOut() async {
     await FirebaseAuth.instance.signOut();
     state = const AsyncValue.data(null);
-  }
-
-  // Dev-only: uses Email/Password (already enabled in Firebase Console).
-  // Creates the test account on first run, signs in on subsequent runs.
-  //
-  // Hard-gated on kReleaseMode in addition to the UI-level kDebugMode check
-  // in PhoneLoginScreen: this makes the method itself a guaranteed no-op in
-  // a release build no matter what calls it, so the hardcoded dev
-  // credential below can never become reachable in production even if a
-  // future call site is added outside that UI guard.
-  Future<void> devSignIn({String role = 'farmer'}) async {
-    if (kReleaseMode) {
-      assert(false, 'devSignIn() must never be called in a release build');
-      return;
-    }
-    state = const AsyncValue.loading();
-    try {
-      final email = 'dev.$role@jeevamitra.app';
-      const password = 'JeevaDev@2024';
-
-      UserCredential result;
-      try {
-        result = await FirebaseAuth.instance.signInWithEmailAndPassword(
-          email: email,
-          password: password,
-        );
-      } on FirebaseAuthException catch (e) {
-        if (e.code == 'user-not-found' || e.code == 'invalid-credential') {
-          result = await FirebaseAuth.instance.createUserWithEmailAndPassword(
-            email: email,
-            password: password,
-          );
-        } else {
-          rethrow;
-        }
-      }
-
-      final uid = result.user!.uid;
-      await FirebaseFirestore.instance
-          .collection(FirebaseConstants.users)
-          .doc(uid)
-          .set({
-        'uid': uid,
-        'phone': '+91 0000000000',
-        'role': role,
-        'name': 'Test ${role == 'farmer' ? 'Farmer' : 'Shepherd'}',
-        'village': 'Test Village',
-        'district': 'Hyderabad',
-        'isProfileComplete': true,
-        'preferredLanguage': 'te',
-        'createdAt': FieldValue.serverTimestamp(),
-      }, SetOptions(merge: true));
-      state = const AsyncValue.data(null);
-    } catch (e, st) {
-      state = AsyncValue.error(e, st);
-    }
   }
 }
 

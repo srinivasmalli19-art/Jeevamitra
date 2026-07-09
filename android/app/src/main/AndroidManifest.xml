@@ -7,11 +7,8 @@
     <!-- Location -->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
 
-    <!-- Camera & Storage -->
-    <uses-permission android:name="android.permission.CAMERA" />
+    <!-- Storage (gallery picking only — the app never invokes the camera) -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="29" />
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
@@ -20,21 +17,14 @@
     <!-- Microphone (Voice Input) -->
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
-    <!-- Phone (Emergency Call) -->
-    <uses-permission android:name="android.permission.CALL_PHONE" />
-
     <!-- Push Notifications (Android 13+) -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-
-    <!-- Receive boot (for scheduled tasks) -->
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <application
         android:label="Jeevamitra"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
-        android:requestLegacyExternalStorage="true"
-        android:usesCleartextTraffic="true">
+        android:requestLegacyExternalStorage="true">
 
         <!-- Google Maps API Key — replace with your actual key from console.cloud.google.com -->
         <meta-data

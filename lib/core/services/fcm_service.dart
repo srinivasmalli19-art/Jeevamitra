@@ -34,7 +34,7 @@ class FcmService {
       // Show local notification when FCM message arrives while app is open.
       FirebaseMessaging.onMessage.listen(_onForegroundMessage);
     } catch (e) {
-      debugPrint('[FCM] init error: $e');
+      if (kDebugMode) debugPrint('[FCM] init error: $e');
     }
   }
 
@@ -75,7 +75,7 @@ class FcmService {
         'fcmTokenUpdatedAt': FieldValue.serverTimestamp(),
       });
     } catch (e) {
-      debugPrint('[FCM] token save error: $e');
+      if (kDebugMode) debugPrint('[FCM] token save error: $e');
     }
   }
 
@@ -88,7 +88,7 @@ class FcmService {
           .doc(userId)
           .update({'fcmToken': FieldValue.delete()});
     } catch (e) {
-      debugPrint('[FCM] clearToken error: $e');
+      if (kDebugMode) debugPrint('[FCM] clearToken error: $e');
     }
   }
 

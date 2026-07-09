@@ -15,8 +15,12 @@ class VoiceService {
     if (_initialized) return true;
     try {
       _initialized = await _speech.initialize(
-        onStatus: (s) => debugPrint('[Voice] status: $s'),
-        onError: (e) => debugPrint('[Voice] error: $e'),
+        onStatus: (s) {
+          if (kDebugMode) debugPrint('[Voice] status: $s');
+        },
+        onError: (e) {
+          if (kDebugMode) debugPrint('[Voice] error: $e');
+        },
       );
       if (_initialized) {
         await _tts.setPitch(1.0);
@@ -24,7 +28,7 @@ class VoiceService {
       }
       return _initialized;
     } catch (e) {
-      debugPrint('[Voice] init failed: $e');
+      if (kDebugMode) debugPrint('[Voice] init failed: $e');
       return false;
     }
   }
@@ -49,7 +53,7 @@ class VoiceService {
       await _tts.setLanguage(localeId);
       await _tts.speak(text);
     } catch (e) {
-      debugPrint('[Voice] TTS error: $e');
+      if (kDebugMode) debugPrint('[Voice] TTS error: $e');
     }
   }
 

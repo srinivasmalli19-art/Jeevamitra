@@ -19,7 +19,9 @@ import 'presentation/app/jeevamitra_app.dart';
 @pragma('vm:entry-point')
 Future<void> _fcmBackgroundHandler(RemoteMessage message) async {
   // Firebase is already initialized when this runs in the background isolate.
-  debugPrint('[FCM Background] ${message.notification?.title}');
+  if (kDebugMode) {
+    debugPrint('[FCM Background] ${message.notification?.title}');
+  }
 }
 
 void main() async {
@@ -75,7 +77,9 @@ void main() async {
 
     firebaseInitialized = true;
   } catch (e) {
-    debugPrint('[JeevaMitra] Firebase not configured: $e');
+    if (kDebugMode) {
+      debugPrint('[JeevaMitra] Firebase not configured: $e');
+    }
   }
 
   // Local notifications — not supported on web
