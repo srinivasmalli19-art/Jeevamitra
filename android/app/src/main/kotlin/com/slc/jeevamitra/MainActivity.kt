@@ -1,4 +1,4 @@
-package com.jeevamitra.app
+package com.slc.jeevamitra
 
 import io.flutter.embedding.android.FlutterActivity
 

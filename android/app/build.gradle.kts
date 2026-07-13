@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.jeevamitra.app"
+    namespace = "com.slc.jeevamitra"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -17,7 +17,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.jeevamitra.app"
+        applicationId = "com.slc.jeevamitra"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
