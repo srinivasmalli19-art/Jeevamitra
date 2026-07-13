@@ -299,6 +299,7 @@ class _VetCard extends StatelessWidget {
                 backgroundImage: vet.profileImageUrl != null
                     ? NetworkImage(vet.profileImageUrl!)
                     : null,
+                onBackgroundImageError: vet.profileImageUrl != null ? (_, __) {} : null,
                 child: vet.profileImageUrl == null
                     ? Text(
                         vet.name.isNotEmpty ? vet.name[0].toUpperCase() : 'V',

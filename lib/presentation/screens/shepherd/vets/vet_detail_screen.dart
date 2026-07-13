@@ -72,6 +72,7 @@ class VetDetailScreen extends ConsumerWidget {
                     backgroundImage: vet.profileImageUrl != null
                         ? NetworkImage(vet.profileImageUrl!)
                         : null,
+                    onBackgroundImageError: vet.profileImageUrl != null ? (_, __) {} : null,
                     child: vet.profileImageUrl == null
                         ? Text(
                             vet.name.isNotEmpty

@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../../../core/constants/feature_flags.dart';
 import '../../../../core/constants/route_constants.dart';
 import '../../../../core/services/image_upload_service.dart';
 import '../../../../core/services/location_service.dart';
@@ -220,6 +221,17 @@ class _AddLandScreenState extends ConsumerState<AddLandScreen> {
   }
 
   Future<void> _pickImages() async {
+    if (!FeatureFlags.photoUploadsEnabled) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Photo uploads will be available in an upcoming update. '
+            'You can continue creating your listing without photos.',
+          ),
+        ),
+      );
+      return;
+    }
     final files = await _imgService.pickMultipleImages(maxImages: 5 - _data.images.length);
     if (files.isNotEmpty) {
       setState(() => _data = _data.copyWith(images: [..._data.images, ...files]));
@@ -234,9 +246,11 @@ class _AddLandScreenState extends ConsumerState<AddLandScreen> {
       final uid = FirebaseAuth.instance.currentUser?.uid ?? '';
       final userDoc = ref.read(currentUserDocProvider).valueOrNull;
 
-      // Upload images
+      // Upload images — hard-gated here (not just at the picker) so no
+      // Storage call can ever occur while photoUploadsEnabled is false,
+      // regardless of how _data.images was populated.
       List<String> imageUrls = [];
-      if (_data.images.isNotEmpty) {
+      if (FeatureFlags.photoUploadsEnabled && _data.images.isNotEmpty) {
         imageUrls = await _imgService.uploadImages(
           files: _data.images,
           folder: 'farms',
@@ -774,8 +788,12 @@ class _Step4Photos extends StatelessWidget {
           const SizedBox(height: AppSpacing.base),
           Text('Photos', style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: AppSpacing.xs),
-          Text('Add up to 5 photos of your land (optional)',
-              style: Theme.of(context).textTheme.bodySmall),
+          Text(
+            FeatureFlags.photoUploadsEnabled
+                ? 'Add up to 5 photos of your land (optional)'
+                : 'Photo uploads are coming in an upcoming update — you can list your land without photos for now.',
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
           const SizedBox(height: AppSpacing.base),
           if (images.isNotEmpty) ...[
             GridView.builder(
