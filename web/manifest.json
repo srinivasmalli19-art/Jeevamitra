@@ -1,11 +1,11 @@
 {
-    "name": "jeevamitra",
-    "short_name": "jeevamitra",
+    "name": "JeevaMitra",
+    "short_name": "JeevaMitra",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#F7F7F2",
+    "theme_color": "#1B6B3A",
+    "description": "JeevaMitra connects farmers and shepherds for grazing land, vets, and livestock disease alerts.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
