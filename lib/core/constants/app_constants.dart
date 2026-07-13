@@ -1,7 +1,7 @@
 class AppConstants {
   static const String appName = 'JeevaMitra';
   static const String appVersion = '1.0.0';
-  static const String appPackage = 'com.slc.jeevamitra';
+  static const String appPackage = 'com.jeevamitra.app';
 
   // Phone auth
   static const int otpLength = 6;
