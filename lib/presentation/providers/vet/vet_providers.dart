@@ -2,7 +2,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../data/models/vet_model.dart';
 import '../../../data/repositories/vet_repository.dart';
-import '../auth/auth_provider.dart';
 
 // ── Repository ────────────────────────────────────────────────────────────────
 

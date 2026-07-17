@@ -4,15 +4,20 @@ import '../../core/constants/firebase_constants.dart';
 import '../models/booking_model.dart';
 
 class BookingRepository {
-  final _col = FirebaseFirestore.instance
+  BookingRepository({FirebaseFirestore? firestore})
+      : _firestore = firestore ?? FirebaseFirestore.instance;
+
+  final FirebaseFirestore _firestore;
+
+  late final _col = _firestore
       .collection(FirebaseConstants.bookings)
       .withConverter<BookingModel>(
         fromFirestore: (snap, _) => BookingModel.fromFirestore(snap),
         toFirestore: (b, _) => b.toFirestore(),
       );
 
-  final _notifications =
-      FirebaseFirestore.instance.collection(FirebaseConstants.notifications);
+  late final _notifications =
+      _firestore.collection(FirebaseConstants.notifications);
 
   // ── Streams ────────────────────────────────────────────────────────────────
 
@@ -36,7 +41,7 @@ class BookingRepository {
   // ── Writes ────────────────────────────────────────────────────────────────
 
   Future<String> createBooking(BookingModel booking) async {
-    final batch = FirebaseFirestore.instance.batch();
+    final batch = _firestore.batch();
     final bookingRef = _col.doc();
     batch.set(bookingRef, booking);
     // Notify farmer of new booking request
@@ -64,7 +69,7 @@ class BookingRepository {
       return;
     }
 
-    final batch = FirebaseFirestore.instance.batch();
+    final batch = _firestore.batch();
     batch.update(_col.doc(bookingId), update);
     _applyStatusNotif(batch, status, bookingId, booking);
     await batch.commit();
@@ -72,7 +77,7 @@ class BookingRepository {
 
   Future<void> cancelBooking(String bookingId, String reason,
       {BookingModel? booking}) async {
-    final batch = FirebaseFirestore.instance.batch();
+    final batch = _firestore.batch();
     batch.update(_col.doc(bookingId), {
       'status': FirebaseConstants.bookingCancelled,
       'cancellationReason': reason,

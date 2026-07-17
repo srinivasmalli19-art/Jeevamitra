@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(/usr/libexec/java_home -V)",
+      "Bash(JAVA_HOME=\"/opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home\" flutter build apk --debug)",
+      "Read(//Users/ramakrishnachavara/Repos/pasumitra/lib/l10n/**)",
+      "Bash(flutter gen-l10n *)",
+      "Bash(python3 -c ' *)",
+      "Bash(gcloud config *)",
+      "Bash(gcloud storage *)",
+      "Bash(firebase apps:list --project jeevamitra)",
+      "Bash(keytool -list -v -keystore ~/.android/debug.keystore -storepass android -alias androiddebugkey)",
+      "Bash(grep -rniE \"AIzaSy[A-Za-z0-9_-]{33}|sk_live|api[_-]?key\\\\s*=\\\\s*[\\\\\"'][A-Za-z0-9]{20,}|password\\\\s*=\\\\s*[\\\\\"'][^\\\\\"']{4,}|secret\\\\s*=\\\\s*[\\\\\"'][^\\\\\"']{4,}\" lib android ios --include=\"*.dart\" --include=\"*.kt\" --include=\"*.swift\" --include=\"*.xml\" --include=\"*.plist\" --include=\"*.gradle*\")",
+      "Bash(grep -v \"^--$\")"
+    ]
+  }
+}

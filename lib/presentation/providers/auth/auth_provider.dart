@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -37,35 +39,87 @@ final currentUserDocProvider = StreamProvider<UserDoc?>((ref) {
 // ─── Auth notifier ────────────────────────────────────────────────────────────
 
 class AuthNotifier extends StateNotifier<AsyncValue<void>> {
-  AuthNotifier() : super(const AsyncValue.data(null));
+  AuthNotifier({FirebaseAuth? auth, FirebaseFirestore? firestore})
+      : _auth = auth ?? FirebaseAuth.instance,
+        _firestore = firestore ?? FirebaseFirestore.instance,
+        super(const AsyncValue.data(null));
+
+  final FirebaseAuth _auth;
+  final FirebaseFirestore _firestore;
 
   String? _verificationId;
   int? _resendToken;
 
+  /// Exposed for tests that need to assert on the verification id a
+  /// `codeSent`/`codeAutoRetrievalTimeout` callback captured.
+  String? get debugVerificationId => _verificationId;
+
+  /// Sends (or resends) an OTP to [phone] and reports the real outcome.
+  ///
+  /// `FirebaseAuth.verifyPhoneNumber()`'s returned Future completes as soon
+  /// as the native call has registered its event-channel listener — well
+  /// before `codeSent`/`verificationFailed` actually fire (those arrive
+  /// later on that event channel). Awaiting it directly and returning
+  /// whatever a callback happened to set by then is a race: the caller
+  /// almost always got `null` (no error) and navigated to the OTP screen
+  /// even when verification had already failed (bad phone number, quota
+  /// exceeded, missing SHA-1/SHA-256 in Firebase causing a Play Integrity
+  /// attestation failure, etc.), leaving the user stuck with no error and
+  /// no OTP. A [Completer] makes this method actually wait for one of the
+  /// terminal callbacks before returning.
   Future<String?> sendOtp(String phone) async {
     state = const AsyncValue.loading();
-    String? error;
+    final completer = Completer<String?>();
 
-    await FirebaseAuth.instance.verifyPhoneNumber(
-      phoneNumber: phone,
-      timeout: const Duration(seconds: 60),
-      forceResendingToken: _resendToken,
-      verificationCompleted: (PhoneAuthCredential credential) async {
-        await FirebaseAuth.instance.signInWithCredential(credential);
-      },
-      verificationFailed: (FirebaseAuthException e) {
-        error = e.message ?? 'Verification failed';
-        state = AsyncValue.error(e, StackTrace.current);
-      },
-      codeSent: (String verificationId, int? resendToken) {
-        _verificationId = verificationId;
-        _resendToken = resendToken;
-        state = const AsyncValue.data(null);
-      },
-      codeAutoRetrievalTimeout: (_) {},
+    void complete(String? error) {
+      if (!completer.isCompleted) completer.complete(error);
+    }
+
+    try {
+      await _auth.verifyPhoneNumber(
+        phoneNumber: phone,
+        timeout: const Duration(seconds: 60),
+        forceResendingToken: _resendToken,
+        verificationCompleted: (PhoneAuthCredential credential) async {
+          try {
+            await _auth.signInWithCredential(credential);
+            state = const AsyncValue.data(null);
+          } catch (e, st) {
+            state = AsyncValue.error(e, st);
+          }
+          complete(null);
+        },
+        verificationFailed: (FirebaseAuthException e) {
+          state = AsyncValue.error(e, StackTrace.current);
+          complete(e.message ?? 'Verification failed. Please try again.');
+        },
+        codeSent: (String verificationId, int? resendToken) {
+          _verificationId = verificationId;
+          _resendToken = resendToken;
+          state = const AsyncValue.data(null);
+          complete(null);
+        },
+        codeAutoRetrievalTimeout: (String verificationId) {
+          // Auto SMS-read gave up; the code was still sent, so keep the
+          // verification id usable for manual entry. Only completes the
+          // request here if codeSent never fired for some reason.
+          _verificationId = verificationId;
+          complete(null);
+        },
+      );
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
+      complete(
+        e is FirebaseAuthException
+            ? (e.message ?? 'Verification failed. Please try again.')
+            : 'Could not send OTP. Check your connection and try again.',
+      );
+    }
+
+    return completer.future.timeout(
+      const Duration(seconds: 65),
+      onTimeout: () => 'Request timed out. Please try again.',
     );
-
-    return error;
   }
 
   Future<bool> verifyOtp(String otp) async {
@@ -76,7 +130,7 @@ class AuthNotifier extends StateNotifier<AsyncValue<void>> {
         verificationId: _verificationId!,
         smsCode: otp,
       );
-      await FirebaseAuth.instance.signInWithCredential(credential);
+      await _auth.signInWithCredential(credential);
       state = const AsyncValue.data(null);
       return true;
     } on FirebaseAuthException catch (e, st) {
@@ -108,7 +162,7 @@ class AuthNotifier extends StateNotifier<AsyncValue<void>> {
         isProfileComplete: name.isNotEmpty && village != null && district != null,
         preferredLanguage: preferredLanguage,
       );
-      await FirebaseFirestore.instance
+      await _firestore
           .collection(FirebaseConstants.users)
           .doc(uid)
           .set(doc.toMap(), SetOptions(merge: true));
@@ -129,7 +183,7 @@ class AuthNotifier extends StateNotifier<AsyncValue<void>> {
   }) async {
     state = const AsyncValue.loading();
     try {
-      await FirebaseFirestore.instance
+      await _firestore
           .collection(FirebaseConstants.users)
           .doc(uid)
           .update({
@@ -160,7 +214,7 @@ class AuthNotifier extends StateNotifier<AsyncValue<void>> {
     state = const AsyncValue.loading();
 
     try {
-      await FirebaseFirestore.instance
+      await _firestore
           .collection(FirebaseConstants.users)
           .doc(uid)
           .delete();
@@ -171,7 +225,7 @@ class AuthNotifier extends StateNotifier<AsyncValue<void>> {
     }
 
     try {
-      await FirebaseAuth.instance.currentUser?.delete();
+      await _auth.currentUser?.delete();
       state = const AsyncValue.data(null);
       return null;
     } on FirebaseAuthException catch (e, st) {
@@ -184,7 +238,7 @@ class AuthNotifier extends StateNotifier<AsyncValue<void>> {
   }
 
   Future<void> signOut() async {
-    await FirebaseAuth.instance.signOut();
+    await _auth.signOut();
     state = const AsyncValue.data(null);
   }
 }

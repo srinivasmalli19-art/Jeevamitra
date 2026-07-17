@@ -5,7 +5,12 @@ import '../../core/utils/geo_hash_helper.dart';
 import '../models/vet_model.dart';
 
 class VetRepository {
-  final _col = FirebaseFirestore.instance
+  VetRepository({FirebaseFirestore? firestore})
+      : _firestore = firestore ?? FirebaseFirestore.instance;
+
+  final FirebaseFirestore _firestore;
+
+  late final _col = _firestore
       .collection(FirebaseConstants.vets)
       .withConverter<VetModel>(
         fromFirestore: (snap, _) => VetModel.fromFirestore(snap),

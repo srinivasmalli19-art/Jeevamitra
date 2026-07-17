@@ -6,7 +6,20 @@ import '../../core/utils/geo_hash_helper.dart';
 import '../models/farm_model.dart';
 
 class FarmRepository {
-  final _col = FirebaseFirestore.instance.collection(FirebaseConstants.farms);
+  FarmRepository({FirebaseFirestore? firestore, FirebaseAuth? auth})
+      : _firestoreOverride = firestore,
+        _authOverride = auth;
+
+  final FirebaseFirestore? _firestoreOverride;
+  final FirebaseAuth? _authOverride;
+
+  // Resolved lazily (not in the initializer list) so constructing this class
+  // with only one override supplied doesn't force-touch the other real
+  // Firebase singleton before it's actually needed.
+  FirebaseFirestore get _firestore => _firestoreOverride ?? FirebaseFirestore.instance;
+  FirebaseAuth get _auth => _authOverride ?? FirebaseAuth.instance;
+
+  late final _col = _firestore.collection(FirebaseConstants.farms);
 
   // ── Streams ──────────────────────────────────────────────────────────────
 
@@ -85,8 +98,7 @@ class FarmRepository {
 
   // ── Auth guard ────────────────────────────────────────────────────────────
 
-  String get currentUid =>
-      FirebaseAuth.instance.currentUser?.uid ?? '';
+  String get currentUid => _auth.currentUser?.uid ?? '';
 
   bool ownsDoc(FarmModel farm) => farm.ownerId == currentUid;
 

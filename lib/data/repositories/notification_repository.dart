@@ -4,7 +4,12 @@ import '../../core/constants/firebase_constants.dart';
 import '../models/notification_model.dart';
 
 class NotificationRepository {
-  final _col = FirebaseFirestore.instance
+  NotificationRepository({FirebaseFirestore? firestore})
+      : _firestore = firestore ?? FirebaseFirestore.instance;
+
+  final FirebaseFirestore _firestore;
+
+  late final _col = _firestore
       .collection(FirebaseConstants.notifications)
       .withConverter<NotificationModel>(
         fromFirestore: (snap, _) => NotificationModel.fromFirestore(snap),
@@ -22,7 +27,7 @@ class NotificationRepository {
       _col.doc(notificationId).update({'isRead': true});
 
   Future<void> markAllAsRead(String userId) async {
-    final batch = FirebaseFirestore.instance.batch();
+    final batch = _firestore.batch();
     final unread = await _col
         .where('userId', isEqualTo: userId)
         .where('isRead', isEqualTo: false)
