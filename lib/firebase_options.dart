@@ -4,6 +4,16 @@ import 'package:firebase_core/firebase_core.dart' show FirebaseOptions;
 import 'package:flutter/foundation.dart'
     show defaultTargetPlatform, kIsWeb, TargetPlatform;
 
+/// Default [FirebaseOptions] for use with your Firebase apps.
+///
+/// Example:
+/// ```dart
+/// import 'firebase_options.dart';
+/// // ...
+/// await Firebase.initializeApp(
+///   options: DefaultFirebaseOptions.currentPlatform,
+/// );
+/// ```
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
@@ -14,8 +24,15 @@ class DefaultFirebaseOptions {
         return android;
       case TargetPlatform.iOS:
         return ios;
+      case TargetPlatform.macOS:
+        return macos;
       case TargetPlatform.windows:
         return windows;
+      case TargetPlatform.linux:
+        throw UnsupportedError(
+          'DefaultFirebaseOptions have not been configured for linux - '
+          'you can reconfigure this by running the FlutterFire CLI again.',
+        );
       default:
         throw UnsupportedError(
           'DefaultFirebaseOptions are not supported for this platform.',
@@ -23,7 +40,6 @@ class DefaultFirebaseOptions {
     }
   }
 
-  // Web uses the same JS-SDK config as Windows
   static const FirebaseOptions web = FirebaseOptions(
     apiKey: 'AIzaSyDAhvO3a3xvrdCoqAFU8rgGQedRBmPZWHc',
     appId: '1:360739375700:web:9ffc681c2a5615771b3bc1',
@@ -44,11 +60,24 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyCwkrtuMrnwb5xl8yVMi7To1Z39gKWAluI',
-    appId: '1:360739375700:ios:a5e1ec8834b178621b3bc1',
+    appId: '1:360739375700:ios:fa1f43f7a6d2a5101b3bc1',
     messagingSenderId: '360739375700',
     projectId: 'jeevamitra',
     storageBucket: 'jeevamitra.firebasestorage.app',
+    androidClientId: '360739375700-0qo9qrf7vrj2lni3iiimirrvu1qebvd7.apps.googleusercontent.com',
+    iosClientId: '360739375700-v47hduk1iv9haku2sddkbksn9m25cifu.apps.googleusercontent.com',
     iosBundleId: 'com.jeevamitra.app',
+  );
+
+  static const FirebaseOptions macos = FirebaseOptions(
+    apiKey: 'AIzaSyCwkrtuMrnwb5xl8yVMi7To1Z39gKWAluI',
+    appId: '1:360739375700:ios:7a5196b43ae3d4b91b3bc1',
+    messagingSenderId: '360739375700',
+    projectId: 'jeevamitra',
+    storageBucket: 'jeevamitra.firebasestorage.app',
+    androidClientId: '360739375700-0qo9qrf7vrj2lni3iiimirrvu1qebvd7.apps.googleusercontent.com',
+    iosClientId: '360739375700-1bkpmm99o1k3q9i57jdgv718dro4s8u5.apps.googleusercontent.com',
+    iosBundleId: 'com.jeevamitra.jeevamitra',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(

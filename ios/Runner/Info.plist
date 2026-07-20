@@ -42,7 +42,7 @@
 				     firebase_options.dart ios options set no iosClientId): "app-" followed
 				     by the iOS GOOGLE_APP_ID with ":" replaced by "-"
 				     (1:360739375700:ios:a5e1ec8834b178621b3bc1). -->
-				<string>app-1-360739375700-ios-a5e1ec8834b178621b3bc1</string>
+				<string>app-1-360739375700-ios-fa1f43f7a6d2a5101b3bc1</string>
 			</array>
 		</dict>
 	</array>
