@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -35,11 +36,19 @@ class _PhoneLoginScreenState extends ConsumerState<PhoneLoginScreen> {
     final error = await ref.read(authNotifierProvider.notifier).sendOtp(phone);
     if (!context.mounted) return;
     if (error != null) {
+      debugPrint(
+        '[OTP_FLOW] Login screen navigation decision — error present, '
+        'staying on login screen: $error',
+      );
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(error), backgroundColor: AppColors.error),
       );
       return;
     }
+    debugPrint(
+      '[OTP_FLOW] Login screen navigation decision — no error, '
+      'navigating to OTP screen',
+    );
     context.push(RouteConstants.otpVerification, extra: {'phone': phone});
   }
 

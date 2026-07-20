@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/constants/firebase_constants.dart';
@@ -68,19 +69,25 @@ class AuthNotifier extends StateNotifier<AsyncValue<void>> {
   /// no OTP. A [Completer] makes this method actually wait for one of the
   /// terminal callbacks before returning.
   Future<String?> sendOtp(String phone) async {
+    debugPrint('[OTP_FLOW] sendOtp() entered — phone=$phone');
     state = const AsyncValue.loading();
     final completer = Completer<String?>();
 
     void complete(String? error) {
-      if (!completer.isCompleted) completer.complete(error);
+      if (!completer.isCompleted) {
+        debugPrint('[OTP_FLOW] Completer completed — error=$error');
+        completer.complete(error);
+      }
     }
 
     try {
+      debugPrint('[OTP_FLOW] verifyPhoneNumber() invoked — phone=$phone');
       await _auth.verifyPhoneNumber(
         phoneNumber: phone,
         timeout: const Duration(seconds: 60),
         forceResendingToken: _resendToken,
         verificationCompleted: (PhoneAuthCredential credential) async {
+          debugPrint('[OTP_FLOW] verificationCompleted callback fired');
           try {
             await _auth.signInWithCredential(credential);
             state = const AsyncValue.data(null);
@@ -90,16 +97,28 @@ class AuthNotifier extends StateNotifier<AsyncValue<void>> {
           complete(null);
         },
         verificationFailed: (FirebaseAuthException e) {
+          debugPrint(
+            '[OTP_FLOW] verificationFailed callback fired — '
+            'code=${e.code}, message=${e.message}',
+          );
           state = AsyncValue.error(e, StackTrace.current);
           complete(e.message ?? 'Verification failed. Please try again.');
         },
         codeSent: (String verificationId, int? resendToken) {
+          debugPrint(
+            '[OTP_FLOW] codeSent callback fired — '
+            'verificationId=$verificationId, resendToken=$resendToken',
+          );
           _verificationId = verificationId;
           _resendToken = resendToken;
           state = const AsyncValue.data(null);
           complete(null);
         },
         codeAutoRetrievalTimeout: (String verificationId) {
+          debugPrint(
+            '[OTP_FLOW] codeAutoRetrievalTimeout callback fired — '
+            'verificationId=$verificationId',
+          );
           // Auto SMS-read gave up; the code was still sent, so keep the
           // verification id usable for manual entry. Only completes the
           // request here if codeSent never fired for some reason.
@@ -108,6 +127,10 @@ class AuthNotifier extends StateNotifier<AsyncValue<void>> {
         },
       );
     } catch (e, st) {
+      debugPrint(
+        '[OTP_FLOW] verifyPhoneNumber() threw synchronously — '
+        '${e is FirebaseAuthException ? 'code=${e.code}, message=${e.message}' : 'error=$e'}',
+      );
       state = AsyncValue.error(e, st);
       complete(
         e is FirebaseAuthException
@@ -116,10 +139,15 @@ class AuthNotifier extends StateNotifier<AsyncValue<void>> {
       );
     }
 
-    return completer.future.timeout(
+    final result = await completer.future.timeout(
       const Duration(seconds: 65),
-      onTimeout: () => 'Request timed out. Please try again.',
+      onTimeout: () {
+        debugPrint('[OTP_FLOW] Completer timed out after 65s with no callback firing');
+        return 'Request timed out. Please try again.';
+      },
     );
+    debugPrint('[OTP_FLOW] sendOtp() returned — value=$result');
+    return result;
   }
 
   Future<bool> verifyOtp(String otp) async {

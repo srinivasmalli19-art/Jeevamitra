@@ -12,7 +12,28 @@
           "package_name": "com.jeevamitra.app"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "360739375700-0qo9qrf7vrj2lni3iiimirrvu1qebvd7.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.jeevamitra.app",
+            "certificate_hash": "6deac209386dc7a349ecb9fff8351b973d03211d"
+          }
+        },
+        {
+          "client_id": "360739375700-emj1fr554rf8l8qabqkek4a3ral2kmsu.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.jeevamitra.app",
+            "certificate_hash": "7d8a2684931c8e2590ec5443ec412285381e62c7"
+          }
+        },
+        {
+          "client_id": "360739375700-01k15beblvkkk8n88io0ngvrgnvs3sqa.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyD5jfwTsvShnTXIsY5d6BtQdQWNZnjNRNA"
@@ -20,7 +41,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "360739375700-01k15beblvkkk8n88io0ngvrgnvs3sqa.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "360739375700-kg8a2lktoht1tti6o94pvqhbiis7ugil.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.pasumitra.pasumitra"
+              }
+            }
+          ]
         }
       }
     }
