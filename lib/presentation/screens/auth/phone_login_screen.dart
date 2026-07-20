@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -7,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/constants/route_constants.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../../core/utils/otp_flow_logger.dart';
 import '../../../core/utils/validators.dart';
 import '../../../generated/l10n/app_localizations.dart';
 import '../../providers/auth/auth_provider.dart';
@@ -33,11 +33,12 @@ class _PhoneLoginScreenState extends ConsumerState<PhoneLoginScreen> {
   Future<void> _sendOtp() async {
     if (!_formKey.currentState!.validate()) return;
     final phone = '+91${_phoneCtrl.text.trim()}';
+    otpFlowLog('Phone number entered on login screen — phone=$phone');
     final error = await ref.read(authNotifierProvider.notifier).sendOtp(phone);
     if (!context.mounted) return;
     if (error != null) {
-      debugPrint(
-        '[OTP_FLOW] Login screen navigation decision — error present, '
+      otpFlowLog(
+        'Login screen navigation decision — error present, '
         'staying on login screen: $error',
       );
       ScaffoldMessenger.of(context).showSnackBar(
@@ -45,9 +46,8 @@ class _PhoneLoginScreenState extends ConsumerState<PhoneLoginScreen> {
       );
       return;
     }
-    debugPrint(
-      '[OTP_FLOW] Login screen navigation decision — no error, '
-      'navigating to OTP screen',
+    otpFlowLog(
+      'Login screen navigation decision — no error, navigating to OTP screen',
     );
     context.push(RouteConstants.otpVerification, extra: {'phone': phone});
   }

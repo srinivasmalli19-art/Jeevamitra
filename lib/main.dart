@@ -1,3 +1,5 @@
+import 'dart:io' show Platform;
+
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
@@ -8,11 +10,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 import 'core/constants/app_constants.dart';
 import 'core/router/firebase_initialized_provider.dart';
 import 'core/services/local_notification_service.dart';
 import 'core/services/remote_config_service.dart';
+import 'core/utils/otp_flow_logger.dart';
 import 'firebase_options.dart';
 import 'presentation/app/jeevamitra_app.dart';
 
@@ -76,7 +80,26 @@ void main() async {
     await RemoteConfigService().init();
 
     firebaseInitialized = true;
+
+    final app = Firebase.app();
+    otpFlowLog(
+      'Firebase initialized — projectId=${app.options.projectId}, '
+      'appId=${app.options.appId}',
+    );
+    otpFlowLog(
+      'Platform detected — ${kIsWeb ? 'web' : Platform.operatingSystem}',
+    );
+    final packageInfo = await PackageInfo.fromPlatform();
+    otpFlowLog(
+      'Bundle ID / package name — ${packageInfo.packageName} '
+      '(version ${packageInfo.version}+${packageInfo.buildNumber})',
+    );
   } catch (e) {
+    // This exception is otherwise only visible when kDebugMode is true —
+    // i.e. invisible in the release builds real devices/testers run. Log it
+    // unconditionally too so it's visible in Xcode's Console / adb logcat
+    // regardless of build mode.
+    otpFlowLog('Firebase initialization threw — error=$e');
     if (kDebugMode) {
       debugPrint('[JeevaMitra] Firebase not configured: $e');
     }

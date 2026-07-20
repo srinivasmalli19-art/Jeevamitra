@@ -24,6 +24,28 @@
 	<string>????</string>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<!-- Required by FirebaseAuth/PhoneAuthProvider.swift's verifyPhoneNumber()
+				     (guard at line 108-109 of the pinned firebase-ios-sdk 11.15.0 source):
+				     it force-reads Info.plist's CFBundleURLTypes via an implicitly-unwrapped
+				     optional (Auth.swift mainBundleUrlTypes, set from
+				     Bundle.main.object(forInfoDictionaryKey: "CFBundleURLTypes") in Auth.init).
+				     With this key absent, that read is nil and the guard's argument
+				     evaluation traps with "Unexpectedly found nil while implicitly
+				     unwrapping an Optional value" before any verifyPhoneNumber callback
+				     can fire. The scheme below is the exact fallback PhoneAuthProvider
+				     computes when no Google Sign-In clientID is configured (this project's
+				     firebase_options.dart ios options set no iosClientId): "app-" followed
+				     by the iOS GOOGLE_APP_ID with ":" replaced by "-"
+				     (1:360739375700:ios:a5e1ec8834b178621b3bc1). -->
+				<string>app-1-360739375700-ios-a5e1ec8834b178621b3bc1</string>
+			</array>
+		</dict>
+	</array>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSLocationWhenInUseUsageDescription</key>
@@ -55,6 +77,10 @@
 	</dict>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>remote-notification</string>
+	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
