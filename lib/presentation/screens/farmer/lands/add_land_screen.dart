@@ -251,11 +251,22 @@ class _AddLandScreenState extends ConsumerState<AddLandScreen> {
       // regardless of how _data.images was populated.
       List<String> imageUrls = [];
       if (FeatureFlags.photoUploadsEnabled && _data.images.isNotEmpty) {
-        imageUrls = await _imgService.uploadImages(
-          files: _data.images,
-          folder: 'farms',
-          ownerId: uid,
-        );
+        try {
+          imageUrls = await _imgService.uploadImages(
+            files: _data.images,
+            folder: 'farms',
+            ownerId: uid,
+          );
+        } catch (_) {
+          if (!mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Could not upload photos. Check your connection and try again, or remove photos and add the land without them for now.'),
+              backgroundColor: AppColors.error,
+            ),
+          );
+          return;
+        }
       }
 
       final areaSqMeters = _areaToSqMeters(_areaCtrl.text.trim(), _data.areaUnit);
@@ -303,7 +314,7 @@ class _AddLandScreenState extends ConsumerState<AddLandScreen> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Could not upload photos. Check your connection and try again, or remove photos and add the land without them for now.'),
+          content: Text('Could not save your land. Check your connection and try again.'),
           backgroundColor: AppColors.error,
         ),
       );

@@ -72,7 +72,12 @@ class FarmRepository {
   Future<String> addFarm(FarmModel farm) async {
     final ref = _col.doc();
     final model = farm.copyWithModel(); // ensure geohash is set
-    await ref.set(model.toFirestore());
+    final data = model.toFirestore();
+    // watchMyFarms() orderBy('createdAt') must sort by the server's clock,
+    // not the caller's device clock, so a skewed device doesn't push a new
+    // listing out of order (or off the top) in My Lands.
+    data['createdAt'] = FieldValue.serverTimestamp();
+    await ref.set(data);
     return ref.id;
   }
 
