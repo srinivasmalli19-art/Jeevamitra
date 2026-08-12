@@ -21,28 +21,32 @@ class FarmAvailabilityNotifier extends StateNotifier<AsyncValue<void>> {
 
   final FarmAvailabilityRepository _repo;
 
-  Future<bool> addBlockedPeriod(
+  /// Returns null on success, or the thrown error for the caller to
+  /// translate and show.
+  Future<Object?> addBlockedPeriod(
       String farmId, DateTime start, DateTime end, String? reason) async {
     state = const AsyncValue.loading();
     try {
       await _repo.addBlockedPeriod(farmId, start, end, reason);
       state = const AsyncValue.data(null);
-      return true;
+      return null;
     } catch (e, st) {
       state = AsyncValue.error(e, st);
-      return false;
+      return e;
     }
   }
 
-  Future<bool> removeBlockedPeriod(String farmId, String periodId) async {
+  /// Returns null on success, or the thrown error for the caller to
+  /// translate and show.
+  Future<Object?> removeBlockedPeriod(String farmId, String periodId) async {
     state = const AsyncValue.loading();
     try {
       await _repo.removeBlockedPeriod(farmId, periodId);
       state = const AsyncValue.data(null);
-      return true;
+      return null;
     } catch (e, st) {
       state = AsyncValue.error(e, st);
-      return false;
+      return e;
     }
   }
 }

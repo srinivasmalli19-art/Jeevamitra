@@ -8,6 +8,8 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../providers/farm/farm_providers.dart';
 import '../../../providers/location_provider.dart';
+import '../../../widgets/common/cached_farm_image.dart';
+import '../../../widgets/common/full_screen_photo_viewer.dart';
 import '../../../widgets/common/jm_badge.dart';
 import '../../../widgets/common/jm_error_state.dart';
 import '../../../widgets/common/jm_loading.dart';
@@ -58,10 +60,13 @@ class ShepherdLandDetailScreen extends ConsumerWidget {
                   background: farm.imageUrls.isNotEmpty
                       ? PageView.builder(
                           itemCount: farm.imageUrls.length,
-                          itemBuilder: (_, i) => Image.network(
-                            farm.imageUrls[i],
-                            fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) => _placeholder(),
+                          itemBuilder: (_, i) => GestureDetector(
+                            onTap: () => showFullScreenPhotoViewer(
+                              context,
+                              urls: farm.imageUrls,
+                              initialIndex: i,
+                            ),
+                            child: CachedFarmImage(url: farm.imageUrls[i]),
                           ),
                         )
                       : _placeholder(),

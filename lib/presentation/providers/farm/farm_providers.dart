@@ -60,32 +60,46 @@ class AddFarmNotifier extends StateNotifier<AsyncValue<void>> {
     }
   }
 
-  Future<bool> updateFarm(String farmId, Map<String, dynamic> fields) async {
+  /// Returns null on success, or the thrown error for the caller to
+  /// translate and show.
+  Future<Object?> updateFarm(String farmId, Map<String, dynamic> fields) async {
     state = const AsyncValue.loading();
     try {
       await _repo.updateFarm(farmId, fields);
       state = const AsyncValue.data(null);
-      return true;
+      return null;
     } catch (e, st) {
       state = AsyncValue.error(e, st);
-      return false;
+      return e;
     }
   }
 
-  Future<bool> deleteFarm(String farmId) async {
+  /// Returns null on success, or the thrown error for the caller to
+  /// translate and show.
+  Future<Object?> deleteFarm(String farmId) async {
     state = const AsyncValue.loading();
     try {
       await _repo.deleteFarm(farmId);
       state = const AsyncValue.data(null);
-      return true;
+      return null;
     } catch (e, st) {
       state = AsyncValue.error(e, st);
-      return false;
+      return e;
     }
   }
 
-  Future<void> toggleAvailability(String farmId, bool isAvailable) async {
-    await _repo.toggleAvailability(farmId, isAvailable);
+  /// Returns null on success, or the thrown error for the caller to
+  /// translate and show — previously this was fire-and-forget from a
+  /// synchronous Switch.onChanged, so a failed write (offline,
+  /// permission-denied) surfaced as an unhandled Future rejection with no
+  /// feedback: the switch appeared to silently do nothing.
+  Future<Object?> toggleAvailability(String farmId, bool isAvailable) async {
+    try {
+      await _repo.toggleAvailability(farmId, isAvailable);
+      return null;
+    } catch (e) {
+      return e;
+    }
   }
 }
 

@@ -4,11 +4,14 @@ import 'package:table_calendar/table_calendar.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/utils/firebase_error_translator.dart';
 import '../../../../data/models/farm_blocked_period.dart';
 import '../../../../data/repositories/farm_availability_repository.dart';
 import '../../../providers/farm/farm_availability_providers.dart';
 import '../../../widgets/common/jm_button.dart';
+import '../../../widgets/common/jm_error_state.dart';
 import '../../../widgets/common/jm_loading.dart';
+import '../../../widgets/common/standard_app_bar.dart';
 
 class AvailabilityCalendarScreen extends ConsumerStatefulWidget {
   final String farmId;
@@ -47,32 +50,32 @@ class _AvailabilityCalendarScreenState
     final end = _rangeEnd ?? _rangeStart;
     if (start == null || end == null) return;
 
-    if (FarmAvailabilityRepository.hasConflict(existing, start,
-        end.add(const Duration(days: 1)))) {
+    if (FarmAvailabilityRepository.hasConflict(
+        existing, start, end.add(const Duration(days: 1)))) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-            content: Text('Selected range overlaps an existing blocked period.')),
+            content:
+                Text('Selected range overlaps an existing blocked period.')),
       );
       return;
     }
 
     setState(() => _saving = true);
-    final ok = await ref
+    final error = await ref
         .read(farmAvailabilityNotifierProvider.notifier)
-        .addBlockedPeriod(
-            widget.farmId, start, end, _reasonCtrl.text.trim());
+        .addBlockedPeriod(widget.farmId, start, end, _reasonCtrl.text.trim());
     setState(() => _saving = false);
 
     if (!mounted) return;
-    if (ok) {
+    if (error == null) {
       _clearSelection();
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Dates blocked successfully.')),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text('Failed to save. Please try again.'),
+        SnackBar(
+            content: Text(friendlyFirebaseMessage(error)),
             backgroundColor: AppColors.error),
       );
     }
@@ -98,30 +101,42 @@ class _AvailabilityCalendarScreenState
       ),
     );
     if (confirmed != true) return;
-    await ref
+    final error = await ref
         .read(farmAvailabilityNotifierProvider.notifier)
         .removeBlockedPeriod(widget.farmId, period.id);
+    if (!mounted || error == null) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(friendlyFirebaseMessage(error)),
+        backgroundColor: AppColors.error,
+      ),
+    );
   }
 
   String _fmt(DateTime d) => '${d.day}/${d.month}/${d.year}';
 
   @override
   Widget build(BuildContext context) {
-    final periodsAsync =
-        ref.watch(farmBlockedPeriodsProvider(widget.farmId));
+    final periodsAsync = ref.watch(farmBlockedPeriodsProvider(widget.farmId));
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Manage Availability'),
+      appBar: StandardAppBar(
+        title: 'Manage Availability',
         actions: [
           if (_rangeStart != null)
             TextButton(
-                onPressed: _clearSelection, child: const Text('Clear')),
+              onPressed: _clearSelection,
+              style: TextButton.styleFrom(foregroundColor: Colors.white),
+              child: const Text('Clear'),
+            ),
         ],
       ),
       body: periodsAsync.when(
         loading: () => const Center(child: JmLoading()),
-        error: (e, _) => Center(child: Text(e.toString())),
+        error: (e, _) => JmErrorState(
+          message: friendlyFirebaseMessage(e),
+          onRetry: () => ref.invalidate(farmBlockedPeriodsProvider(widget.farmId)),
+        ),
         data: (periods) => _Body(
           periods: periods,
           focusedDay: _focusedDay,
@@ -217,8 +232,7 @@ class _Body extends StatelessWidget {
             withinRangeDecoration: BoxDecoration(
               color: AppColors.primary.withAlpha(25),
             ),
-            withinRangeTextStyle:
-                const TextStyle(color: AppColors.primary),
+            withinRangeTextStyle: const TextStyle(color: AppColors.primary),
           ),
           calendarBuilders: CalendarBuilders(
             defaultBuilder: (context, day, _) =>
@@ -247,8 +261,10 @@ class _Body extends StatelessWidget {
                         rangeEnd != null
                             ? '${fmt(rangeStart!)} – ${fmt(rangeEnd!)}'
                             : fmt(rangeStart!),
-                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                            color: AppColors.primary),
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleSmall
+                            ?.copyWith(color: AppColors.primary),
                       ),
                     ),
                     if (rangeEnd != null)
@@ -295,8 +311,7 @@ class _Body extends StatelessWidget {
         if (periods.isEmpty)
           Padding(
             padding: const EdgeInsets.only(
-                left: AppSpacing.base,
-                bottom: AppSpacing.xl),
+                left: AppSpacing.base, bottom: AppSpacing.xl),
             child: Text('No blocked periods — all dates available.',
                 style: Theme.of(context)
                     .textTheme
@@ -312,7 +327,8 @@ class _Body extends StatelessWidget {
               subtitle: p.reason != null
                   ? Text(p.reason!,
                       style: Theme.of(context).textTheme.bodySmall)
-                  : Text('${p.lengthInDays} day${p.lengthInDays == 1 ? '' : 's'}',
+                  : Text(
+                      '${p.lengthInDays} day${p.lengthInDays == 1 ? '' : 's'}',
                       style: Theme.of(context).textTheme.bodySmall),
               trailing: IconButton(
                 icon: const Icon(Icons.delete_outline_rounded,

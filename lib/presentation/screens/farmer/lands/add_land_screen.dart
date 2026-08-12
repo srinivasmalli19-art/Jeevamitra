@@ -3,21 +3,25 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:image_picker/image_picker.dart';
 
 import '../../../../core/constants/feature_flags.dart';
 import '../../../../core/constants/route_constants.dart';
-import '../../../../core/services/image_upload_service.dart';
 import '../../../../core/services/location_service.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/utils/firebase_error_translator.dart';
 import '../../../../core/utils/geo_hash_helper.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../../data/models/farm_model.dart';
 import '../../../providers/auth/auth_provider.dart';
 import '../../../providers/farm/farm_providers.dart';
+import '../../../providers/farm/photo_upload_controller.dart';
 import '../../../widgets/common/jm_button.dart';
+import '../../../widgets/common/jm_error_state.dart';
+import '../../../widgets/common/jm_loading.dart';
 import '../../../widgets/common/jm_text_field.dart';
+import '../../../widgets/common/land_photo_manager.dart';
+import '../../../widgets/common/standard_app_bar.dart';
 
 // ─── Page state ───────────────────────────────────────────────────────────────
 
@@ -44,9 +48,6 @@ class _AddLandState {
   final bool hasFencing;
   final bool hasVetNearby;
 
-  // Step 4 — Photos
-  final List<XFile> images;
-
   const _AddLandState({
     this.title = '',
     this.description = '',
@@ -64,34 +65,44 @@ class _AddLandState {
     this.hasShade = false,
     this.hasFencing = false,
     this.hasVetNearby = false,
-    this.images = const [],
   });
 
   _AddLandState copyWith({
-    String? title, String? description, String? area, String? areaUnit,
-    String? price, String? maxAnimals, double? lat, double? lng,
-    String? village, String? district, String? state,
-    List<String>? fodderTypes, bool? hasWater, bool? hasShade,
-    bool? hasFencing, bool? hasVetNearby, List<XFile>? images,
-  }) => _AddLandState(
-    title: title ?? this.title,
-    description: description ?? this.description,
-    area: area ?? this.area,
-    areaUnit: areaUnit ?? this.areaUnit,
-    price: price ?? this.price,
-    maxAnimals: maxAnimals ?? this.maxAnimals,
-    lat: lat ?? this.lat,
-    lng: lng ?? this.lng,
-    village: village ?? this.village,
-    district: district ?? this.district,
-    state: state ?? this.state,
-    fodderTypes: fodderTypes ?? this.fodderTypes,
-    hasWater: hasWater ?? this.hasWater,
-    hasShade: hasShade ?? this.hasShade,
-    hasFencing: hasFencing ?? this.hasFencing,
-    hasVetNearby: hasVetNearby ?? this.hasVetNearby,
-    images: images ?? this.images,
-  );
+    String? title,
+    String? description,
+    String? area,
+    String? areaUnit,
+    String? price,
+    String? maxAnimals,
+    double? lat,
+    double? lng,
+    String? village,
+    String? district,
+    String? state,
+    List<String>? fodderTypes,
+    bool? hasWater,
+    bool? hasShade,
+    bool? hasFencing,
+    bool? hasVetNearby,
+  }) =>
+      _AddLandState(
+        title: title ?? this.title,
+        description: description ?? this.description,
+        area: area ?? this.area,
+        areaUnit: areaUnit ?? this.areaUnit,
+        price: price ?? this.price,
+        maxAnimals: maxAnimals ?? this.maxAnimals,
+        lat: lat ?? this.lat,
+        lng: lng ?? this.lng,
+        village: village ?? this.village,
+        district: district ?? this.district,
+        state: state ?? this.state,
+        fodderTypes: fodderTypes ?? this.fodderTypes,
+        hasWater: hasWater ?? this.hasWater,
+        hasShade: hasShade ?? this.hasShade,
+        hasFencing: hasFencing ?? this.hasFencing,
+        hasVetNearby: hasVetNearby ?? this.hasVetNearby,
+      );
 }
 
 // ─── Screen ───────────────────────────────────────────────────────────────────
@@ -125,8 +136,20 @@ class _AddLandScreenState extends ConsumerState<AddLandScreen> {
 
   bool _locating = false;
   bool _submitting = false;
-  final _imgService = ImageUploadService();
+  bool _loadingExisting = false;
+  /// Set when loading the existing farm (Edit Land) fails or the farm no
+  /// longer exists. Must block the wizard entirely rather than falling
+  /// through to it with empty controllers — submitting an unpopulated
+  /// form would overwrite the real farm's fields with blanks via
+  /// updateFarm().
+  String? _loadError;
   final _locService = LocationService();
+
+  /// Farm document id for this session: the real id when editing, or a
+  /// Firestore-reserved-but-unwritten id when creating — reserved up
+  /// front so photo uploads have somewhere to go before the farm document
+  /// itself exists (see FarmRepository.reserveFarmId).
+  late final String _farmId;
 
   static const _fodderOptions = [
     ('grass', 'Grass / Pasture', '🌿'),
@@ -137,6 +160,74 @@ class _AddLandScreenState extends ConsumerState<AddLandScreen> {
     ('paddy', 'Paddy Straw', '🌾'),
     ('sugarcane', 'Sugarcane Tops', '🎋'),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.editFarmId != null) {
+      _farmId = widget.editFarmId!;
+      _loadExistingFarm();
+    } else {
+      _farmId = ref.read(farmRepositoryProvider).reserveFarmId();
+    }
+  }
+
+  Future<void> _loadExistingFarm() async {
+    setState(() => _loadingExisting = true);
+    try {
+      final farm = await ref
+          .read(farmRepositoryProvider)
+          .watchFarm(widget.editFarmId!)
+          .first;
+      if (!mounted) return;
+      if (farm == null) {
+        setState(() => _loadError = 'This land no longer exists. It may have been deleted.');
+        return;
+      }
+      _titleCtrl.text = farm.title;
+      _descCtrl.text = farm.description;
+      _areaCtrl.text = _sqMetersToUnitString(farm.areaSqMeters, farm.areaUnit);
+      _priceCtrl.text = farm.pricePerDayPerAnimal.toStringAsFixed(0);
+      _maxAnimalsCtrl.text = farm.maxAnimals.toString();
+      _villageCtrl.text = farm.village;
+      _districtCtrl.text = farm.district;
+      _stateCtrl.text = farm.state;
+      setState(() {
+        _data = _data.copyWith(
+          areaUnit: farm.areaUnit,
+          lat: farm.lat,
+          lng: farm.lng,
+          village: farm.village,
+          district: farm.district,
+          state: farm.state,
+          fodderTypes: farm.fodderTypes,
+          hasWater: farm.hasWater,
+          hasShade: farm.hasShade,
+          hasFencing: farm.hasFencing,
+          hasVetNearby: farm.hasVetNearby,
+        );
+      });
+      final uid = FirebaseAuth.instance.currentUser?.uid ?? '';
+      ref
+          .read(photoUploadControllerProvider((ownerId: uid, farmId: _farmId))
+              .notifier)
+          .loadExisting(farm.imageUrls);
+    } catch (e) {
+      if (mounted) setState(() => _loadError = friendlyFirebaseMessage(e));
+    } finally {
+      if (mounted) setState(() => _loadingExisting = false);
+    }
+  }
+
+  String _sqMetersToUnitString(double sqMeters, String unit) {
+    final v = switch (unit) {
+      'acre' => sqMeters / 4046.856,
+      'hectare' => sqMeters / 10000,
+      'guntha' => sqMeters / 101.17,
+      _ => sqMeters,
+    };
+    return v.toStringAsFixed(2);
+  }
 
   @override
   void dispose() {
@@ -179,9 +270,8 @@ class _AddLandScreenState extends ConsumerState<AddLandScreen> {
   }
 
   Future<void> _pickOnMap() async {
-    final extra = _data.lat != null
-        ? {'lat': _data.lat, 'lng': _data.lng}
-        : null;
+    final extra =
+        _data.lat != null ? {'lat': _data.lat, 'lng': _data.lng} : null;
     final result = await context.push<Map<String, dynamic>>(
       RouteConstants.mapPicker,
       extra: extra,
@@ -191,8 +281,9 @@ class _AddLandScreenState extends ConsumerState<AddLandScreen> {
       final lng = (result['lng'] as num).toDouble();
       setState(() => _data = _data.copyWith(lat: lat, lng: lng));
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(
-            'Location set: ${lat.toStringAsFixed(4)}, ${lng.toStringAsFixed(4)}')),
+        SnackBar(
+            content: Text(
+                'Location set: ${lat.toStringAsFixed(4)}, ${lng.toStringAsFixed(4)}')),
       );
     }
   }
@@ -207,73 +298,57 @@ class _AddLandScreenState extends ConsumerState<AddLandScreen> {
       });
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Location set: ${loc.lat.toStringAsFixed(4)}, ${loc.lng.toStringAsFixed(4)}')),
+          SnackBar(
+              content: Text(
+                  'Location set: ${loc.lat.toStringAsFixed(4)}, ${loc.lng.toStringAsFixed(4)}')),
         );
       }
     } catch (e) {
       setState(() => _locating = false);
       if (mounted) {
+        // LocationService throws plain Exception('...') with an
+        // already-human-readable message — strip Dart's "Exception: "
+        // wrapper rather than routing through the Firebase translator,
+        // which would flatten this specific, correct message into a
+        // generic fallback.
+        final message = e.toString().replaceFirst('Exception: ', '');
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.toString()), backgroundColor: AppColors.error),
+          SnackBar(content: Text(message), backgroundColor: AppColors.error),
         );
       }
     }
   }
 
-  Future<void> _pickImages() async {
-    if (!FeatureFlags.photoUploadsEnabled) {
+  Future<void> _submit() async {
+    if (_submitting) return;
+
+    final uid = FirebaseAuth.instance.currentUser?.uid ?? '';
+    final photoParams = (ownerId: uid, farmId: _farmId);
+    final photoController =
+        ref.read(photoUploadControllerProvider(photoParams).notifier);
+
+    if (FeatureFlags.photoUploadsEnabled && photoController.isUploading) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text(
-            'Photo uploads will be available in an upcoming update. '
-            'You can continue creating your listing without photos.',
-          ),
-        ),
+            content: Text('Please wait for photos to finish uploading.')),
       );
       return;
     }
-    final files = await _imgService.pickMultipleImages(maxImages: 5 - _data.images.length);
-    if (files.isNotEmpty) {
-      setState(() => _data = _data.copyWith(images: [..._data.images, ...files]));
-    }
-  }
 
-  Future<void> _submit() async {
-    if (_submitting) return;
     setState(() => _submitting = true);
 
     try {
-      final uid = FirebaseAuth.instance.currentUser?.uid ?? '';
       final userDoc = ref.read(currentUserDocProvider).valueOrNull;
+      final imageUrls = FeatureFlags.photoUploadsEnabled
+          ? photoController.readyUrls
+          : <String>[];
 
-      // Upload images — hard-gated here (not just at the picker) so no
-      // Storage call can ever occur while photoUploadsEnabled is false,
-      // regardless of how _data.images was populated.
-      List<String> imageUrls = [];
-      if (FeatureFlags.photoUploadsEnabled && _data.images.isNotEmpty) {
-        try {
-          imageUrls = await _imgService.uploadImages(
-            files: _data.images,
-            folder: 'farms',
-            ownerId: uid,
-          );
-        } catch (_) {
-          if (!mounted) return;
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Could not upload photos. Check your connection and try again, or remove photos and add the land without them for now.'),
-              backgroundColor: AppColors.error,
-            ),
-          );
-          return;
-        }
-      }
-
-      final areaSqMeters = _areaToSqMeters(_areaCtrl.text.trim(), _data.areaUnit);
+      final areaSqMeters =
+          _areaToSqMeters(_areaCtrl.text.trim(), _data.areaUnit);
       final geohash = GeoHashHelper.encode(_data.lat!, _data.lng!);
 
       final farm = FarmModel(
-        id: '',
+        id: _farmId,
         ownerId: uid,
         ownerName: userDoc?.name ?? '',
         title: _titleCtrl.text.trim(),
@@ -297,24 +372,56 @@ class _AddLandScreenState extends ConsumerState<AddLandScreen> {
         createdAt: DateTime.now(),
       );
 
-      final id = await ref.read(addFarmProvider.notifier).addFarm(farm);
+      Object? error;
+      if (widget.editFarmId != null) {
+        error = await ref.read(addFarmProvider.notifier).updateFarm(_farmId, {
+          'title': farm.title,
+          'description': farm.description,
+          'lat': farm.lat,
+          'lng': farm.lng,
+          'village': farm.village,
+          'district': farm.district,
+          'state': farm.state,
+          'areaSqMeters': farm.areaSqMeters,
+          'areaUnit': farm.areaUnit,
+          'fodderTypes': farm.fodderTypes,
+          'pricePerDayPerAnimal': farm.pricePerDayPerAnimal,
+          'maxAnimals': farm.maxAnimals,
+          'hasWater': farm.hasWater,
+          'hasShade': farm.hasShade,
+          'hasFencing': farm.hasFencing,
+          'hasVetNearby': farm.hasVetNearby,
+          'imageUrls': farm.imageUrls,
+        });
+      } else {
+        final id = await ref.read(addFarmProvider.notifier).addFarm(farm);
+        if (id == null) {
+          error = ref.read(addFarmProvider).error ?? 'unknown';
+        }
+      }
 
       if (!mounted) return;
-      if (id != null) {
+      if (error == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Land added successfully!')),
+          SnackBar(
+            content: Text(widget.editFarmId != null
+                ? 'Land updated successfully!'
+                : 'Land added successfully!'),
+          ),
         );
         context.go(RouteConstants.farmerLands);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to save. Please try again.'), backgroundColor: AppColors.error),
+          SnackBar(
+              content: Text(friendlyFirebaseMessage(error)),
+              backgroundColor: AppColors.error),
         );
       }
-    } catch (_) {
+    } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Could not save your land. Check your connection and try again.'),
+        SnackBar(
+          content: Text(friendlyFirebaseMessage(e)),
           backgroundColor: AppColors.error,
         ),
       );
@@ -326,98 +433,120 @@ class _AddLandScreenState extends ConsumerState<AddLandScreen> {
   double _areaToSqMeters(String value, String unit) {
     final v = double.tryParse(value) ?? 0;
     switch (unit) {
-      case 'acre': return v * 4046.856;
-      case 'hectare': return v * 10000;
-      case 'guntha': return v * 101.17;
-      default: return v;
+      case 'acre':
+        return v * 4046.856;
+      case 'hectare':
+        return v * 10000;
+      case 'guntha':
+        return v * 101.17;
+      default:
+        return v;
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final uid = FirebaseAuth.instance.currentUser?.uid ?? '';
+
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.editFarmId != null ? 'Edit Land' : 'Add Land'),
-        leading: IconButton(icon: const Icon(Icons.arrow_back_rounded), onPressed: _prevStep),
+      appBar: StandardAppBar(
+        title: widget.editFarmId != null ? 'Edit Land' : 'Add Land',
+        leading: IconButton(
+            icon: const Icon(Icons.arrow_back_rounded), onPressed: _prevStep),
       ),
-      body: Column(
-        children: [
-          // Step indicator
-          _StepBar(current: _step),
-          Expanded(
-            child: PageView(
-              controller: _pageCtrl,
-              physics: const NeverScrollableScrollPhysics(),
-              children: [
-                _Step1BasicInfo(
-                  formKey: _formKey1,
-                  titleCtrl: _titleCtrl,
-                  descCtrl: _descCtrl,
-                  areaCtrl: _areaCtrl,
-                  priceCtrl: _priceCtrl,
-                  maxAnimalsCtrl: _maxAnimalsCtrl,
-                  areaUnit: _data.areaUnit,
-                  onAreaUnitChanged: (u) => setState(() => _data = _data.copyWith(areaUnit: u)),
-                ),
-                _Step2Location(
-                  formKey: _formKey2,
-                  villageCtrl: _villageCtrl,
-                  districtCtrl: _districtCtrl,
-                  stateCtrl: _stateCtrl,
-                  lat: _data.lat,
-                  lng: _data.lng,
-                  locating: _locating,
-                  onDetectLocation: _detectLocation,
-                  onPickOnMap: _pickOnMap,
-                ),
-                _Step3Fodder(
-                  fodderTypes: _data.fodderTypes,
-                  hasWater: _data.hasWater,
-                  hasShade: _data.hasShade,
-                  hasFencing: _data.hasFencing,
-                  hasVetNearby: _data.hasVetNearby,
-                  fodderOptions: _fodderOptions,
-                  onFodderToggle: (type) {
-                    final list = List<String>.from(_data.fodderTypes);
-                    if (list.contains(type)) { list.remove(type); } else { list.add(type); }
-                    setState(() => _data = _data.copyWith(fodderTypes: list));
+      body: _loadingExisting
+          ? const Center(child: JmLoading())
+          : _loadError != null
+              ? JmErrorState(
+                  message: _loadError!,
+                  onRetry: () {
+                    setState(() => _loadError = null);
+                    _loadExistingFarm();
                   },
-                  onAmenityToggle: (key, val) => setState(() {
-                    switch (key) {
-                      case 'water': _data = _data.copyWith(hasWater: val);
-                      case 'shade': _data = _data.copyWith(hasShade: val);
-                      case 'fencing': _data = _data.copyWith(hasFencing: val);
-                      case 'vet': _data = _data.copyWith(hasVetNearby: val);
-                    }
-                  }),
+                )
+              : Column(
+              children: [
+                // Step indicator
+                _StepBar(current: _step),
+                Expanded(
+                  child: PageView(
+                    controller: _pageCtrl,
+                    physics: const NeverScrollableScrollPhysics(),
+                    children: [
+                      _Step1BasicInfo(
+                        formKey: _formKey1,
+                        titleCtrl: _titleCtrl,
+                        descCtrl: _descCtrl,
+                        areaCtrl: _areaCtrl,
+                        priceCtrl: _priceCtrl,
+                        maxAnimalsCtrl: _maxAnimalsCtrl,
+                        areaUnit: _data.areaUnit,
+                        onAreaUnitChanged: (u) =>
+                            setState(() => _data = _data.copyWith(areaUnit: u)),
+                      ),
+                      _Step2Location(
+                        formKey: _formKey2,
+                        villageCtrl: _villageCtrl,
+                        districtCtrl: _districtCtrl,
+                        stateCtrl: _stateCtrl,
+                        lat: _data.lat,
+                        lng: _data.lng,
+                        locating: _locating,
+                        onDetectLocation: _detectLocation,
+                        onPickOnMap: _pickOnMap,
+                      ),
+                      _Step3Fodder(
+                        fodderTypes: _data.fodderTypes,
+                        hasWater: _data.hasWater,
+                        hasShade: _data.hasShade,
+                        hasFencing: _data.hasFencing,
+                        hasVetNearby: _data.hasVetNearby,
+                        fodderOptions: _fodderOptions,
+                        onFodderToggle: (type) {
+                          final list = List<String>.from(_data.fodderTypes);
+                          if (list.contains(type)) {
+                            list.remove(type);
+                          } else {
+                            list.add(type);
+                          }
+                          setState(
+                              () => _data = _data.copyWith(fodderTypes: list));
+                        },
+                        onAmenityToggle: (key, val) => setState(() {
+                          switch (key) {
+                            case 'water':
+                              _data = _data.copyWith(hasWater: val);
+                            case 'shade':
+                              _data = _data.copyWith(hasShade: val);
+                            case 'fencing':
+                              _data = _data.copyWith(hasFencing: val);
+                            case 'vet':
+                              _data = _data.copyWith(hasVetNearby: val);
+                          }
+                        }),
+                      ),
+                      _Step4Photos(ownerId: uid, farmId: _farmId),
+                    ],
+                  ),
                 ),
-                _Step4Photos(
-                  images: _data.images,
-                  onPickImages: _pickImages,
-                  onRemove: (i) => setState(() {
-                    final list = List<XFile>.from(_data.images);
-                    list.removeAt(i);
-                    _data = _data.copyWith(images: list);
-                  }),
+                // Bottom action
+                Padding(
+                  padding:
+                      AppSpacing.screenPadding.copyWith(top: AppSpacing.md),
+                  child: _step < 3
+                      ? JmButton(label: 'Next →', onPressed: _nextStep)
+                      : JmButton(
+                          label: widget.editFarmId != null
+                              ? 'Save Changes'
+                              : 'Submit Land',
+                          onPressed: _submitting ? null : _submit,
+                          isLoading: _submitting,
+                          leadingIcon: Icons.check_rounded,
+                        ),
                 ),
+                const SizedBox(height: AppSpacing.base),
               ],
             ),
-          ),
-          // Bottom action
-          Padding(
-            padding: AppSpacing.screenPadding.copyWith(top: AppSpacing.md),
-            child: _step < 3
-                ? JmButton(label: 'Next →', onPressed: _nextStep)
-                : JmButton(
-                    label: 'Submit Land',
-                    onPressed: _submitting ? null : _submit,
-                    isLoading: _submitting,
-                    leadingIcon: Icons.check_rounded,
-                  ),
-          ),
-          const SizedBox(height: AppSpacing.base),
-        ],
-      ),
     );
   }
 }
@@ -433,7 +562,8 @@ class _StepBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.base, vertical: AppSpacing.sm),
+      padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.base, vertical: AppSpacing.sm),
       color: AppColors.surface,
       child: Row(
         children: List.generate(_labels.length, (i) {
@@ -443,18 +573,27 @@ class _StepBar extends StatelessWidget {
             child: Row(
               children: [
                 Container(
-                  width: 28, height: 28,
+                  width: 28,
+                  height: 28,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: done ? AppColors.success : active ? AppColors.primary : AppColors.outline,
+                    color: done
+                        ? AppColors.success
+                        : active
+                            ? AppColors.primary
+                            : AppColors.outline,
                   ),
                   child: Center(
                     child: done
-                        ? const Icon(Icons.check_rounded, size: 14, color: Colors.white)
+                        ? const Icon(Icons.check_rounded,
+                            size: 14, color: Colors.white)
                         : Text('${i + 1}',
                             style: TextStyle(
-                              fontSize: 12, fontWeight: FontWeight.w700,
-                              color: active ? Colors.white : AppColors.textDisabled,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                              color: active
+                                  ? Colors.white
+                                  : AppColors.textDisabled,
                             )),
                   ),
                 ),
@@ -464,7 +603,9 @@ class _StepBar extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 11,
                         fontWeight: active ? FontWeight.w600 : FontWeight.w400,
-                        color: active ? AppColors.primary : AppColors.textSecondary,
+                        color: active
+                            ? AppColors.primary
+                            : AppColors.textSecondary,
                       ),
                       overflow: TextOverflow.ellipsis),
                 ),
@@ -485,14 +626,23 @@ class _StepBar extends StatelessWidget {
 
 class _Step1BasicInfo extends StatelessWidget {
   final GlobalKey<FormState> formKey;
-  final TextEditingController titleCtrl, descCtrl, areaCtrl, priceCtrl, maxAnimalsCtrl;
+  final TextEditingController titleCtrl,
+      descCtrl,
+      areaCtrl,
+      priceCtrl,
+      maxAnimalsCtrl;
   final String areaUnit;
   final ValueChanged<String> onAreaUnitChanged;
 
   const _Step1BasicInfo({
-    required this.formKey, required this.titleCtrl, required this.descCtrl,
-    required this.areaCtrl, required this.priceCtrl, required this.maxAnimalsCtrl,
-    required this.areaUnit, required this.onAreaUnitChanged,
+    required this.formKey,
+    required this.titleCtrl,
+    required this.descCtrl,
+    required this.areaCtrl,
+    required this.priceCtrl,
+    required this.maxAnimalsCtrl,
+    required this.areaUnit,
+    required this.onAreaUnitChanged,
   });
 
   @override
@@ -505,7 +655,8 @@ class _Step1BasicInfo extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: AppSpacing.base),
-            Text('Basic Details', style: Theme.of(context).textTheme.titleLarge),
+            Text('Basic Details',
+                style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: AppSpacing.base),
             JmTextField(
               label: 'Land Title',
@@ -532,8 +683,11 @@ class _Step1BasicInfo extends StatelessWidget {
                     label: 'Area',
                     hint: '5.0',
                     controller: areaCtrl,
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[\d.]'))],
+                    keyboardType:
+                        const TextInputType.numberWithOptions(decimal: true),
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'[\d.]'))
+                    ],
                     validator: Validators.area,
                   ),
                 ),
@@ -544,10 +698,13 @@ class _Step1BasicInfo extends StatelessWidget {
                     decoration: const InputDecoration(labelText: 'Unit'),
                     items: const [
                       DropdownMenuItem(value: 'acre', child: Text('Acres')),
-                      DropdownMenuItem(value: 'hectare', child: Text('Hectares')),
+                      DropdownMenuItem(
+                          value: 'hectare', child: Text('Hectares')),
                       DropdownMenuItem(value: 'guntha', child: Text('Guntha')),
                     ],
-                    onChanged: (v) { if (v != null) onAreaUnitChanged(v); },
+                    onChanged: (v) {
+                      if (v != null) onAreaUnitChanged(v);
+                    },
                   ),
                 ),
               ],
@@ -590,10 +747,14 @@ class _Step2Location extends StatelessWidget {
   final VoidCallback onPickOnMap;
 
   const _Step2Location({
-    required this.formKey, required this.villageCtrl,
-    required this.districtCtrl, required this.stateCtrl,
-    required this.lat, required this.lng,
-    required this.locating, required this.onDetectLocation,
+    required this.formKey,
+    required this.villageCtrl,
+    required this.districtCtrl,
+    required this.stateCtrl,
+    required this.lat,
+    required this.lng,
+    required this.locating,
+    required this.onDetectLocation,
     required this.onPickOnMap,
   });
 
@@ -607,21 +768,29 @@ class _Step2Location extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: AppSpacing.base),
-            Text('Land Location', style: Theme.of(context).textTheme.titleLarge),
+            Text('Land Location',
+                style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: AppSpacing.base),
             // GPS detection
             Container(
               padding: AppSpacing.cardPadding,
               decoration: BoxDecoration(
-                color: lat != null ? AppColors.primaryContainer : AppColors.surfaceVariant,
+                color: lat != null
+                    ? AppColors.primaryContainer
+                    : AppColors.surfaceVariant,
                 borderRadius: AppSpacing.cardRadius,
-                border: Border.all(color: lat != null ? AppColors.primary : AppColors.outline),
+                border: Border.all(
+                    color: lat != null ? AppColors.primary : AppColors.outline),
               ),
               child: Row(
                 children: [
                   Icon(
-                    lat != null ? Icons.my_location_rounded : Icons.location_searching_rounded,
-                    color: lat != null ? AppColors.primary : AppColors.textSecondary,
+                    lat != null
+                        ? Icons.my_location_rounded
+                        : Icons.location_searching_rounded,
+                    color: lat != null
+                        ? AppColors.primary
+                        : AppColors.textSecondary,
                   ),
                   const SizedBox(width: AppSpacing.md),
                   Expanded(
@@ -629,7 +798,9 @@ class _Step2Location extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          lat != null ? 'Location Set' : 'GPS Location Required',
+                          lat != null
+                              ? 'Location Set'
+                              : 'GPS Location Required',
                           style: Theme.of(context).textTheme.titleSmall,
                         ),
                         Text(
@@ -642,8 +813,10 @@ class _Step2Location extends StatelessWidget {
                     ),
                   ),
                   if (locating)
-                    const SizedBox(width: 20, height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2))
+                    const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2))
                   else
                     TextButton(
                       onPressed: onDetectLocation,
@@ -701,9 +874,14 @@ class _Step3Fodder extends StatelessWidget {
   final void Function(String key, bool val) onAmenityToggle;
 
   const _Step3Fodder({
-    required this.fodderTypes, required this.hasWater, required this.hasShade,
-    required this.hasFencing, required this.hasVetNearby,
-    required this.fodderOptions, required this.onFodderToggle, required this.onAmenityToggle,
+    required this.fodderTypes,
+    required this.hasWater,
+    required this.hasShade,
+    required this.hasFencing,
+    required this.hasVetNearby,
+    required this.fodderOptions,
+    required this.onFodderToggle,
+    required this.onAmenityToggle,
   });
 
   @override
@@ -714,7 +892,8 @@ class _Step3Fodder extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: AppSpacing.base),
-          Text('Fodder Available', style: Theme.of(context).textTheme.titleLarge),
+          Text('Fodder Available',
+              style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: AppSpacing.xs),
           Text('Select all fodder types available on your land',
               style: Theme.of(context).textTheme.bodySmall),
@@ -737,20 +916,28 @@ class _Step3Fodder extends StatelessWidget {
           Text('Amenities', style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: AppSpacing.sm),
           _AmenityTile(
-            icon: Icons.water_drop_rounded, label: 'Water Available',
-            value: hasWater, onChanged: (v) => onAmenityToggle('water', v),
+            icon: Icons.water_drop_rounded,
+            label: 'Water Available',
+            value: hasWater,
+            onChanged: (v) => onAmenityToggle('water', v),
           ),
           _AmenityTile(
-            icon: Icons.park_rounded, label: 'Shade / Trees',
-            value: hasShade, onChanged: (v) => onAmenityToggle('shade', v),
+            icon: Icons.park_rounded,
+            label: 'Shade / Trees',
+            value: hasShade,
+            onChanged: (v) => onAmenityToggle('shade', v),
           ),
           _AmenityTile(
-            icon: Icons.fence_rounded, label: 'Fencing Available',
-            value: hasFencing, onChanged: (v) => onAmenityToggle('fencing', v),
+            icon: Icons.fence_rounded,
+            label: 'Fencing Available',
+            value: hasFencing,
+            onChanged: (v) => onAmenityToggle('fencing', v),
           ),
           _AmenityTile(
-            icon: Icons.medical_services_rounded, label: 'Vet Nearby',
-            value: hasVetNearby, onChanged: (v) => onAmenityToggle('vet', v),
+            icon: Icons.medical_services_rounded,
+            label: 'Vet Nearby',
+            value: hasVetNearby,
+            onChanged: (v) => onAmenityToggle('vet', v),
           ),
         ],
       ),
@@ -765,13 +952,17 @@ class _AmenityTile extends StatelessWidget {
   final ValueChanged<bool> onChanged;
 
   const _AmenityTile({
-    required this.icon, required this.label, required this.value, required this.onChanged,
+    required this.icon,
+    required this.label,
+    required this.value,
+    required this.onChanged,
   });
 
   @override
   Widget build(BuildContext context) {
     return SwitchListTile(
-      secondary: Icon(icon, color: value ? AppColors.primary : AppColors.textSecondary),
+      secondary: Icon(icon,
+          color: value ? AppColors.primary : AppColors.textSecondary),
       title: Text(label, style: Theme.of(context).textTheme.bodyMedium),
       value: value,
       onChanged: onChanged,
@@ -783,11 +974,10 @@ class _AmenityTile extends StatelessWidget {
 // ─── Step 4: Photos ───────────────────────────────────────────────────────────
 
 class _Step4Photos extends StatelessWidget {
-  final List<XFile> images;
-  final VoidCallback onPickImages;
-  final ValueChanged<int> onRemove;
+  final String ownerId;
+  final String farmId;
 
-  const _Step4Photos({required this.images, required this.onPickImages, required this.onRemove});
+  const _Step4Photos({required this.ownerId, required this.farmId});
 
   @override
   Widget build(BuildContext context) {
@@ -801,91 +991,15 @@ class _Step4Photos extends StatelessWidget {
           const SizedBox(height: AppSpacing.xs),
           Text(
             FeatureFlags.photoUploadsEnabled
-                ? 'Add up to 5 photos of your land (optional)'
+                ? 'Add up to ${PhotoUploadController.maxPhotos} photos of your land (optional). Drag to reorder — the first photo is your cover.'
                 : 'Photo uploads are coming in an upcoming update — you can list your land without photos for now.',
             style: Theme.of(context).textTheme.bodySmall,
           ),
           const SizedBox(height: AppSpacing.base),
-          if (images.isNotEmpty) ...[
-            GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: images.length,
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3,
-                crossAxisSpacing: AppSpacing.sm,
-                mainAxisSpacing: AppSpacing.sm,
-              ),
-              itemBuilder: (_, i) => Stack(
-                fit: StackFit.expand,
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-                    child: _XFileImage(xfile: images[i]),
-                  ),
-                  Positioned(
-                    top: 4, right: 4,
-                    child: GestureDetector(
-                      onTap: () => onRemove(i),
-                      child: Container(
-                        decoration: const BoxDecoration(
-                          color: Colors.black54, shape: BoxShape.circle,
-                        ),
-                        child: const Icon(Icons.close_rounded, size: 18, color: Colors.white),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: AppSpacing.base),
-          ],
-          if (images.length < 5)
-            OutlinedButton.icon(
-              onPressed: onPickImages,
-              icon: const Icon(Icons.add_photo_alternate_rounded),
-              label: Text(images.isEmpty ? 'Add Photos' : 'Add More Photos'),
-              style: OutlinedButton.styleFrom(
-                minimumSize: const Size(double.infinity, AppSpacing.buttonHeight),
-              ),
-            ),
+          if (FeatureFlags.photoUploadsEnabled)
+            LandPhotoManager(ownerId: ownerId, farmId: farmId),
         ],
       ),
     );
-  }
-}
-
-// ─── Cross-platform picked-image preview ──────────────────────────────────────
-// Image.file() is not supported on Flutter Web. This widget reads bytes from
-// the XFile (works on all platforms) and displays via Image.memory.
-
-class _XFileImage extends StatefulWidget {
-  final XFile xfile;
-  const _XFileImage({required this.xfile});
-
-  @override
-  State<_XFileImage> createState() => _XFileImageState();
-}
-
-class _XFileImageState extends State<_XFileImage> {
-  Uint8List? _bytes;
-
-  @override
-  void initState() {
-    super.initState();
-    widget.xfile.readAsBytes().then((b) {
-      if (mounted) setState(() => _bytes = b);
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (_bytes == null) {
-      return const AspectRatio(
-        aspectRatio: 1,
-        child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
-      );
-    }
-    return Image.memory(_bytes!, fit: BoxFit.cover);
   }
 }

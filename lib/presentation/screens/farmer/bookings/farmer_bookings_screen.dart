@@ -11,6 +11,8 @@ import '../../../widgets/common/jm_badge.dart';
 import '../../../widgets/common/jm_empty_state.dart';
 import '../../../widgets/common/jm_error_state.dart';
 import '../../../widgets/common/jm_loading.dart';
+import '../../../widgets/common/responsive_center.dart';
+import '../../../widgets/common/standard_app_bar.dart';
 
 class FarmerBookingsScreen extends ConsumerStatefulWidget {
   const FarmerBookingsScreen({super.key});
@@ -41,10 +43,13 @@ class _FarmerBookingsScreenState extends ConsumerState<FarmerBookingsScreen>
     final bookingsAsync = ref.watch(farmerBookingsProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Bookings'),
+      appBar: StandardAppBar(
+        title: 'Bookings',
         bottom: TabBar(
           controller: _tabs,
+          labelColor: Colors.white,
+          unselectedLabelColor: Colors.white70,
+          indicatorColor: Colors.white,
           tabs: const [
             Tab(text: 'Pending'),
             Tab(text: 'Active'),
@@ -62,27 +67,24 @@ class _FarmerBookingsScreenState extends ConsumerState<FarmerBookingsScreen>
           controller: _tabs,
           children: [
             _BookingList(
-              bookings: all
-                  .where((b) => b.isPending)
-                  .toList(),
+              bookings: all.where((b) => b.isPending).toList(),
               emptyTitle: 'No Pending Requests',
-              emptySubtitle: 'New booking requests from shepherds will appear here.',
+              emptySubtitle:
+                  'New booking requests from shepherds will appear here.',
               role: 'farmer',
             ),
             _BookingList(
-              bookings: all
-                  .where((b) => b.isConfirmed || b.isActive)
-                  .toList(),
+              bookings: all.where((b) => b.isConfirmed || b.isActive).toList(),
               emptyTitle: 'No Active Bookings',
               emptySubtitle: 'Confirmed and ongoing bookings will appear here.',
               role: 'farmer',
             ),
             _BookingList(
-              bookings: all
-                  .where((b) => b.isCompleted || b.isCancelled)
-                  .toList(),
+              bookings:
+                  all.where((b) => b.isCompleted || b.isCancelled).toList(),
               emptyTitle: 'No History Yet',
-              emptySubtitle: 'Completed and cancelled bookings will appear here.',
+              emptySubtitle:
+                  'Completed and cancelled bookings will appear here.',
               role: 'farmer',
             ),
           ],
@@ -114,11 +116,13 @@ class _BookingList extends StatelessWidget {
         subtitle: emptySubtitle,
       );
     }
-    return ListView.separated(
-      padding: AppSpacing.screenPadding,
-      itemCount: bookings.length,
-      separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.md),
-      itemBuilder: (_, i) => _BookingCard(booking: bookings[i], role: role),
+    return ResponsiveCenter(
+      child: ListView.separated(
+        padding: AppSpacing.screenPadding,
+        itemCount: bookings.length,
+        separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.md),
+        itemBuilder: (_, i) => _BookingCard(booking: bookings[i], role: role),
+      ),
     );
   }
 }
@@ -141,8 +145,8 @@ class _BookingCard extends ConsumerWidget {
         ),
       ),
       child: InkWell(
-        onTap: () => context.push(
-            RouteConstants.bookingDetail(role, booking.id)),
+        onTap: () =>
+            context.push(RouteConstants.bookingDetail(role, booking.id)),
         borderRadius: AppSpacing.cardRadius,
         child: Padding(
           padding: AppSpacing.cardPadding,
@@ -185,7 +189,9 @@ class _BookingCard extends ConsumerWidget {
                   const Spacer(),
                   Text(
                     '₹${booking.totalAmount.toStringAsFixed(0)}',
-                    style: Theme.of(context).textTheme.titleSmall
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleSmall
                         ?.copyWith(color: AppColors.primary),
                   ),
                 ],
@@ -242,8 +248,21 @@ class _BookingCard extends ConsumerWidget {
   }
 
   String _fmt(DateTime d) {
-    const m = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const m = [
+      '',
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec'
+    ];
     return '${d.day} ${m[d.month]}';
   }
 }

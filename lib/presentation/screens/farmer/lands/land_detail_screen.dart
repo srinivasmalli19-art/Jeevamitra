@@ -5,7 +5,10 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/constants/route_constants.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/utils/firebase_error_translator.dart';
 import '../../../providers/farm/farm_providers.dart';
+import '../../../widgets/common/cached_farm_image.dart';
+import '../../../widgets/common/full_screen_photo_viewer.dart';
 import '../../../widgets/common/jm_badge.dart';
 import '../../../widgets/common/jm_button.dart';
 import '../../../widgets/common/jm_error_state.dart';
@@ -24,7 +27,7 @@ class LandDetailScreen extends ConsumerWidget {
       error: (e, _) => Scaffold(
         appBar: AppBar(title: const Text('Land Details')),
         body: JmErrorState(
-          message: e.toString(),
+          message: friendlyFirebaseMessage(e),
           onRetry: () => ref.invalidate(farmDetailProvider(farmId)),
         ),
       ),
@@ -46,10 +49,13 @@ class LandDetailScreen extends ConsumerWidget {
                   background: farm.imageUrls.isNotEmpty
                       ? PageView.builder(
                           itemCount: farm.imageUrls.length,
-                          itemBuilder: (_, i) => Image.network(
-                            farm.imageUrls[i],
-                            fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) => _imagePlaceholder(),
+                          itemBuilder: (_, i) => GestureDetector(
+                            onTap: () => showFullScreenPhotoViewer(
+                              context,
+                              urls: farm.imageUrls,
+                              initialIndex: i,
+                            ),
+                            child: CachedFarmImage(url: farm.imageUrls[i]),
                           ),
                         )
                       : _imagePlaceholder(),
@@ -165,9 +171,18 @@ class LandDetailScreen extends ConsumerWidget {
                               ? 'Shepherds can book this land'
                               : 'Hidden from shepherd search'),
                           value: farm.isAvailable,
-                          onChanged: (v) => ref
-                              .read(addFarmProvider.notifier)
-                              .toggleAvailability(farm.id, v),
+                          onChanged: (v) async {
+                            final error = await ref
+                                .read(addFarmProvider.notifier)
+                                .toggleAvailability(farm.id, v);
+                            if (error == null || !context.mounted) return;
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(friendlyFirebaseMessage(error)),
+                                backgroundColor: AppColors.error,
+                              ),
+                            );
+                          },
                         ),
                       ),
                       const SizedBox(height: AppSpacing.md),
@@ -247,13 +262,16 @@ class LandDetailScreen extends ConsumerWidget {
       ),
     );
     if (confirmed != true) return;
-    final ok = await ref.read(addFarmProvider.notifier).deleteFarm(farmId);
+    final error = await ref.read(addFarmProvider.notifier).deleteFarm(farmId);
     if (!context.mounted) return;
-    if (ok) {
+    if (error == null) {
       context.go(RouteConstants.farmerLands);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Delete failed. Please try again.')),
+        SnackBar(
+          content: Text(friendlyFirebaseMessage(error)),
+          backgroundColor: AppColors.error,
+        ),
       );
     }
   }

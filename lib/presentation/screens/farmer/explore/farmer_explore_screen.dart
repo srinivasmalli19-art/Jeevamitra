@@ -12,6 +12,8 @@ import '../../../providers/location_provider.dart';
 import '../../../widgets/common/jm_empty_state.dart';
 import '../../../widgets/common/jm_error_state.dart';
 import '../../../widgets/common/jm_loading.dart';
+import '../../../widgets/common/responsive_center.dart';
+import '../../../widgets/common/standard_app_bar.dart';
 
 class FarmerExploreScreen extends ConsumerStatefulWidget {
   const FarmerExploreScreen({super.key});
@@ -46,10 +48,13 @@ class _FarmerExploreScreenState extends ConsumerState<FarmerExploreScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Explore'),
+      appBar: StandardAppBar(
+        title: 'Explore',
         bottom: TabBar(
           controller: _tabs,
+          labelColor: Colors.white,
+          unselectedLabelColor: Colors.white70,
+          indicatorColor: Colors.white,
           tabs: const [
             Tab(icon: Icon(Icons.coronavirus_rounded), text: 'Disease Alerts'),
             Tab(icon: Icon(Icons.tips_and_updates_rounded), text: 'Advisory'),
@@ -117,11 +122,13 @@ class _DiseaseAlertsTab extends ConsumerWidget {
             subtitle: 'No disease alerts reported in your area. Stay vigilant!',
           );
         }
-        return ListView.separated(
-          padding: AppSpacing.screenPadding,
-          itemCount: alerts.length,
-          separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.md),
-          itemBuilder: (_, i) => _AlertCard(alert: alerts[i]),
+        return ResponsiveCenter(
+          child: ListView.separated(
+            padding: AppSpacing.screenPadding,
+            itemCount: alerts.length,
+            separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.md),
+            itemBuilder: (_, i) => _AlertCard(alert: alerts[i]),
+          ),
         );
       },
     );
@@ -171,8 +178,8 @@ class _AlertCard extends StatelessWidget {
               ),
             ],
           ),
-          childrenPadding:
-              const EdgeInsets.fromLTRB(AppSpacing.base, 0, AppSpacing.base, AppSpacing.base),
+          childrenPadding: const EdgeInsets.fromLTRB(
+              AppSpacing.base, 0, AppSpacing.base, AppSpacing.base),
           children: [
             const Divider(),
             Text(alert.description,
@@ -315,8 +322,7 @@ class _InfoBlock extends StatelessWidget {
                         fontWeight: FontWeight.w700,
                         color: color)),
                 const SizedBox(height: 2),
-                Text(text,
-                    style: Theme.of(context).textTheme.bodySmall),
+                Text(text, style: Theme.of(context).textTheme.bodySmall),
               ],
             ),
           ),
@@ -449,8 +455,8 @@ class _AdvisoryTab extends StatelessWidget {
             child: TabBarView(
               children: [
                 _TipList(tips: _tips),
-                ...categories
-                    .map((c) => _TipList(tips: _tips.where((t) => t.category == c).toList())),
+                ...categories.map((c) => _TipList(
+                    tips: _tips.where((t) => t.category == c).toList())),
               ],
             ),
           ),
@@ -466,11 +472,13 @@ class _TipList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView.separated(
-      padding: AppSpacing.screenPadding,
-      itemCount: tips.length,
-      separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.md),
-      itemBuilder: (_, i) => _TipCard(tip: tips[i]),
+    return ResponsiveCenter(
+      child: ListView.separated(
+        padding: AppSpacing.screenPadding,
+        itemCount: tips.length,
+        separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.md),
+        itemBuilder: (_, i) => _TipCard(tip: tips[i]),
+      ),
     );
   }
 }

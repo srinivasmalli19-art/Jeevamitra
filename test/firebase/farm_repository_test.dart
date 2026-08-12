@@ -4,6 +4,7 @@
 import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:jeevamitra/core/services/image_upload_service.dart';
 import 'package:jeevamitra/core/utils/geo_hash_helper.dart';
 import 'package:jeevamitra/data/models/farm_model.dart';
 import 'package:jeevamitra/data/repositories/farm_repository.dart';
@@ -14,6 +15,8 @@ import 'package:mocktail/mocktail.dart';
 // which throws "no Firebase App" outside a real Firebase context even for
 // tests that never touch currentUid/ownsDoc. Always pass a dummy mock here.
 class _DummyAuth extends Mock implements FirebaseAuth {}
+
+class _MockImageUploadService extends Mock implements ImageUploadService {}
 
 FarmModel _farm({
   required String id,
@@ -57,6 +60,20 @@ void main() {
     repo = FarmRepository(firestore: firestore, auth: _DummyAuth());
   });
 
+  group('reserveFarmId', () {
+    test('returns a non-empty id without writing anything', () async {
+      final id = repo.reserveFarmId();
+      expect(id, isNotEmpty);
+
+      final snap = await firestore.collection('farms').get();
+      expect(snap.docs, isEmpty);
+    });
+
+    test('two reservations return different ids', () {
+      expect(repo.reserveFarmId(), isNot(repo.reserveFarmId()));
+    });
+  });
+
   group('addFarm / watchMyFarms', () {
     test('a newly added farm appears in the owner\'s farm list', () async {
       final farm = _farm(id: 'ignored-by-write', lat: originLat, lng: originLng);
@@ -66,6 +83,17 @@ void main() {
       expect(mine, hasLength(1));
       expect(mine.first.id, id);
       expect(mine.first.title, contains('Green Pasture'));
+    });
+
+    test('honors a pre-reserved id instead of minting a new one', () async {
+      final reservedId = repo.reserveFarmId();
+      final farm = _farm(id: reservedId, lat: originLat, lng: originLng);
+
+      final returnedId = await repo.addFarm(farm);
+
+      expect(returnedId, reservedId);
+      final doc = await firestore.collection('farms').doc(reservedId).get();
+      expect(doc.exists, isTrue);
     });
 
     test('another owner\'s farms are excluded', () async {
@@ -136,13 +164,14 @@ void main() {
   });
 
   group('toggleAvailability / deleteFarm', () {
-    test('toggleAvailability flips the flag', () async {
+    test('toggleAvailability flips the flag and stamps updatedAt', () async {
       final ref = await firestore.collection('farms').add(
             _farm(id: 'x', lat: originLat, lng: originLng).toFirestore(),
           );
       await repo.toggleAvailability(ref.id, false);
       final doc = await firestore.collection('farms').doc(ref.id).get();
       expect(doc.data()!['isAvailable'], isFalse);
+      expect(doc.data()!['updatedAt'], isNotNull);
     });
 
     test('deleteFarm removes the document', () async {
@@ -152,6 +181,28 @@ void main() {
       await repo.deleteFarm(ref.id);
       final doc = await firestore.collection('farms').doc(ref.id).get();
       expect(doc.exists, isFalse);
+    });
+
+    test('deleteFarm also sweeps the farm\'s Storage photo folder (no orphans)', () async {
+      final mockUpload = _MockImageUploadService();
+      when(() => mockUpload.deleteFarmFolder(
+            ownerId: any(named: 'ownerId'),
+            farmId: any(named: 'farmId'),
+          )).thenAnswer((_) async {});
+      final repoWithMock = FarmRepository(
+        firestore: firestore,
+        auth: _DummyAuth(),
+        imageUploadService: mockUpload,
+      );
+      final ref = await firestore.collection('farms').add(
+            _farm(id: 'x', lat: originLat, lng: originLng, ownerId: 'owner-9')
+                .toFirestore(),
+          );
+
+      await repoWithMock.deleteFarm(ref.id);
+
+      verify(() => mockUpload.deleteFarmFolder(ownerId: 'owner-9', farmId: ref.id))
+          .called(1);
     });
   });
 }

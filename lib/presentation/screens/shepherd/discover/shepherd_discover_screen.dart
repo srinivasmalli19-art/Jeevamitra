@@ -9,6 +9,7 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../data/models/farm_model.dart';
 import '../../../providers/farm/farm_providers.dart';
 import '../../../providers/location_provider.dart';
+import '../../../widgets/common/cached_farm_image.dart';
 import '../../../widgets/common/jm_empty_state.dart';
 import '../../../widgets/common/jm_error_state.dart';
 import '../../../widgets/common/jm_loading.dart';
@@ -296,12 +297,10 @@ class _DiscoverCard extends StatelessWidget {
               borderRadius: const BorderRadius.vertical(
                   top: Radius.circular(AppSpacing.radiusLg)),
               child: farm.imageUrls.isNotEmpty
-                  ? Image.network(
-                      farm.imageUrls.first,
+                  ? CachedFarmImage(
+                      url: farm.imageUrls.first,
                       height: 160,
                       width: double.infinity,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => _placeholder(),
                     )
                   : _placeholder(),
             ),

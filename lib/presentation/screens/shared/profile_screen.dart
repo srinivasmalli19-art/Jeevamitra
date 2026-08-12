@@ -11,6 +11,8 @@ import '../../providers/auth/auth_provider.dart';
 import '../../providers/booking/booking_providers.dart';
 import '../../providers/farm/farm_providers.dart';
 import '../../providers/locale_provider.dart';
+import '../../widgets/common/responsive_center.dart';
+import '../../widgets/common/standard_app_bar.dart';
 
 // ─── Shared profile screen ────────────────────────────────────────────────────
 
@@ -53,8 +55,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           name: _nameCtrl.text.trim(),
           village: _villageCtrl.text.trim(),
           district: _districtCtrl.text.trim(),
-          preferredLanguage:
-              ref.read(localeProvider).languageCode,
+          preferredLanguage: ref.read(localeProvider).languageCode,
         );
     setState(() {
       _saving = false;
@@ -112,8 +113,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final loc = AppLocalizations.of(context);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(loc.profile),
+      appBar: StandardAppBar(
+        title: loc.profile,
         actions: [
           if (!_editing)
             IconButton(
@@ -123,200 +124,208 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             ),
           if (_editing)
             TextButton(
-              onPressed: _saving ? null : () => setState(() => _editing = false),
+              onPressed:
+                  _saving ? null : () => setState(() => _editing = false),
+              style: TextButton.styleFrom(foregroundColor: Colors.white),
               child: Text(loc.cancelBtn),
             ),
         ],
       ),
-      body: ListView(
-        padding: AppSpacing.screenPadding,
-        children: [
-          const SizedBox(height: AppSpacing.base),
-          // ── Avatar + name header ─────────────────────────────────────────
-          Center(
-            child: Column(
-              children: [
-                CircleAvatar(
-                  radius: 44,
-                  backgroundColor: widget.role == 'farmer'
-                      ? AppColors.primaryContainer
-                      : AppColors.secondaryContainer,
-                  child: Text(
-                    (userDoc?.name.isNotEmpty == true)
-                        ? userDoc!.name[0].toUpperCase()
-                        : '?',
-                    style: TextStyle(
-                      fontSize: 36,
-                      fontWeight: FontWeight.w700,
-                      color: widget.role == 'farmer'
-                          ? AppColors.primary
-                          : AppColors.secondary,
+      body: ResponsiveCenter(
+        maxWidth: 560,
+        child: ListView(
+          padding: AppSpacing.screenPadding,
+          children: [
+            const SizedBox(height: AppSpacing.base),
+            // ── Avatar + name header ─────────────────────────────────────────
+            Center(
+              child: Column(
+                children: [
+                  CircleAvatar(
+                    radius: 44,
+                    backgroundColor: widget.role == 'farmer'
+                        ? AppColors.primaryContainer
+                        : AppColors.secondaryContainer,
+                    child: Text(
+                      (userDoc?.name.isNotEmpty == true)
+                          ? userDoc!.name[0].toUpperCase()
+                          : '?',
+                      style: TextStyle(
+                        fontSize: 36,
+                        fontWeight: FontWeight.w700,
+                        color: widget.role == 'farmer'
+                            ? AppColors.primary
+                            : AppColors.secondary,
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(height: AppSpacing.md),
-                Text(
-                  userDoc?.name ?? '—',
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-                const SizedBox(height: AppSpacing.xs),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: AppSpacing.md, vertical: AppSpacing.xs),
-                      decoration: BoxDecoration(
-                        color: widget.role == 'farmer'
-                            ? AppColors.primaryContainer
-                            : AppColors.secondaryContainer,
-                        borderRadius:
-                            BorderRadius.circular(AppSpacing.radiusFull),
-                      ),
-                      child: Text(
-                        widget.role == 'farmer' ? '🌾 ${loc.roleFarmer}' : '🐑 ${loc.roleShepherd}',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
+                  const SizedBox(height: AppSpacing.md),
+                  Text(
+                    userDoc?.name ?? '—',
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  const SizedBox(height: AppSpacing.xs),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: AppSpacing.md, vertical: AppSpacing.xs),
+                        decoration: BoxDecoration(
                           color: widget.role == 'farmer'
-                              ? AppColors.primary
-                              : AppColors.secondary,
+                              ? AppColors.primaryContainer
+                              : AppColors.secondaryContainer,
+                          borderRadius:
+                              BorderRadius.circular(AppSpacing.radiusFull),
+                        ),
+                        child: Text(
+                          widget.role == 'farmer'
+                              ? '🌾 ${loc.roleFarmer}'
+                              : '🐑 ${loc.roleShepherd}',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: widget.role == 'farmer'
+                                ? AppColors.primary
+                                : AppColors.secondary,
+                          ),
                         ),
                       ),
-                    ),
-                    const SizedBox(width: AppSpacing.sm),
-                    Text(
-                      userDoc?.phone ?? '',
-                      style: Theme.of(context)
-                          .textTheme
-                          .bodySmall
-                          ?.copyWith(color: AppColors.textSecondary),
-                    ),
-                  ],
+                      const SizedBox(width: AppSpacing.sm),
+                      Text(
+                        userDoc?.phone ?? '',
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodySmall
+                            ?.copyWith(color: AppColors.textSecondary),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: AppSpacing.xl),
+            // ── Stats ────────────────────────────────────────────────────────
+            _StatsRow(role: widget.role),
+            const SizedBox(height: AppSpacing.xl),
+            // ── Edit form ────────────────────────────────────────────────────
+            if (_editing) ...[
+              _SectionHeader(loc.editProfileTitle),
+              const SizedBox(height: AppSpacing.sm),
+              TextField(
+                controller: _nameCtrl,
+                decoration: InputDecoration(
+                  labelText: loc.yourName,
+                  prefixIcon: const Icon(Icons.person_rounded),
                 ),
-              ],
-            ),
-          ),
-          const SizedBox(height: AppSpacing.xl),
-          // ── Stats ────────────────────────────────────────────────────────
-          _StatsRow(role: widget.role),
-          const SizedBox(height: AppSpacing.xl),
-          // ── Edit form ────────────────────────────────────────────────────
-          if (_editing) ...[
-            _SectionHeader(loc.editProfileTitle),
+                textCapitalization: TextCapitalization.words,
+              ),
+              const SizedBox(height: AppSpacing.md),
+              TextField(
+                controller: _villageCtrl,
+                decoration: InputDecoration(
+                  labelText: loc.yourVillage,
+                  prefixIcon: const Icon(Icons.location_city_rounded),
+                ),
+              ),
+              const SizedBox(height: AppSpacing.md),
+              TextField(
+                controller: _districtCtrl,
+                decoration: InputDecoration(
+                  labelText: loc.yourDistrict,
+                  prefixIcon: const Icon(Icons.map_rounded),
+                ),
+              ),
+              const SizedBox(height: AppSpacing.base),
+              FilledButton.icon(
+                onPressed: _saving ? null : () => _saveEdit(uid),
+                icon: _saving
+                    ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(
+                            strokeWidth: 2, color: Colors.white))
+                    : const Icon(Icons.save_rounded),
+                label: Text(loc.saveBtn),
+                style: FilledButton.styleFrom(
+                  minimumSize:
+                      const Size(double.infinity, AppSpacing.buttonHeight),
+                ),
+              ),
+              const SizedBox(height: AppSpacing.xl),
+            ] else ...[
+              // Read-only info
+              _SectionHeader(loc.profileInfoLabel),
+              const SizedBox(height: AppSpacing.sm),
+              _InfoCard(children: [
+                _InfoRow(
+                    Icons.person_rounded, loc.yourName, userDoc?.name ?? '—'),
+                _InfoRow(Icons.phone_rounded, loc.mobileNumber,
+                    userDoc?.phone ?? '—'),
+                _InfoRow(Icons.location_city_rounded, loc.yourVillage,
+                    userDoc?.village ?? '—'),
+                _InfoRow(Icons.map_rounded, loc.yourDistrict,
+                    userDoc?.district ?? '—'),
+              ]),
+              const SizedBox(height: AppSpacing.xl),
+            ],
+            // ── Language preference ──────────────────────────────────────────
+            _SectionHeader(loc.language),
             const SizedBox(height: AppSpacing.sm),
-            TextField(
-              controller: _nameCtrl,
-              decoration: InputDecoration(
-                labelText: loc.yourName,
-                prefixIcon: const Icon(Icons.person_rounded),
-              ),
-              textCapitalization: TextCapitalization.words,
-            ),
-            const SizedBox(height: AppSpacing.md),
-            TextField(
-              controller: _villageCtrl,
-              decoration: InputDecoration(
-                labelText: loc.yourVillage,
-                prefixIcon: const Icon(Icons.location_city_rounded),
-              ),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            TextField(
-              controller: _districtCtrl,
-              decoration: InputDecoration(
-                labelText: loc.yourDistrict,
-                prefixIcon: const Icon(Icons.map_rounded),
-              ),
-            ),
-            const SizedBox(height: AppSpacing.base),
-            FilledButton.icon(
-              onPressed: _saving ? null : () => _saveEdit(uid),
-              icon: _saving
-                  ? const SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(
-                          strokeWidth: 2, color: Colors.white))
-                  : const Icon(Icons.save_rounded),
-              label: Text(loc.saveBtn),
-              style: FilledButton.styleFrom(
-                minimumSize: const Size(double.infinity, AppSpacing.buttonHeight),
-              ),
+            _LanguageSelector(
+              selected: locale.languageCode,
+              onSelect: (code) async {
+                await ref.read(localeProvider.notifier).setLanguage(code);
+                if (uid.isNotEmpty) {
+                  await ref.read(authNotifierProvider.notifier).updateProfile(
+                        uid: uid,
+                        name: userDoc?.name ?? '',
+                        village: userDoc?.village ?? '',
+                        district: userDoc?.district ?? '',
+                        preferredLanguage: code,
+                      );
+                }
+              },
             ),
             const SizedBox(height: AppSpacing.xl),
-          ] else ...[
-            // Read-only info
-            _SectionHeader(loc.profileInfoLabel),
+            // ── Account actions ──────────────────────────────────────────────
+            _SectionHeader(loc.accountLabel),
             const SizedBox(height: AppSpacing.sm),
-            _InfoCard(children: [
-              _InfoRow(Icons.person_rounded, loc.yourName, userDoc?.name ?? '—'),
-              _InfoRow(Icons.phone_rounded, loc.mobileNumber, userDoc?.phone ?? '—'),
-              _InfoRow(Icons.location_city_rounded, loc.yourVillage,
-                  userDoc?.village ?? '—'),
-              _InfoRow(Icons.map_rounded, loc.yourDistrict,
-                  userDoc?.district ?? '—'),
-            ]),
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(Icons.logout_rounded,
+                  color: AppColors.textSecondary),
+              title: Text(loc.logout),
+              trailing: const Icon(Icons.chevron_right_rounded,
+                  color: AppColors.textDisabled),
+              onTap: _signOut,
+            ),
+            const Divider(),
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(Icons.delete_forever_rounded,
+                  color: AppColors.error),
+              title: Text(loc.deleteAccountTitle,
+                  style: const TextStyle(color: AppColors.error)),
+              subtitle: Text(loc.deleteAccountSubtitle),
+              trailing: const Icon(Icons.chevron_right_rounded,
+                  color: AppColors.textDisabled),
+              onTap: () => _deleteAccount(uid),
+            ),
             const SizedBox(height: AppSpacing.xl),
+            // ── App version ──────────────────────────────────────────────────
+            Center(
+              child: Text(
+                'JeevaMitra v1.0.0',
+                style: Theme.of(context)
+                    .textTheme
+                    .bodySmall
+                    ?.copyWith(color: AppColors.textDisabled),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.xxl),
           ],
-          // ── Language preference ──────────────────────────────────────────
-          _SectionHeader(loc.language),
-          const SizedBox(height: AppSpacing.sm),
-          _LanguageSelector(
-            selected: locale.languageCode,
-            onSelect: (code) async {
-              await ref.read(localeProvider.notifier).setLanguage(code);
-              if (uid.isNotEmpty) {
-                await ref
-                    .read(authNotifierProvider.notifier)
-                    .updateProfile(
-                      uid: uid,
-                      name: userDoc?.name ?? '',
-                      village: userDoc?.village ?? '',
-                      district: userDoc?.district ?? '',
-                      preferredLanguage: code,
-                    );
-              }
-            },
-          ),
-          const SizedBox(height: AppSpacing.xl),
-          // ── Account actions ──────────────────────────────────────────────
-          _SectionHeader(loc.accountLabel),
-          const SizedBox(height: AppSpacing.sm),
-          ListTile(
-            contentPadding: EdgeInsets.zero,
-            leading:
-                const Icon(Icons.logout_rounded, color: AppColors.textSecondary),
-            title: Text(loc.logout),
-            trailing: const Icon(Icons.chevron_right_rounded,
-                color: AppColors.textDisabled),
-            onTap: _signOut,
-          ),
-          const Divider(),
-          ListTile(
-            contentPadding: EdgeInsets.zero,
-            leading: const Icon(Icons.delete_forever_rounded,
-                color: AppColors.error),
-            title: Text(loc.deleteAccountTitle,
-                style: const TextStyle(color: AppColors.error)),
-            subtitle: Text(loc.deleteAccountSubtitle),
-            trailing: const Icon(Icons.chevron_right_rounded,
-                color: AppColors.textDisabled),
-            onTap: () => _deleteAccount(uid),
-          ),
-          const SizedBox(height: AppSpacing.xl),
-          // ── App version ──────────────────────────────────────────────────
-          Center(
-            child: Text(
-              'JeevaMitra v1.0.0',
-              style: Theme.of(context)
-                  .textTheme
-                  .bodySmall
-                  ?.copyWith(color: AppColors.textDisabled),
-            ),
-          ),
-          const SizedBox(height: AppSpacing.xxl),
-        ],
+        ),
       ),
     );
   }
@@ -402,10 +411,8 @@ class _StatChip extends StatelessWidget {
         child: Column(
           children: [
             Text(value,
-                style: Theme.of(context)
-                    .textTheme
-                    .titleLarge
-                    ?.copyWith(color: AppColors.primary, fontWeight: FontWeight.w700)),
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    color: AppColors.primary, fontWeight: FontWeight.w700)),
             Text(label,
                 style: Theme.of(context).textTheme.bodySmall,
                 textAlign: TextAlign.center),
@@ -460,10 +467,11 @@ class _LanguageSelector extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
-                          color: active ? AppColors.primary : AppColors.textPrimary,
+                          color: active
+                              ? AppColors.primary
+                              : AppColors.textPrimary,
                         )),
-                    Text(lang.$3,
-                        style: Theme.of(context).textTheme.bodySmall),
+                    Text(lang.$3, style: Theme.of(context).textTheme.bodySmall),
                   ],
                 ),
               ),

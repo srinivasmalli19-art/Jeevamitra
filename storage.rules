@@ -7,15 +7,25 @@ service firebase.storage {
       return request.auth != null;
     }
 
-    // ── farms/{ownerId}/{fileName} ──────────────────────────────────────────
+    // ── farms/{ownerId}/{farmId}/{fileName} ─────────────────────────────────
     // Land listing photos, uploaded by ImageUploadService as
-    // "farms/{currentUserUid}/{imageId}.{ext}" (see add_land_screen.dart).
+    // "farms/{currentUserUid}/{farmId}/{imageId}.{ext}" (see
+    // image_upload_service.dart). Nested per-farm so a farm's photos can be
+    // listed and swept in one prefix operation when the farm is deleted
+    // (FarmRepository.deleteFarm -> ImageUploadService.deleteFarmFolder),
+    // rather than relying solely on Firestore's imageUrls array staying in
+    // sync with Storage.
     // Read: any signed-in user, since farm photos are shown to shepherds
     // browsing listings (matches the Firestore `farms` collection's own
-    // isSignedIn()-readable rule).
+    // isSignedIn()-readable rule). `allow read` here also covers `list`,
+    // which deleteFarmFolder's listAll() needs.
     // Write: only the owner whose uid matches the path segment, capped at
-    // 10MB and restricted to image content types.
-    match /farms/{ownerId}/{fileName} {
+    // 10MB and restricted to image content types. The farmId segment itself
+    // isn't cross-checked against Firestore — ownership is fully decided by
+    // the ownerId segment, and a farmId is an opaque, unguessable Firestore
+    // auto-ID, so there's no meaningful access to gain by writing under an
+    // arbitrary farmId string.
+    match /farms/{ownerId}/{farmId}/{fileName} {
       allow read: if isSignedIn();
       allow write: if isSignedIn() &&
           request.auth.uid == ownerId &&

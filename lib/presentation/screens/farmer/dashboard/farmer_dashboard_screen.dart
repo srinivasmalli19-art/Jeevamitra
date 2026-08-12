@@ -12,8 +12,11 @@ import '../../../providers/auth/auth_provider.dart';
 import '../../../providers/booking/booking_providers.dart';
 import '../../../providers/farm/farm_providers.dart';
 import '../../../providers/notifications/notification_providers.dart';
+import '../../../widgets/common/dashboard_stat_card.dart';
+import '../../../widgets/common/hero_banner.dart';
 import '../../../widgets/common/jm_badge.dart';
 import '../../../widgets/common/jm_loading.dart';
+import '../../../widgets/common/responsive_center.dart';
 
 JmBadgeVariant _bookingVariant(String status) => switch (status) {
       'pending' => JmBadgeVariant.warning,
@@ -43,20 +46,25 @@ class FarmerDashboardScreen extends ConsumerWidget {
       backgroundColor: AppColors.background,
       body: CustomScrollView(
         slivers: [
-          _Header(name: userDoc?.name ?? loc.roleFarmer, village: userDoc?.village),
-          SliverPadding(
+          _Header(
+              name: userDoc?.name ?? loc.roleFarmer, village: userDoc?.village),
+          const SliverPadding(
             padding: AppSpacing.screenPadding,
-            sliver: SliverList(
-              delegate: SliverChildListDelegate([
-                const SizedBox(height: AppSpacing.sm),
-                const _QuickActions(),
-                const SizedBox(height: AppSpacing.xl),
-                const _OverviewStats(),
-                const SizedBox(height: AppSpacing.xl),
-                const _PendingBanner(),
-                const _RecentBookings(),
-                const SizedBox(height: AppSpacing.xxl),
-              ]),
+            sliver: SliverToBoxAdapter(
+              child: ResponsiveCenter(
+                child: Column(
+                  children: [
+                    SizedBox(height: AppSpacing.base),
+                    _QuickActions(),
+                    SizedBox(height: AppSpacing.xxl),
+                    _OverviewStats(),
+                    SizedBox(height: AppSpacing.xxl),
+                    _PendingBanner(),
+                    _RecentBookings(),
+                    SizedBox(height: AppSpacing.xxl),
+                  ],
+                ),
+              ),
             ),
           ),
         ],
@@ -81,6 +89,8 @@ class _Header extends ConsumerWidget {
       expandedHeight: 150,
       floating: false,
       pinned: true,
+      backgroundColor: AppColors.primaryDark,
+      elevation: 0,
       actions: [
         IconButton(
           tooltip: loc.voiceAssistantTooltip,
@@ -93,49 +103,15 @@ class _Header extends ConsumerWidget {
           icon: Badge(
             isLabelVisible: unread > 0,
             label: Text(unread > 9 ? '9+' : '$unread'),
-            child: const Icon(Icons.notifications_outlined, color: Colors.white),
+            child:
+                const Icon(Icons.notifications_outlined, color: Colors.white),
           ),
         ),
       ],
       flexibleSpace: FlexibleSpaceBar(
-        title: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              loc.greetingName(name),
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w700,
-                fontSize: 17,
-              ),
-            ),
-            if (village != null)
-              Text(
-                village!,
-                style: const TextStyle(color: Colors.white70, fontSize: 11),
-              ),
-          ],
-        ),
-        background: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: AppColors.primaryGradient,
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-          ),
-          child: const Align(
-            alignment: Alignment.centerRight,
-            child: Padding(
-              padding: EdgeInsets.only(right: AppSpacing.xl),
-              child: Opacity(
-                opacity: 0.12,
-                child: Icon(Icons.agriculture_rounded,
-                    size: 120, color: Colors.white),
-              ),
-            ),
-          ),
+        background: HeroBanner(
+          name: loc.greetingName(name),
+          subtitle: village,
         ),
       ),
     );
@@ -258,7 +234,7 @@ class _OverviewStats extends ConsumerWidget {
         const SizedBox(height: AppSpacing.md),
         Row(
           children: [
-            _StatCard(
+            DashboardStatCard(
               label: loc.myLands,
               value: '$totalLands',
               icon: Icons.landscape_rounded,
@@ -266,7 +242,7 @@ class _OverviewStats extends ConsumerWidget {
               onTap: () => context.go(RouteConstants.farmerLands),
             ),
             const SizedBox(width: AppSpacing.sm),
-            _StatCard(
+            DashboardStatCard(
               label: loc.bookingPending,
               value: '$pendingCount',
               icon: Icons.hourglass_top_rounded,
@@ -275,7 +251,7 @@ class _OverviewStats extends ConsumerWidget {
               onTap: () => context.go(RouteConstants.farmerBookings),
             ),
             const SizedBox(width: AppSpacing.sm),
-            _StatCard(
+            DashboardStatCard(
               label: loc.bookingActive,
               value: '$activeCount',
               icon: Icons.play_circle_rounded,
@@ -283,7 +259,7 @@ class _OverviewStats extends ConsumerWidget {
               onTap: () => context.go(RouteConstants.farmerBookings),
             ),
             const SizedBox(width: AppSpacing.sm),
-            _StatCard(
+            DashboardStatCard(
               label: loc.earningsLabel,
               value: '₹${fmt.format(earnings)}',
               icon: Icons.currency_rupee_rounded,
@@ -292,87 +268,6 @@ class _OverviewStats extends ConsumerWidget {
           ],
         ),
       ],
-    );
-  }
-}
-
-class _StatCard extends StatelessWidget {
-  final String label;
-  final String value;
-  final IconData icon;
-  final Color color;
-  final bool badge;
-  final VoidCallback? onTap;
-
-  const _StatCard({
-    required this.label,
-    required this.value,
-    required this.icon,
-    required this.color,
-    this.badge = false,
-    this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: Material(
-        color: AppColors.surface,
-        borderRadius: AppSpacing.cardRadius,
-        child: InkWell(
-          borderRadius: AppSpacing.cardRadius,
-          onTap: onTap,
-          child: Container(
-            padding: const EdgeInsets.all(AppSpacing.md),
-            decoration: BoxDecoration(
-              borderRadius: AppSpacing.cardRadius,
-              border: Border.all(
-                color: badge ? color.withAlpha(140) : AppColors.outline,
-                width: badge ? 1.5 : 1,
-              ),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    Icon(icon, color: color, size: 18),
-                    if (badge)
-                      Positioned(
-                        right: -4,
-                        top: -4,
-                        child: Container(
-                          width: 8,
-                          height: 8,
-                          decoration: BoxDecoration(
-                            color: color,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-                const SizedBox(height: AppSpacing.xs),
-                Text(
-                  value,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.textPrimary,
-                      ),
-                ),
-                Text(
-                  label,
-                  style: Theme.of(context)
-                      .textTheme
-                      .bodySmall
-                      ?.copyWith(fontSize: 10),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
     );
   }
 }
@@ -573,7 +468,8 @@ class _BookingRow extends StatelessWidget {
                       style: Theme.of(context).textTheme.titleSmall,
                     ),
                     Text(
-                      loc.bookingSummaryMsg(booking.animalCount, dateStr, fmt.format(booking.totalAmount)),
+                      loc.bookingSummaryMsg(booking.animalCount, dateStr,
+                          fmt.format(booking.totalAmount)),
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             color: AppColors.textSecondary,
                           ),

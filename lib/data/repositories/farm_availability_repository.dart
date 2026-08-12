@@ -4,15 +4,23 @@ import '../../core/constants/firebase_constants.dart';
 import '../models/farm_blocked_period.dart';
 
 class FarmAvailabilityRepository {
-  CollectionReference<FarmBlockedPeriod> _col(String farmId) =>
-      FirebaseFirestore.instance
-          .collection(FirebaseConstants.farms)
-          .doc(farmId)
-          .collection(FirebaseConstants.blockedPeriods)
-          .withConverter<FarmBlockedPeriod>(
-            fromFirestore: (snap, _) => FarmBlockedPeriod.fromFirestore(snap),
-            toFirestore: (p, _) => p.toFirestore(),
-          );
+  FarmAvailabilityRepository({FirebaseFirestore? firestore})
+      : _firestoreOverride = firestore;
+
+  final FirebaseFirestore? _firestoreOverride;
+
+  // Resolved lazily so a test can inject a fake Firestore without ever
+  // touching the real Firebase singleton.
+  FirebaseFirestore get _firestore => _firestoreOverride ?? FirebaseFirestore.instance;
+
+  CollectionReference<FarmBlockedPeriod> _col(String farmId) => _firestore
+      .collection(FirebaseConstants.farms)
+      .doc(farmId)
+      .collection(FirebaseConstants.blockedPeriods)
+      .withConverter<FarmBlockedPeriod>(
+        fromFirestore: (snap, _) => FarmBlockedPeriod.fromFirestore(snap),
+        toFirestore: (p, _) => p.toFirestore(),
+      );
 
   Stream<List<FarmBlockedPeriod>> watchBlockedPeriods(String farmId) => _col(farmId)
       .orderBy('startDate')
