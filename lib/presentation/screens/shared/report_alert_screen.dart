@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -10,9 +11,11 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/utils/geo_hash_helper.dart';
 import '../../../core/utils/validators.dart';
 import '../../../data/models/disease_alert_model.dart';
+import '../../../generated/l10n/app_localizations.dart';
 import '../../providers/alerts/disease_alert_providers.dart';
 import '../../widgets/common/jm_button.dart';
 import '../../widgets/common/jm_text_field.dart';
+import 'alerts/alert_severity.dart';
 
 class ReportAlertScreen extends ConsumerStatefulWidget {
   const ReportAlertScreen({super.key});
@@ -28,11 +31,12 @@ class _ReportAlertScreenState extends ConsumerState<ReportAlertScreen> {
   final _diseaseCtrl = TextEditingController();
   final _titleCtrl = TextEditingController();
   final _descCtrl = TextEditingController();
+  final _symptomsCtrl = TextEditingController();
   final _preventionCtrl = TextEditingController();
   final _treatmentCtrl = TextEditingController();
   final _vetPhoneCtrl = TextEditingController();
-  final _sourceCtrl =
-      TextEditingController(text: 'Farmer Community Report');
+  final _sourceCtrl = TextEditingController(text: 'Farmer Community Report');
+  final _villageCtrl = TextEditingController();
   final _districtCtrl = TextEditingController();
   final _stateCtrl = TextEditingController(text: 'Andhra Pradesh');
 
@@ -44,25 +48,23 @@ class _ReportAlertScreenState extends ConsumerState<ReportAlertScreen> {
   bool _locating = false;
   bool _submitting = false;
 
-  static const _speciesOptions = [
-    ('all', 'All Animals'),
-    ('sheep', 'Sheep'),
-    ('goat', 'Goat'),
-    ('cattle', 'Cattle'),
-  ];
-
-  static const _severityOptions = [
-    ('low', 'Low', AppColors.textSecondary),
-    ('medium', 'Medium', AppColors.info),
-    ('high', 'High', AppColors.warning),
-    ('critical', 'Critical', AppColors.error),
-  ];
+  static const _speciesValues = ['all', 'sheep', 'goat', 'cattle'];
+  static const _severityValues = ['low', 'medium', 'high', 'critical'];
 
   @override
   void dispose() {
     for (final c in [
-      _diseaseCtrl, _titleCtrl, _descCtrl, _preventionCtrl,
-      _treatmentCtrl, _vetPhoneCtrl, _sourceCtrl, _districtCtrl, _stateCtrl,
+      _diseaseCtrl,
+      _titleCtrl,
+      _descCtrl,
+      _symptomsCtrl,
+      _preventionCtrl,
+      _treatmentCtrl,
+      _vetPhoneCtrl,
+      _sourceCtrl,
+      _villageCtrl,
+      _districtCtrl,
+      _stateCtrl,
     ]) {
       c.dispose();
     }
@@ -91,16 +93,14 @@ class _ReportAlertScreenState extends ConsumerState<ReportAlertScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text(e.toString()),
-              backgroundColor: AppColors.error),
+              content: Text(e.toString()), backgroundColor: AppColors.error),
         );
       }
     }
   }
 
   Future<void> _pickOnMap() async {
-    final extra =
-        _lat != null ? {'lat': _lat, 'lng': _lng} : null;
+    final extra = _lat != null ? {'lat': _lat, 'lng': _lng} : null;
     final result = await context
         .push<Map<String, dynamic>>(RouteConstants.mapPicker, extra: extra);
     if (result != null && mounted) {
@@ -112,21 +112,23 @@ class _ReportAlertScreenState extends ConsumerState<ReportAlertScreen> {
   }
 
   Future<void> _pickExpiry() async {
+    final loc = AppLocalizations.of(context);
     final picked = await showDatePicker(
       context: context,
       initialDate: DateTime.now().add(const Duration(days: 30)),
       firstDate: DateTime.now().add(const Duration(days: 1)),
       lastDate: DateTime.now().add(const Duration(days: 365)),
-      helpText: 'Alert valid until',
+      helpText: loc.alertValidUntilHelp,
     );
     if (picked != null) setState(() => _expiresAt = picked);
   }
 
   Future<void> _submit() async {
+    final loc = AppLocalizations.of(context);
     if (!_formKey.currentState!.validate()) return;
     if (_lat == null || _lng == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please set the alert location')),
+        SnackBar(content: Text(loc.setLocationMsg)),
       );
       return;
     }
@@ -143,16 +145,21 @@ class _ReportAlertScreenState extends ConsumerState<ReportAlertScreen> {
       disease: _diseaseCtrl.text.trim(),
       affectedSpecies: _species,
       severity: _severity,
+      village: _villageCtrl.text.trim(),
       district: _districtCtrl.text.trim(),
       state: _stateCtrl.text.trim(),
       lat: _lat!,
       lng: _lng!,
       geohash: geohash,
       radiusKm: 50,
-      prevention:
-          _preventionCtrl.text.trim().isEmpty ? null : _preventionCtrl.text.trim(),
-      treatment:
-          _treatmentCtrl.text.trim().isEmpty ? null : _treatmentCtrl.text.trim(),
+      symptoms:
+          _symptomsCtrl.text.trim().isEmpty ? null : _symptomsCtrl.text.trim(),
+      prevention: _preventionCtrl.text.trim().isEmpty
+          ? null
+          : _preventionCtrl.text.trim(),
+      treatment: _treatmentCtrl.text.trim().isEmpty
+          ? null
+          : _treatmentCtrl.text.trim(),
       vetContactPhone:
           _vetPhoneCtrl.text.trim().isEmpty ? null : _vetPhoneCtrl.text.trim(),
       sourceAuthority: _sourceCtrl.text.trim().isEmpty
@@ -161,6 +168,7 @@ class _ReportAlertScreenState extends ConsumerState<ReportAlertScreen> {
       isActive: true,
       issuedAt: now,
       expiresAt: _expiresAt ?? now.add(const Duration(days: 30)),
+      reportedBy: FirebaseAuth.instance.currentUser?.uid ?? '',
     );
 
     final ok = await ref
@@ -172,13 +180,13 @@ class _ReportAlertScreenState extends ConsumerState<ReportAlertScreen> {
 
     if (ok) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Alert reported. Thank you!')),
+        SnackBar(content: Text(loc.alertReportedMsg)),
       );
       context.pop();
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text('Failed to submit. Please try again.'),
+        SnackBar(
+            content: Text(loc.submitFailedMsg),
             backgroundColor: AppColors.error),
       );
     }
@@ -186,8 +194,9 @@ class _ReportAlertScreenState extends ConsumerState<ReportAlertScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
     return Scaffold(
-      appBar: AppBar(title: const Text('Report Disease Alert')),
+      appBar: AppBar(title: Text(loc.reportAlertTitle)),
       body: Form(
         key: _formKey,
         child: ListView(
@@ -196,37 +205,36 @@ class _ReportAlertScreenState extends ConsumerState<ReportAlertScreen> {
             const SizedBox(height: AppSpacing.sm),
 
             // ── Disease info ──────────────────────────────────────────────
-            _SectionHeader(label: 'Disease Information'),
+            _SectionHeader(label: loc.diseaseInfoSection),
             const SizedBox(height: AppSpacing.md),
             JmTextField(
-              label: 'Disease Name *',
+              label: loc.diseaseNameLabel,
               controller: _diseaseCtrl,
-              hint: 'e.g. Foot & Mouth Disease',
-              validator: (v) => Validators.required(v, 'Disease name'),
+              hint: loc.diseaseNameHint,
+              validator: (v) => Validators.required(v, loc.diseaseNameFieldName),
               onChanged: (_) => _autoTitle(),
               prefixIcon: const Icon(Icons.coronavirus_rounded),
             ),
             const SizedBox(height: AppSpacing.md),
             JmTextField(
-              label: 'Alert Title *',
+              label: loc.alertTitleLabel,
               controller: _titleCtrl,
-              hint: 'e.g. FMD Alert in Guntur',
-              validator: (v) => Validators.required(v, 'Title'),
+              hint: loc.alertTitleHint,
+              validator: (v) => Validators.required(v, loc.titleFieldName),
               prefixIcon: const Icon(Icons.title_rounded),
             ),
             const SizedBox(height: AppSpacing.base),
 
             // Affected species
-            Text('Affected Animals',
+            Text(loc.affectedAnimalsLabel,
                 style: Theme.of(context).textTheme.labelLarge),
             const SizedBox(height: AppSpacing.sm),
             Wrap(
               spacing: AppSpacing.sm,
-              children: _speciesOptions.map((opt) {
-                final (val, label) = opt;
+              children: _speciesValues.map((val) {
                 final selected = _species == val;
                 return FilterChip(
-                  label: Text(label),
+                  label: Text(speciesLabel(val, loc)),
                   selected: selected,
                   onSelected: (_) => setState(() => _species = val),
                   selectedColor: AppColors.primaryContainer,
@@ -237,32 +245,30 @@ class _ReportAlertScreenState extends ConsumerState<ReportAlertScreen> {
             const SizedBox(height: AppSpacing.base),
 
             // Severity
-            Text('Severity', style: Theme.of(context).textTheme.labelLarge),
+            Text(loc.severityLabel, style: Theme.of(context).textTheme.labelLarge),
             const SizedBox(height: AppSpacing.sm),
             Wrap(
               spacing: AppSpacing.sm,
-              children: _severityOptions.map((opt) {
-                final (val, label, color) = opt;
+              children: _severityValues.map((val) {
+                final color = AlertSeverity.of(val).color;
                 final selected = _severity == val;
                 return ChoiceChip(
-                  label: Text(label),
+                  label: Text(severityLabel(val, loc)),
                   selected: selected,
                   onSelected: (_) => setState(() => _severity = val),
                   selectedColor: color.withAlpha(40),
                   labelStyle: TextStyle(
                     color: selected ? color : AppColors.textSecondary,
-                    fontWeight:
-                        selected ? FontWeight.w700 : FontWeight.normal,
+                    fontWeight: selected ? FontWeight.w700 : FontWeight.normal,
                   ),
-                  side: BorderSide(
-                      color: selected ? color : AppColors.outline),
+                  side: BorderSide(color: selected ? color : AppColors.outline),
                 );
               }).toList(),
             ),
             const SizedBox(height: AppSpacing.xl),
 
             // ── Location ──────────────────────────────────────────────────
-            _SectionHeader(label: 'Alert Location'),
+            _SectionHeader(label: loc.alertLocationSection),
             const SizedBox(height: AppSpacing.md),
             _LocationCard(
               lat: _lat,
@@ -270,53 +276,67 @@ class _ReportAlertScreenState extends ConsumerState<ReportAlertScreen> {
               locating: _locating,
               onDetect: _detectLocation,
               onPickOnMap: _pickOnMap,
+              loc: loc,
             ),
             const SizedBox(height: AppSpacing.md),
             JmTextField(
-              label: 'District *',
+              label: loc.villageFieldLabel,
+              controller: _villageCtrl,
+              prefixIcon: const Icon(Icons.location_city_rounded),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            JmTextField(
+              label: loc.yourDistrict,
               controller: _districtCtrl,
-              validator: (v) => Validators.required(v, 'District'),
+              validator: (v) => Validators.required(v, loc.districtFieldName),
               prefixIcon: const Icon(Icons.map_rounded),
               onChanged: (_) => _autoTitle(),
             ),
             const SizedBox(height: AppSpacing.md),
             JmTextField(
-              label: 'State *',
+              label: loc.stateLabel,
               controller: _stateCtrl,
-              validator: (v) => Validators.required(v, 'State'),
+              validator: (v) => Validators.required(v, loc.stateFieldName),
               prefixIcon: const Icon(Icons.flag_rounded),
             ),
             const SizedBox(height: AppSpacing.xl),
 
             // ── Details ───────────────────────────────────────────────────
-            _SectionHeader(label: 'Alert Details'),
+            _SectionHeader(label: loc.alertDetailsSection),
             const SizedBox(height: AppSpacing.md),
             JmTextField(
-              label: 'Description *',
+              label: loc.descriptionFieldLabel,
               controller: _descCtrl,
-              hint: 'Describe the symptoms and spread pattern…',
+              hint: loc.descriptionHint,
               maxLines: 4,
-              validator: (v) => Validators.required(v, 'Description'),
+              validator: (v) => Validators.required(v, loc.descriptionFieldName),
             ),
             const SizedBox(height: AppSpacing.md),
             JmTextField(
-              label: 'Prevention Tips (optional)',
+              label: loc.symptomsFieldLabel,
+              controller: _symptomsCtrl,
+              hint: loc.symptomsHint,
+              maxLines: 3,
+            ),
+            const SizedBox(height: AppSpacing.md),
+            JmTextField(
+              label: loc.preventionTipsLabel,
               controller: _preventionCtrl,
-              hint: 'What farmers can do to protect their animals…',
+              hint: loc.preventionHint,
               maxLines: 3,
             ),
             const SizedBox(height: AppSpacing.md),
             JmTextField(
-              label: 'Treatment (optional)',
+              label: loc.treatmentFieldLabel,
               controller: _treatmentCtrl,
-              hint: 'Recommended treatment or medication…',
+              hint: loc.treatmentHint,
               maxLines: 3,
             ),
             const SizedBox(height: AppSpacing.md),
             JmTextField(
-              label: 'Vet Contact Number (optional)',
+              label: loc.vetContactLabel,
               controller: _vetPhoneCtrl,
-              hint: '+91 98765 43210',
+              hint: loc.vetContactHint,
               keyboardType: TextInputType.phone,
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
               prefixIcon: const Icon(Icons.phone_rounded),
@@ -324,13 +344,13 @@ class _ReportAlertScreenState extends ConsumerState<ReportAlertScreen> {
             const SizedBox(height: AppSpacing.xl),
 
             // ── Source & Validity ─────────────────────────────────────────
-            _SectionHeader(label: 'Source & Validity'),
+            _SectionHeader(label: loc.sourceValiditySection),
             const SizedBox(height: AppSpacing.md),
             JmTextField(
-              label: 'Source Authority *',
+              label: loc.sourceAuthorityLabel,
               controller: _sourceCtrl,
-              hint: 'e.g. Animal Husbandry Dept., Farmer Community',
-              validator: (v) => Validators.required(v, 'Source authority'),
+              hint: loc.sourceAuthorityHint,
+              validator: (v) => Validators.required(v, loc.sourceAuthorityFieldName),
               prefixIcon: const Icon(Icons.verified_rounded),
             ),
             const SizedBox(height: AppSpacing.md),
@@ -352,12 +372,12 @@ class _ReportAlertScreenState extends ConsumerState<ReportAlertScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Alert Valid Until',
+                          Text(loc.alertValidUntilLabel,
                               style: Theme.of(context).textTheme.labelMedium),
                           Text(
                             _expiresAt != null
                                 ? '${_expiresAt!.day}/${_expiresAt!.month}/${_expiresAt!.year}'
-                                : '30 days from today (default)',
+                                : loc.defaultValidityMsg,
                             style: Theme.of(context)
                                 .textTheme
                                 .bodyMedium
@@ -378,7 +398,7 @@ class _ReportAlertScreenState extends ConsumerState<ReportAlertScreen> {
             const SizedBox(height: AppSpacing.xl),
 
             JmButton(
-              label: 'Submit Alert',
+              label: loc.submitAlertBtn,
               leadingIcon: Icons.add_alert_rounded,
               isLoading: _submitting,
               onPressed: _submitting ? null : _submit,
@@ -413,6 +433,7 @@ class _LocationCard extends StatelessWidget {
   final bool locating;
   final VoidCallback onDetect;
   final VoidCallback onPickOnMap;
+  final AppLocalizations loc;
 
   const _LocationCard({
     required this.lat,
@@ -420,6 +441,7 @@ class _LocationCard extends StatelessWidget {
     required this.locating,
     required this.onDetect,
     required this.onPickOnMap,
+    required this.loc,
   });
 
   @override
@@ -430,9 +452,8 @@ class _LocationCard extends StatelessWidget {
         Container(
           padding: AppSpacing.cardPadding,
           decoration: BoxDecoration(
-            color: hasLoc
-                ? AppColors.primaryContainer
-                : AppColors.surfaceVariant,
+            color:
+                hasLoc ? AppColors.primaryContainer : AppColors.surfaceVariant,
             borderRadius: AppSpacing.cardRadius,
             border: Border.all(
                 color: hasLoc ? AppColors.primary : AppColors.outline),
@@ -443,22 +464,20 @@ class _LocationCard extends StatelessWidget {
                 hasLoc
                     ? Icons.my_location_rounded
                     : Icons.location_searching_rounded,
-                color:
-                    hasLoc ? AppColors.primary : AppColors.textSecondary,
+                color: hasLoc ? AppColors.primary : AppColors.textSecondary,
               ),
               const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: Text(
                   hasLoc
                       ? '${lat!.toStringAsFixed(5)}, ${lng!.toStringAsFixed(5)}'
-                      : 'No location set',
+                      : loc.noLocationSetMsg,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: hasLoc
                             ? AppColors.primary
                             : AppColors.textSecondary,
-                        fontWeight: hasLoc
-                            ? FontWeight.w600
-                            : FontWeight.normal,
+                        fontWeight:
+                            hasLoc ? FontWeight.w600 : FontWeight.normal,
                       ),
                 ),
               ),
@@ -470,7 +489,7 @@ class _LocationCard extends StatelessWidget {
               else
                 TextButton(
                   onPressed: onDetect,
-                  child: Text(hasLoc ? 'Update' : 'Detect'),
+                  child: Text(hasLoc ? loc.updateBtn : loc.detectBtn),
                 ),
             ],
           ),
@@ -479,7 +498,7 @@ class _LocationCard extends StatelessWidget {
         OutlinedButton.icon(
           onPressed: onPickOnMap,
           icon: const Icon(Icons.map_outlined, size: 18),
-          label: Text(hasLoc ? 'Adjust on Map' : 'Pick on Map'),
+          label: Text(hasLoc ? loc.adjustOnMapBtn : loc.pickOnMapBtn),
           style: OutlinedButton.styleFrom(
             minimumSize: const Size.fromHeight(44),
             side: const BorderSide(color: AppColors.primary),

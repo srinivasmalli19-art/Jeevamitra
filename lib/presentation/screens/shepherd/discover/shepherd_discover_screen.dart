@@ -3,62 +3,35 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/route_constants.dart';
-import '../../../../core/services/location_service.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
-import '../../../../data/models/farm_model.dart';
+import '../../../../generated/l10n/app_localizations.dart';
 import '../../../providers/farm/farm_providers.dart';
 import '../../../providers/location_provider.dart';
-import '../../../widgets/common/cached_farm_image.dart';
-import '../../../widgets/common/jm_empty_state.dart';
-import '../../../widgets/common/jm_error_state.dart';
+import '../../../widgets/explore/empty_state_card.dart';
+import '../../../widgets/explore/nearby_land_card.dart';
+import '../../../widgets/explore/retry_card.dart';
 import '../../../widgets/common/jm_loading.dart';
+import '../../../widgets/explore/loading_skeleton.dart';
+import 'discover_filter.dart';
 
-// ─── Filter state ─────────────────────────────────────────────────────────────
+// ─── Sort UI ──────────────────────────────────────────────────────────────────
+// (DiscoverSortMode itself, and the rankFarms it drives, live in
+// discover_filter.dart so they're unit-testable — this extension is purely
+// presentational and stays local to the screen.)
 
-class _FilterState {
-  final double radiusKm;
-  final List<String> fodderTypes;
-  final bool onlyWater;
-  final bool onlyShade;
-  final bool onlyFencing;
-  final double? maxPricePerDay;
+extension on DiscoverSortMode {
+  String labelFor(AppLocalizations loc) => switch (this) {
+        DiscoverSortMode.closest => loc.sortClosestLabel,
+        DiscoverSortMode.available => loc.availableNow,
+        DiscoverSortMode.newest => loc.sortNewestLabel,
+      };
 
-  const _FilterState({
-    this.radiusKm = 50,
-    this.fodderTypes = const [],
-    this.onlyWater = false,
-    this.onlyShade = false,
-    this.onlyFencing = false,
-    this.maxPricePerDay,
-  });
-
-  _FilterState copyWith({
-    double? radiusKm, List<String>? fodderTypes,
-    bool? onlyWater, bool? onlyShade, bool? onlyFencing,
-    double? maxPricePerDay, bool clearMaxPrice = false,
-  }) => _FilterState(
-    radiusKm: radiusKm ?? this.radiusKm,
-    fodderTypes: fodderTypes ?? this.fodderTypes,
-    onlyWater: onlyWater ?? this.onlyWater,
-    onlyShade: onlyShade ?? this.onlyShade,
-    onlyFencing: onlyFencing ?? this.onlyFencing,
-    maxPricePerDay: clearMaxPrice ? null : (maxPricePerDay ?? this.maxPricePerDay),
-  );
-
-  bool get hasActiveFilters =>
-      fodderTypes.isNotEmpty || onlyWater || onlyShade || onlyFencing || maxPricePerDay != null;
-
-  List<FarmModel> apply(List<FarmModel> farms) {
-    return farms.where((f) {
-      if (fodderTypes.isNotEmpty && !fodderTypes.any((t) => f.fodderTypes.contains(t))) return false;
-      if (onlyWater && !f.hasWater) return false;
-      if (onlyShade && !f.hasShade) return false;
-      if (onlyFencing && !f.hasFencing) return false;
-      if (maxPricePerDay != null && f.pricePerDayPerAnimal > maxPricePerDay!) return false;
-      return true;
-    }).toList();
-  }
+  IconData get icon => switch (this) {
+        DiscoverSortMode.closest => Icons.near_me_rounded,
+        DiscoverSortMode.available => Icons.check_circle_outline_rounded,
+        DiscoverSortMode.newest => Icons.fiber_new_rounded,
+      };
 }
 
 // ─── Screen ───────────────────────────────────────────────────────────────────
@@ -67,11 +40,14 @@ class ShepherdDiscoverScreen extends ConsumerStatefulWidget {
   const ShepherdDiscoverScreen({super.key});
 
   @override
-  ConsumerState<ShepherdDiscoverScreen> createState() => _ShepherdDiscoverScreenState();
+  ConsumerState<ShepherdDiscoverScreen> createState() =>
+      _ShepherdDiscoverScreenState();
 }
 
-class _ShepherdDiscoverScreenState extends ConsumerState<ShepherdDiscoverScreen> {
-  _FilterState _filter = const _FilterState();
+class _ShepherdDiscoverScreenState
+    extends ConsumerState<ShepherdDiscoverScreen> {
+  DiscoverFilterState _filter = const DiscoverFilterState();
+  DiscoverSortMode _sort = DiscoverSortMode.closest;
 
   static const _radii = [10.0, 25.0, 50.0, 100.0];
 
@@ -88,31 +64,46 @@ class _ShepherdDiscoverScreenState extends ConsumerState<ShepherdDiscoverScreen>
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
     final locAsync = ref.watch(locationProvider);
 
     return Scaffold(
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
-            title: const Text('Discover Lands'),
+            title: Text(loc.discoverLandsBtn),
             floating: true,
             snap: true,
             actions: [
+              IconButton(
+                icon: const Icon(Icons.search_rounded),
+                tooltip: loc.searchEverythingTooltip,
+                onPressed: () => context.push(RouteConstants.unifiedSearch),
+              ),
+              IconButton(
+                icon: const Icon(Icons.map_rounded),
+                tooltip: loc.mapViewTooltip,
+                onPressed: () =>
+                    context.push(RouteConstants.shepherdExploreMap),
+              ),
               Stack(
                 alignment: Alignment.topRight,
                 children: [
                   IconButton(
                     icon: const Icon(Icons.tune_rounded),
-                    tooltip: 'Filters',
+                    tooltip: loc.filtersLabel,
                     onPressed: () => _showFilterSheet(context),
                   ),
                   if (_filter.hasActiveFilters)
                     Positioned(
-                      top: 10, right: 10,
+                      top: 10,
+                      right: 10,
                       child: Container(
-                        width: 8, height: 8,
+                        width: 8,
+                        height: 8,
                         decoration: const BoxDecoration(
-                          color: AppColors.secondary, shape: BoxShape.circle,
+                          color: AppColors.secondary,
+                          shape: BoxShape.circle,
                         ),
                       ),
                     ),
@@ -120,11 +111,21 @@ class _ShepherdDiscoverScreenState extends ConsumerState<ShepherdDiscoverScreen>
               ),
             ],
             bottom: PreferredSize(
-              preferredSize: const Size.fromHeight(48),
-              child: _RadiusBar(
-                selected: _filter.radiusKm,
-                radii: _radii,
-                onSelect: (r) => setState(() => _filter = _filter.copyWith(radiusKm: r)),
+              preferredSize: const Size.fromHeight(96),
+              child: Column(
+                children: [
+                  _RadiusBar(
+                    selected: _filter.radiusKm,
+                    radii: _radii,
+                    onSelect: (r) =>
+                        setState(() => _filter = _filter.copyWith(radiusKm: r)),
+                  ),
+                  _SortBar(
+                    selected: _sort,
+                    loc: loc,
+                    onSelect: (s) => setState(() => _sort = s),
+                  ),
+                ],
               ),
             ),
           ),
@@ -132,14 +133,29 @@ class _ShepherdDiscoverScreenState extends ConsumerState<ShepherdDiscoverScreen>
             const SliverFillRemaining(child: Center(child: JmLoading()))
           else if (locAsync.hasError)
             SliverFillRemaining(
-              child: JmErrorState(
-                message: 'Could not get your location. Please enable GPS.',
-                onRetry: () => ref.read(locationProvider.notifier).fetch(),
+              // Not RetryCard here deliberately: LocationService throws a
+              // plain Exception with an already-specific, human-readable
+              // message ("Location services are disabled...", "Location
+              // permission denied...") — routing it through
+              // friendlyFirebaseMessage (which only recognizes
+              // FirebaseException/FirebaseAuthException) would discard
+              // that and replace it with a generic fallback.
+              child: EmptyStateCard(
+                icon: Icons.location_off_rounded,
+                title: loc.locationErrorTitle,
+                subtitle: locAsync.error
+                        ?.toString()
+                        .replaceFirst('Exception: ', '') ??
+                    loc.couldNotGetLocationMsg,
+                accentColor: AppColors.error,
+                buttonLabel: loc.retryBtn,
+                onButtonTap: () => ref.read(locationProvider.notifier).fetch(),
               ),
             )
           else if (locAsync.valueOrNull == null)
             SliverFillRemaining(
               child: _LocationPermissionView(
+                loc: loc,
                 onRequest: () => ref.read(locationProvider.notifier).fetch(),
               ),
             )
@@ -148,6 +164,10 @@ class _ShepherdDiscoverScreenState extends ConsumerState<ShepherdDiscoverScreen>
               lat: locAsync.value!.lat,
               lng: locAsync.value!.lng,
               filter: _filter,
+              sort: _sort,
+              loc: loc,
+              onClearFilters: () =>
+                  setState(() => _filter = const DiscoverFilterState()),
             ),
         ],
       ),
@@ -173,7 +193,8 @@ class _RadiusBar extends StatelessWidget {
   final List<double> radii;
   final ValueChanged<double> onSelect;
 
-  const _RadiusBar({required this.selected, required this.radii, required this.onSelect});
+  const _RadiusBar(
+      {required this.selected, required this.radii, required this.onSelect});
 
   @override
   Widget build(BuildContext context) {
@@ -186,11 +207,54 @@ class _RadiusBar extends StatelessWidget {
         children: radii.map((r) {
           final active = r == selected;
           return Padding(
-            padding: const EdgeInsets.only(right: AppSpacing.sm, top: 8, bottom: 8),
+            padding:
+                const EdgeInsets.only(right: AppSpacing.sm, top: 8, bottom: 8),
             child: ChoiceChip(
-              label: Text('${r.toInt()} km'),
+              label: Text(AppLocalizations.of(context).kmChipLabel(r.toInt())),
               selected: active,
               onSelected: (_) => onSelect(r),
+              selectedColor: AppColors.primaryContainer,
+              labelStyle: TextStyle(
+                color: active ? AppColors.primary : AppColors.textSecondary,
+                fontWeight: active ? FontWeight.w600 : FontWeight.w400,
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+}
+
+// ─── Sort bar ─────────────────────────────────────────────────────────────────
+
+class _SortBar extends StatelessWidget {
+  final DiscoverSortMode selected;
+  final AppLocalizations loc;
+  final ValueChanged<DiscoverSortMode> onSelect;
+
+  const _SortBar({required this.selected, required this.loc, required this.onSelect});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 48,
+      color: AppColors.surface,
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        padding: AppSpacing.screenHPadding,
+        children: DiscoverSortMode.values.map((s) {
+          final active = s == selected;
+          return Padding(
+            padding:
+                const EdgeInsets.only(right: AppSpacing.sm, top: 8, bottom: 8),
+            child: ChoiceChip(
+              avatar: Icon(s.icon,
+                  size: 16,
+                  color: active ? AppColors.primary : AppColors.textSecondary),
+              label: Text(loc.sortByLabel(s.labelFor(loc))),
+              selected: active,
+              onSelected: (_) => onSelect(s),
               selectedColor: AppColors.primaryContainer,
               labelStyle: TextStyle(
                 color: active ? AppColors.primary : AppColors.textSecondary,
@@ -208,9 +272,19 @@ class _RadiusBar extends StatelessWidget {
 
 class _FarmList extends ConsumerWidget {
   final double lat, lng;
-  final _FilterState filter;
+  final DiscoverFilterState filter;
+  final DiscoverSortMode sort;
+  final AppLocalizations loc;
+  final VoidCallback onClearFilters;
 
-  const _FarmList({required this.lat, required this.lng, required this.filter});
+  const _FarmList({
+    required this.lat,
+    required this.lng,
+    required this.filter,
+    required this.sort,
+    required this.loc,
+    required this.onClearFilters,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -222,236 +296,47 @@ class _FarmList extends ConsumerWidget {
 
     return farmsAsync.when(
       loading: () => const SliverFillRemaining(
-        child: JmShimmerList(count: 4, cardHeight: 200),
+        child: LoadingSkeleton(count: 4),
       ),
-      error: (e, _) {
-        final errStr = e.toString();
-        final isPermission = errStr.contains('permission-denied');
-        return SliverFillRemaining(
-          child: JmErrorState(
-            message: isPermission
-                ? 'Access denied. Please sign in to discover nearby lands.'
-                : errStr,
-            onRetry: () => ref.invalidate(nearbyFarmsProvider),
-            isNetwork: !isPermission,
-          ),
-        );
-      },
+      error: (e, _) => SliverFillRemaining(
+        child: RetryCard(
+          error: e,
+          onRetry: () => ref.invalidate(nearbyFarmsProvider),
+        ),
+      ),
       data: (all) {
-        final farms = filter.apply(all);
-        if (farms.isEmpty) {
+        final filtered = filter.apply(all);
+        if (filtered.isEmpty) {
           return SliverFillRemaining(
-            child: JmEmptyState(
+            child: EmptyStateCard(
               icon: Icons.search_off_rounded,
-              title: 'No Lands Found',
+              title: loc.noLandsFoundTitle,
               subtitle: filter.hasActiveFilters
-                  ? 'Try removing some filters or increasing the radius.'
-                  : 'No available grazing land within ${filter.radiusKm.toInt()} km.',
+                  ? loc.tryFewerFiltersMsg
+                  : loc.noAvailableLandRadiusMsg(filter.radiusKm.toInt()),
+              buttonLabel: filter.hasActiveFilters ? loc.clearFiltersBtn : null,
+              onButtonTap: filter.hasActiveFilters ? onClearFilters : null,
             ),
           );
         }
+        final ranked = rankFarms(filtered, lat, lng, sort);
         return SliverPadding(
           padding: AppSpacing.screenPadding,
           sliver: SliverList.separated(
-            itemCount: farms.length,
+            itemCount: ranked.length,
             separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.md),
-            itemBuilder: (_, i) =>
-                _DiscoverCard(farm: farms[i], userLat: lat, userLng: lng),
+            itemBuilder: (_, i) {
+              final (farm, distanceKm) = ranked[i];
+              return NearbyLandCard(
+                farm: farm,
+                distanceKm: distanceKm,
+                onViewDetails: () =>
+                    context.push(RouteConstants.shepherdLand(farm.id)),
+              );
+            },
           ),
         );
       },
-    );
-  }
-}
-
-// ─── Discover card ────────────────────────────────────────────────────────────
-
-class _DiscoverCard extends StatelessWidget {
-  final FarmModel farm;
-  final double userLat, userLng;
-
-  const _DiscoverCard(
-      {required this.farm, required this.userLat, required this.userLng});
-
-  @override
-  Widget build(BuildContext context) {
-    final distKm =
-        LocationService().distanceBetween(userLat, userLng, farm.lat, farm.lng);
-    final distLabel = distKm < 1
-        ? '${(distKm * 1000).toInt()} m'
-        : '${distKm.toStringAsFixed(1)} km';
-
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: AppSpacing.cardRadius,
-        side: const BorderSide(color: AppColors.outline),
-      ),
-      child: InkWell(
-        onTap: () => context.push(RouteConstants.shepherdLand(farm.id)),
-        borderRadius: AppSpacing.cardRadius,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            ClipRRect(
-              borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(AppSpacing.radiusLg)),
-              child: farm.imageUrls.isNotEmpty
-                  ? CachedFarmImage(
-                      url: farm.imageUrls.first,
-                      height: 160,
-                      width: double.infinity,
-                    )
-                  : _placeholder(),
-            ),
-            Padding(
-              padding: AppSpacing.cardPadding,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(farm.title,
-                            style: Theme.of(context).textTheme.titleMedium,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis),
-                      ),
-                      _DistanceBadge(label: distLabel),
-                    ],
-                  ),
-                  const SizedBox(height: AppSpacing.xs),
-                  Row(
-                    children: [
-                      const Icon(Icons.location_on_rounded,
-                          size: 13, color: AppColors.textSecondary),
-                      const SizedBox(width: 3),
-                      Expanded(
-                        child: Text('${farm.village}, ${farm.district}',
-                            style: Theme.of(context).textTheme.bodySmall,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: AppSpacing.sm),
-                  Row(
-                    children: [
-                      _AmenityDot(
-                          icon: Icons.water_drop_rounded,
-                          active: farm.hasWater,
-                          tooltip: 'Water'),
-                      _AmenityDot(
-                          icon: Icons.park_rounded,
-                          active: farm.hasShade,
-                          tooltip: 'Shade'),
-                      _AmenityDot(
-                          icon: Icons.fence_rounded,
-                          active: farm.hasFencing,
-                          tooltip: 'Fencing'),
-                      _AmenityDot(
-                          icon: Icons.medical_services_rounded,
-                          active: farm.hasVetNearby,
-                          tooltip: 'Vet Nearby'),
-                      const Spacer(),
-                      Text(
-                        '₹${farm.pricePerDayPerAnimal.toStringAsFixed(0)}',
-                        style: Theme.of(context)
-                            .textTheme
-                            .titleMedium
-                            ?.copyWith(color: AppColors.primary),
-                      ),
-                      Text(' /day/animal',
-                          style: Theme.of(context).textTheme.bodySmall),
-                    ],
-                  ),
-                  const SizedBox(height: AppSpacing.xs),
-                  Row(
-                    children: [
-                      const Icon(Icons.landscape_rounded,
-                          size: 13, color: AppColors.textSecondary),
-                      const SizedBox(width: 3),
-                      Text('${farm.areaInAcres.toStringAsFixed(1)} acres',
-                          style: Theme.of(context).textTheme.bodySmall),
-                      const SizedBox(width: AppSpacing.md),
-                      const Icon(Icons.groups_rounded,
-                          size: 13, color: AppColors.textSecondary),
-                      const SizedBox(width: 3),
-                      Text('Max ${farm.maxAnimals}',
-                          style: Theme.of(context).textTheme.bodySmall),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _placeholder() => Container(
-        height: 160,
-        width: double.infinity,
-        color: AppColors.surfaceVariant,
-        child: const Icon(Icons.landscape_rounded,
-            size: 56, color: AppColors.textDisabled),
-      );
-}
-
-class _DistanceBadge extends StatelessWidget {
-  final String label;
-  const _DistanceBadge({required this.label});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.sm, vertical: 2),
-      decoration: BoxDecoration(
-        color: AppColors.primaryContainer,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Icon(Icons.near_me_rounded, size: 12, color: AppColors.primary),
-          const SizedBox(width: 3),
-          Text(label,
-              style: const TextStyle(
-                  fontSize: 11,
-                  color: AppColors.primary,
-                  fontWeight: FontWeight.w600)),
-        ],
-      ),
-    );
-  }
-}
-
-class _AmenityDot extends StatelessWidget {
-  final IconData icon;
-  final bool active;
-  final String tooltip;
-
-  const _AmenityDot(
-      {required this.icon, required this.active, required this.tooltip});
-
-  @override
-  Widget build(BuildContext context) {
-    return Tooltip(
-      message: tooltip,
-      child: Container(
-        width: 28,
-        height: 28,
-        margin: const EdgeInsets.only(right: AppSpacing.xs),
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: active ? AppColors.primaryContainer : AppColors.surfaceVariant,
-        ),
-        child: Icon(icon,
-            size: 14,
-            color: active ? AppColors.primary : AppColors.textDisabled),
-      ),
     );
   }
 }
@@ -459,35 +344,18 @@ class _AmenityDot extends StatelessWidget {
 // ─── Location permission view ─────────────────────────────────────────────────
 
 class _LocationPermissionView extends StatelessWidget {
+  final AppLocalizations loc;
   final VoidCallback onRequest;
-  const _LocationPermissionView({required this.onRequest});
+  const _LocationPermissionView({required this.loc, required this.onRequest});
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: AppSpacing.screenPadding,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.location_off_rounded,
-              size: 80, color: AppColors.textDisabled),
-          const SizedBox(height: AppSpacing.base),
-          Text('Location Required',
-              style: Theme.of(context).textTheme.titleLarge),
-          const SizedBox(height: AppSpacing.sm),
-          Text(
-            'JeevaMitra needs your location to show nearby grazing lands.',
-            style: Theme.of(context).textTheme.bodyMedium,
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: AppSpacing.xl),
-          FilledButton.icon(
-            onPressed: onRequest,
-            icon: const Icon(Icons.my_location_rounded),
-            label: const Text('Enable Location'),
-          ),
-        ],
-      ),
+    return EmptyStateCard(
+      icon: Icons.location_off_rounded,
+      title: loc.locationRequiredTitle,
+      subtitle: loc.locationNeededLandsMsg,
+      buttonLabel: loc.enableLocationBtn,
+      onButtonTap: onRequest,
     );
   }
 }
@@ -495,8 +363,8 @@ class _LocationPermissionView extends StatelessWidget {
 // ─── Filter bottom sheet ──────────────────────────────────────────────────────
 
 class _FilterSheet extends StatefulWidget {
-  final _FilterState initial;
-  final ValueChanged<_FilterState> onApply;
+  final DiscoverFilterState initial;
+  final ValueChanged<DiscoverFilterState> onApply;
 
   const _FilterSheet({required this.initial, required this.onApply});
 
@@ -505,7 +373,10 @@ class _FilterSheet extends StatefulWidget {
 }
 
 class _FilterSheetState extends State<_FilterSheet> {
-  late _FilterState _filter;
+  late DiscoverFilterState _filter;
+  late final _villageCtrl = TextEditingController(text: widget.initial.village);
+  late final _districtCtrl =
+      TextEditingController(text: widget.initial.district);
 
   static const _fodderOptions = [
     ('grass', '🌿 Grass'),
@@ -524,10 +395,18 @@ class _FilterSheetState extends State<_FilterSheet> {
   }
 
   @override
+  void dispose() {
+    _villageCtrl.dispose();
+    _districtCtrl.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
     return DraggableScrollableSheet(
-      initialChildSize: 0.65,
-      maxChildSize: 0.92,
+      initialChildSize: 0.75,
+      maxChildSize: 0.95,
       minChildSize: 0.4,
       expand: false,
       builder: (_, ctrl) => Column(
@@ -548,13 +427,15 @@ class _FilterSheetState extends State<_FilterSheet> {
             padding: const EdgeInsets.symmetric(horizontal: AppSpacing.base),
             child: Row(
               children: [
-                Text('Filters',
-                    style: Theme.of(context).textTheme.titleLarge),
+                Text(loc.filtersLabel, style: Theme.of(context).textTheme.titleLarge),
                 const Spacer(),
                 TextButton(
-                  onPressed: () =>
-                      setState(() => _filter = const _FilterState()),
-                  child: const Text('Reset'),
+                  onPressed: () => setState(() {
+                    _filter = const DiscoverFilterState();
+                    _villageCtrl.clear();
+                    _districtCtrl.clear();
+                  }),
+                  child: Text(loc.resetBtn),
                 ),
               ],
             ),
@@ -565,7 +446,67 @@ class _FilterSheetState extends State<_FilterSheet> {
               controller: ctrl,
               padding: AppSpacing.screenPadding,
               children: [
-                Text('Fodder Type',
+                Text(loc.availableNow,
+                    style: Theme.of(context).textTheme.titleSmall),
+                SwitchListTile(
+                  dense: true,
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(loc.showUnavailableLabel),
+                  value: _filter.includeUnavailable,
+                  onChanged: (v) => setState(
+                      () => _filter = _filter.copyWith(includeUnavailable: v)),
+                ),
+                const SizedBox(height: AppSpacing.lg),
+                Text(loc.locationLabel, style: Theme.of(context).textTheme.titleSmall),
+                const SizedBox(height: AppSpacing.sm),
+                TextField(
+                  controller: _villageCtrl,
+                  decoration: InputDecoration(
+                    labelText: loc.villageFieldLabel,
+                    prefixIcon: const Icon(Icons.location_city_rounded),
+                    isDense: true,
+                  ),
+                  onChanged: (v) => _filter = _filter.copyWith(village: v),
+                ),
+                const SizedBox(height: AppSpacing.md),
+                TextField(
+                  controller: _districtCtrl,
+                  decoration: InputDecoration(
+                    labelText: loc.yourDistrict,
+                    prefixIcon: const Icon(Icons.map_rounded),
+                    isDense: true,
+                  ),
+                  onChanged: (v) => _filter = _filter.copyWith(district: v),
+                ),
+                const SizedBox(height: AppSpacing.xl),
+                Text(loc.areaAcresLabel,
+                    style: Theme.of(context).textTheme.titleSmall),
+                const SizedBox(height: AppSpacing.sm),
+                RangeSlider(
+                  min: 0,
+                  max: 50,
+                  divisions: 25,
+                  values: RangeValues(
+                      _filter.minAcres ?? 0, _filter.maxAcres ?? 50),
+                  labels: RangeLabels(
+                    _filter.minAcres == null
+                        ? loc.anyLabel
+                        : _filter.minAcres!.toStringAsFixed(0),
+                    _filter.maxAcres == null
+                        ? loc.anyLabel
+                        : _filter.maxAcres!.toStringAsFixed(0),
+                  ),
+                  onChanged: (v) => setState(() {
+                    _filter = _filter.copyWith(
+                      minAcres: v.start > 0 ? v.start : null,
+                      clearMinAcres: v.start <= 0,
+                      maxAcres: v.end < 50 ? v.end : null,
+                      clearMaxAcres: v.end >= 50,
+                    );
+                  }),
+                ),
+                const SizedBox(height: AppSpacing.xl),
+                Text(loc.fodderTypeLabel,
                     style: Theme.of(context).textTheme.titleSmall),
                 const SizedBox(height: AppSpacing.sm),
                 Wrap(
@@ -583,20 +524,20 @@ class _FilterSheetState extends State<_FilterSheet> {
                         } else {
                           list.add(opt.$1);
                         }
-                        setState(
-                            () => _filter = _filter.copyWith(fodderTypes: list));
+                        setState(() =>
+                            _filter = _filter.copyWith(fodderTypes: list));
                       },
                       selectedColor: AppColors.primaryContainer,
                     );
                   }).toList(),
                 ),
                 const SizedBox(height: AppSpacing.xl),
-                Text('Amenities',
+                Text(loc.amenities,
                     style: Theme.of(context).textTheme.titleSmall),
                 SwitchListTile(
                   dense: true,
                   contentPadding: EdgeInsets.zero,
-                  title: const Text('Water Available'),
+                  title: Text(loc.waterAvailableLabel),
                   value: _filter.onlyWater,
                   onChanged: (v) =>
                       setState(() => _filter = _filter.copyWith(onlyWater: v)),
@@ -604,7 +545,7 @@ class _FilterSheetState extends State<_FilterSheet> {
                 SwitchListTile(
                   dense: true,
                   contentPadding: EdgeInsets.zero,
-                  title: const Text('Shade / Trees'),
+                  title: Text(loc.shadeTreesLabel),
                   value: _filter.onlyShade,
                   onChanged: (v) =>
                       setState(() => _filter = _filter.copyWith(onlyShade: v)),
@@ -612,7 +553,7 @@ class _FilterSheetState extends State<_FilterSheet> {
                 SwitchListTile(
                   dense: true,
                   contentPadding: EdgeInsets.zero,
-                  title: const Text('Fencing'),
+                  title: Text(loc.fencing),
                   value: _filter.onlyFencing,
                   onChanged: (v) => setState(
                       () => _filter = _filter.copyWith(onlyFencing: v)),
@@ -620,7 +561,7 @@ class _FilterSheetState extends State<_FilterSheet> {
                 const SizedBox(height: AppSpacing.xl),
                 Row(
                   children: [
-                    Text('Max Price / Day / Animal',
+                    Text(loc.maxPriceLabel,
                         style: Theme.of(context).textTheme.titleSmall),
                     const Spacer(),
                     if (_filter.maxPricePerDay != null)
@@ -637,7 +578,7 @@ class _FilterSheetState extends State<_FilterSheet> {
                   divisions: 20,
                   value: _filter.maxPricePerDay ?? 500,
                   label: _filter.maxPricePerDay == null
-                      ? 'Any'
+                      ? loc.anyLabel
                       : '₹${_filter.maxPricePerDay!.toInt()}',
                   onChanged: (v) => setState(() => _filter = _filter.copyWith(
                       maxPricePerDay: v < 500 ? v : null,
@@ -658,7 +599,7 @@ class _FilterSheetState extends State<_FilterSheet> {
                 minimumSize:
                     const Size(double.infinity, AppSpacing.buttonHeight),
               ),
-              child: const Text('Apply Filters'),
+              child: Text(loc.applyFiltersBtn),
             ),
           ),
         ],

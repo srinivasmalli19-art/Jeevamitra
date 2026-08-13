@@ -32,6 +32,7 @@ class RouteConstants {
   static const String shepherdVets = '/shepherd/vets';
   static const String shepherdVetDetail = '/shepherd/vets/:vetId';
   static const String shepherdProfile = '/shepherd/profile';
+  static const String shepherdExploreMap = '/shepherd/explore-map';
 
   // Shared
   static const String emergency = '/shared/emergency';
@@ -39,6 +40,9 @@ class RouteConstants {
   static const String notifications = '/shared/notifications';
   static const String mapPicker = '/shared/map-picker';
   static const String reportAlert = '/shared/report-alert';
+  static const String unifiedSearch = '/shared/search';
+  static const String alertDetailPath = '/shared/alerts/:alertId';
+  static const String alertMap = '/shared/alerts-map';
 
   // Helper: path with substituted params
   static String landDetail(String landId) => '/farmer/lands/$landId';
@@ -49,4 +53,5 @@ class RouteConstants {
   static String vetDetail(String vetId) => '/shepherd/vets/$vetId';
   static String shepherdLand(String landId) => '/shepherd/discover/$landId';
   static String shepherdBook(String farmId) => '/shepherd/book/$farmId';
+  static String alertDetail(String alertId) => '/shared/alerts/$alertId';
 }

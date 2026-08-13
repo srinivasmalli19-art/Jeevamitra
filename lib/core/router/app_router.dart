@@ -29,6 +29,10 @@ import '../../presentation/screens/shepherd/bookings/shepherd_bookings_screen.da
 import '../../presentation/screens/shepherd/vets/shepherd_vets_screen.dart';
 import '../../presentation/screens/shepherd/vets/vet_detail_screen.dart';
 import '../../presentation/screens/shepherd/profile/shepherd_profile_screen.dart';
+import '../../presentation/screens/shepherd/explore_map/explore_map_screen.dart';
+import '../../presentation/screens/shared/search/unified_search_screen.dart';
+import '../../presentation/screens/shared/alerts/alert_detail_screen.dart';
+import '../../presentation/screens/shared/alerts/alert_map_screen.dart';
 import '../../presentation/screens/shared/emergency_screen.dart';
 import '../../presentation/screens/shared/booking_detail_screen.dart';
 import '../../presentation/screens/shared/assistant_screen.dart';
@@ -274,6 +278,23 @@ final routerProvider = Provider<GoRouter>((ref) {
             initialLng: extra?['lng'] as double?,
           );
         },
+      ),
+      GoRoute(
+        path: RouteConstants.shepherdExploreMap,
+        builder: (_, __) => const ExploreMapScreen(),
+      ),
+      GoRoute(
+        path: RouteConstants.unifiedSearch,
+        builder: (_, __) => const UnifiedSearchScreen(),
+      ),
+      GoRoute(
+        path: RouteConstants.alertDetailPath,
+        builder: (_, state) =>
+            AlertDetailScreen(alertId: state.pathParameters['alertId']!),
+      ),
+      GoRoute(
+        path: RouteConstants.alertMap,
+        builder: (_, __) => const AlertMapScreen(),
       ),
     ],
   );

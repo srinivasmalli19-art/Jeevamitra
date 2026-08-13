@@ -15,6 +15,7 @@ class CachedFarmImage extends StatelessWidget {
   final double? width;
   final double? height;
   final BorderRadius? borderRadius;
+  final IconData errorIcon;
 
   const CachedFarmImage({
     super.key,
@@ -23,6 +24,7 @@ class CachedFarmImage extends StatelessWidget {
     this.width,
     this.height,
     this.borderRadius,
+    this.errorIcon = Icons.landscape_rounded,
   });
 
   @override
@@ -57,6 +59,6 @@ class CachedFarmImage extends StatelessWidget {
         width: width,
         height: height,
         color: AppColors.surfaceVariant,
-        child: const Icon(Icons.landscape_rounded, size: 32, color: AppColors.textDisabled),
+        child: Icon(errorIcon, size: 32, color: AppColors.textDisabled),
       );
 }

@@ -316,6 +316,11 @@ class AppLocalizationsTe extends AppLocalizations {
   }
 
   @override
+  String distanceMetersAway(int m) {
+    return '$m మీ దూరంలో';
+  }
+
+  @override
   String perDayPerAnimal(String price) {
     return '₹$price/రోజు/జంతువు';
   }
@@ -520,4 +525,715 @@ class AppLocalizationsTe extends AppLocalizations {
 
   @override
   String get districtRequiredMsg => 'జిల్లా అవసరం';
+
+  @override
+  String get clearBtn => 'క్లియర్ చేయి';
+
+  @override
+  String get filtersLabel => 'ఫిల్టర్‌లు';
+
+  @override
+  String get resetBtn => 'రీసెట్';
+
+  @override
+  String get applyFiltersBtn => 'ఫిల్టర్‌లు వర్తింపజేయి';
+
+  @override
+  String get anyLabel => 'ఏదైనా';
+
+  @override
+  String get villageFieldLabel => 'గ్రామం';
+
+  @override
+  String get locationRequiredTitle => 'లొకేషన్ అవసరం';
+
+  @override
+  String get locationErrorTitle => 'లొకేషన్ లోపం';
+
+  @override
+  String get couldNotGetLocationMsg => 'మీ లొకేషన్ పొందలేకపోయాము.';
+
+  @override
+  String get enableLocationBtn => 'లొకేషన్ ఆన్ చేయండి';
+
+  @override
+  String get couldNotOpenMapsMsg => 'మ్యాప్స్ తెరవలేకపోయాము';
+
+  @override
+  String get couldNotOpenDialerMsg => 'డయలర్ తెరవలేకపోయాము';
+
+  @override
+  String get couldNotOpenLinkMsg => 'ఈ లింక్ తెరవలేకపోయాము';
+
+  @override
+  String get whatsappNotInstalledMsg => 'WhatsApp ఇన్‌స్టాల్ చేయలేదు';
+
+  @override
+  String get navigateBtn => 'నావిగేట్';
+
+  @override
+  String get callBtn => 'కాల్';
+
+  @override
+  String get bookBtn => 'బుక్ చేయి';
+
+  @override
+  String get viewProfileBtn => 'ప్రొఫైల్ చూడండి';
+
+  @override
+  String get justNowMsg => 'ఇప్పుడే';
+
+  @override
+  String get shareTooltip => 'షేర్ చేయి';
+
+  @override
+  String get searchEverythingTooltip => 'అన్నీ వెతకండి';
+
+  @override
+  String get mapViewTooltip => 'మ్యాప్ వీక్షణ';
+
+  @override
+  String get availableTodayLabel => 'ఈరోజు అందుబాటులో';
+
+  @override
+  String get sortClosestLabel => 'దగ్గరగా';
+
+  @override
+  String get sortNewestLabel => 'కొత్తవి';
+
+  @override
+  String get clearFiltersBtn => 'ఫిల్టర్‌లు క్లియర్ చేయి';
+
+  @override
+  String get tryFewerFiltersMsg =>
+      'కొన్ని ఫిల్టర్‌లు తీసివేయండి లేదా రేడియస్ పెంచండి.';
+
+  @override
+  String get noLandsFoundTitle => 'భూములు కనబడలేదు';
+
+  @override
+  String get locationNeededLandsMsg =>
+      'సమీపంలోని మేత భూములను చూపించడానికి జీవమిత్రకు మీ లొకేషన్ కావాలి.';
+
+  @override
+  String get showUnavailableLabel => 'అందుబాటులో లేని భూములను కూడా చూపించు';
+
+  @override
+  String get waterAvailableLabel => 'నీరు అందుబాటులో';
+
+  @override
+  String get shadeTreesLabel => 'నీడ / చెట్లు';
+
+  @override
+  String get fodderTypeLabel => 'మేత రకం';
+
+  @override
+  String get maxPriceLabel => 'గరిష్ట ధర / రోజు / జంతువు';
+
+  @override
+  String get viewDetailsBtn => 'వివరాలు చూడండి';
+
+  @override
+  String get landDetailsTitle => 'భూమి వివరాలు';
+
+  @override
+  String get landNoLongerAvailableMsg => 'ఈ భూమి ఇక అందుబాటులో లేదు.';
+
+  @override
+  String get farmerLabel => 'రైతు';
+
+  @override
+  String get areaLabel => 'విస్తీర్ణం';
+
+  @override
+  String get maxAnimalsLabel => 'గరిష్ట జంతువులు';
+
+  @override
+  String get perDayLabel => 'రోజుకు';
+
+  @override
+  String get aboutLandTitle => 'భూమి గురించి';
+
+  @override
+  String get finalAmountNoteMsg =>
+      'మంద పరిమాణం మరియు రోజుల సంఖ్యపై తుది మొత్తం ఆధారపడి ఉంటుంది.';
+
+  @override
+  String get bookThisLandBtn => 'ఈ భూమిని బుక్ చేయండి';
+
+  @override
+  String get notAvailableForBookingMsg => 'బుకింగ్‌కు అందుబాటులో లేదు';
+
+  @override
+  String get sortTopRatedLabel => 'టాప్ రేటెడ్';
+
+  @override
+  String get sortExperiencedLabel => 'అనుభవజ్ఞులు';
+
+  @override
+  String get noVetsFoundTitle => 'పశువైద్యులు కనబడలేదు';
+
+  @override
+  String get locationNeededVetsMsg =>
+      'మీ మంద దగ్గర పశువైద్యులను కనుగొనడానికి లొకేషన్ ఆన్ చేయండి.';
+
+  @override
+  String get filterVetsTitle => 'పశువైద్యులను ఫిల్టర్ చేయండి';
+
+  @override
+  String get govtVetsOnlyLabel => 'ప్రభుత్వ పశువైద్యులు మాత్రమే';
+
+  @override
+  String get govtVetsOnlySubtitle => 'సబ్సిడీ / ఉచిత సేవలు';
+
+  @override
+  String get freeConsultationLabel => 'ఉచిత సంప్రదింపు';
+
+  @override
+  String get minimumRatingLabel => 'కనీస రేటింగ్';
+
+  @override
+  String get specializationLabel => 'ప్రత్యేకత';
+
+  @override
+  String get languageLabel => 'భాష';
+
+  @override
+  String get vetDetailsTitle => 'పశువైద్యుని వివరాలు';
+
+  @override
+  String get vetProfileTitle => 'పశువైద్యుని ప్రొఫైల్';
+
+  @override
+  String get veterinarianNotFoundTitle => 'పశువైద్యుడు కనబడలేదు';
+
+  @override
+  String get profileRemovedMsg => 'ఈ ప్రొఫైల్ తీసివేయబడి ఉండవచ్చు.';
+
+  @override
+  String get verifiedVeterinarianMsg => 'ధృవీకరించబడిన పశువైద్యుడు';
+
+  @override
+  String get locationLabel => 'లొకేషన్';
+
+  @override
+  String get languagesTitle => 'భాషలు';
+
+  @override
+  String get servicesTitle => 'సేవలు';
+
+  @override
+  String get galleryTitle => 'గ్యాలరీ';
+
+  @override
+  String get contactTitle => 'సంప్రదించండి';
+
+  @override
+  String get phoneCopiedMsg => 'ఫోన్ నంబర్ కాపీ చేయబడింది';
+
+  @override
+  String get vetContactCopiedMsg =>
+      'పశువైద్యుని సంప్రదింపు వివరాలు కాపీ చేయబడ్డాయి';
+
+  @override
+  String get exploreMapTitle => 'మ్యాప్‌లో అన్వేషించండి';
+
+  @override
+  String get locationNeededMapMsg =>
+      'మ్యాప్‌లో భూములు మరియు పశువైద్యులను అన్వేషించడానికి లొకేషన్ ఆన్ చేయండి.';
+
+  @override
+  String get searchMapHint =>
+      'గ్రామం, జిల్లా, భూమి లేదా పశువైద్యుని వెతకండి...';
+
+  @override
+  String get landsChipLabel => 'భూములు';
+
+  @override
+  String get nothingFoundTitle => 'ఏమీ కనబడలేదు';
+
+  @override
+  String get tryDifferentSearchMsg =>
+      'వేరే శోధన, రేడియస్ లేదా ఫిల్టర్ ప్రయత్నించండి.';
+
+  @override
+  String resultsWithinRadiusMsg(int count, int radius) {
+    return '$radius కి.మీ లోపల $count ఫలితాలు';
+  }
+
+  @override
+  String get alertsMapTitle => 'అలర్ట్‌ల మ్యాప్';
+
+  @override
+  String get locationNeededAlertsMapMsg =>
+      'మ్యాప్‌లో వ్యాధి హెచ్చరికలను చూడటానికి లొకేషన్ ఆన్ చేయండి.';
+
+  @override
+  String noActiveAlertsRadiusMsg(int radius) {
+    return '$radius కి.మీ లోపల యాక్టివ్ వ్యాధి హెచ్చరికలు లేవు';
+  }
+
+  @override
+  String get searchTitle => 'శోధన';
+
+  @override
+  String get searchEverythingHint =>
+      'భూములు, పశువైద్యులు, హెచ్చరికలు, గ్రామాలు, జిల్లాలు వెతకండి...';
+
+  @override
+  String get searchEverythingTitle => 'అన్నీ వెతకండి';
+
+  @override
+  String get searchEverythingDesc =>
+      'సమీపంలోని భూములు, పశువైద్యులు, వ్యాధి హెచ్చరికలు, గ్రామాలు మరియు జిల్లాలు — అన్నీ ఒకే చోట కనుగొనండి.';
+
+  @override
+  String get locationNeededSearchMsg =>
+      'సమీపంలోని భూములు, పశువైద్యులు మరియు హెచ్చరికలను వెతకడానికి లొకేషన్ ఆన్ చేయండి.';
+
+  @override
+  String get noResultsTitle => 'ఫలితాలు లేవు';
+
+  @override
+  String noResultsMsg(String query) {
+    return '\"$query\" కి సరిపోలలేదు. వేరే శోధన ప్రయత్నించండి.';
+  }
+
+  @override
+  String get categoryLandLabel => 'భూమి';
+
+  @override
+  String get categoryVetLabel => 'పశువైద్యుడు';
+
+  @override
+  String get categoryAlertLabel => 'హెచ్చరిక';
+
+  @override
+  String get categoryVillageLabel => 'గ్రామం';
+
+  @override
+  String get categoryDistrictLabel => 'జిల్లా';
+
+  @override
+  String get diseaseAlertsTabLabel => 'వ్యాధి హెచ్చరికలు';
+
+  @override
+  String get advisoryTabLabel => 'సలహా';
+
+  @override
+  String get reportBtn => 'నివేదించు';
+
+  @override
+  String get exploreSubtitle => 'వ్యాధి హెచ్చరికలు, సలహాలు & వ్యవసాయ చిట్కాలు';
+
+  @override
+  String get searchAdvisoryHint => 'సలహా చిట్కాలు వెతకండి...';
+
+  @override
+  String get allCategoryLabel => 'అన్నీ';
+
+  @override
+  String get noTipsYetTitle => 'ఇంకా చిట్కాలు లేవు';
+
+  @override
+  String get noTipsYetMsg => 'ఈ కేటగిరీకి సలహా చిట్కాలు త్వరలో వస్తాయి.';
+
+  @override
+  String get categoryHealth => 'ఆరోగ్యం';
+
+  @override
+  String get categoryNutrition => 'పోషణ';
+
+  @override
+  String get categoryFodder => 'మేత';
+
+  @override
+  String get categoryGrazing => 'మేపడం';
+
+  @override
+  String get categoryFinance => 'ఆర్థిక';
+
+  @override
+  String get categoryWeather => 'వాతావరణం';
+
+  @override
+  String get searchDiseaseAlertsHint => 'వ్యాధి హెచ్చరికలు వెతకండి...';
+
+  @override
+  String get noActiveAlertsTitle => 'యాక్టివ్ హెచ్చరికలు లేవు';
+
+  @override
+  String get noActiveAlertsMsg =>
+      'మీ ప్రాంతంలో వ్యాధి హెచ్చరికలు నివేదించబడలేదు. అప్రమత్తంగా ఉండండి!';
+
+  @override
+  String get noMatchesTitle => 'సరిపోలికలు లేవు';
+
+  @override
+  String noMatchesMsg(String query) {
+    return '\"$query\" కి సరిపోలే హెచ్చరికలు లేవు. వేరే శోధన ప్రయత్నించండి.';
+  }
+
+  @override
+  String get locationNeededAlertsMsg =>
+      'మీ దగ్గర వ్యాధి హెచ్చరికలను చూడటానికి లొకేషన్ ఆన్ చేయండి.';
+
+  @override
+  String get searchAlertDashboardHint => 'వ్యాధి, శీర్షిక, గ్రామం వెతకండి...';
+
+  @override
+  String get noDistrictYetTitle => 'ఇంకా జిల్లా లేదు';
+
+  @override
+  String get noDistrictYetMsg =>
+      'ఫిల్టర్‌లలో జిల్లాను సెట్ చేయండి, లేదా సమీప హెచ్చరికలు సూచించే వరకు వేచి ఉండండి.';
+
+  @override
+  String get noUrgentAlertsTitle => 'అత్యవసర హెచ్చరికలు లేవు';
+
+  @override
+  String get noAlertsFoundTitle => 'హెచ్చరికలు కనబడలేదు';
+
+  @override
+  String get tryRemovingFiltersMsg =>
+      'కొన్ని ఫిల్టర్‌లు లేదా శోధన వచనాన్ని తీసివేయండి.';
+
+  @override
+  String noActiveAlertsInDistrictMsg(String district) {
+    return '$districtలో యాక్టివ్ హెచ్చరికలు నివేదించబడలేదు.';
+  }
+
+  @override
+  String get tabNearbyLabel => 'సమీపంలో';
+
+  @override
+  String get tabDistrictLabel => 'జిల్లా';
+
+  @override
+  String get tabActiveLabel => 'యాక్టివ్';
+
+  @override
+  String get tabRecentLabel => 'ఇటీవలి';
+
+  @override
+  String get severityCriticalLabel => 'అత్యంత తీవ్రం';
+
+  @override
+  String get severityHighLabel => 'అధిక';
+
+  @override
+  String get severityMediumLabel => 'మధ్యస్థ';
+
+  @override
+  String get severityLowLabel => 'తక్కువ';
+
+  @override
+  String get speciesSheepLabel => 'గొర్రె';
+
+  @override
+  String get speciesGoatLabel => 'మేక';
+
+  @override
+  String get speciesCattleLabel => 'పశువులు';
+
+  @override
+  String get speciesAllAnimalsLabel => 'అన్ని జంతువులు';
+
+  @override
+  String get radiusLabel => 'రేడియస్';
+
+  @override
+  String get severityLabel => 'తీవ్రత';
+
+  @override
+  String get affectedAnimalsLabel => 'ప్రభావిత జంతువులు';
+
+  @override
+  String get issuedDateLabel => 'జారీ తేదీ';
+
+  @override
+  String get issuedFromBtn => 'నుండి';
+
+  @override
+  String get issuedUntilBtn => 'వరకు';
+
+  @override
+  String get issuedFromHelp => 'నుండి జారీ చేయబడింది';
+
+  @override
+  String get issuedUntilHelp => 'వరకు జారీ చేయబడింది';
+
+  @override
+  String get alertDetailsTitle => 'హెచ్చరిక వివరాలు';
+
+  @override
+  String get alertNotFoundTitle => 'హెచ్చరిక కనబడలేదు';
+
+  @override
+  String get alertRemovedMsg =>
+      'ఈ హెచ్చరిక గడువు ముగిసి లేదా తీసివేయబడి ఉండవచ్చు.';
+
+  @override
+  String get descriptionLabel => 'వివరణ';
+
+  @override
+  String get symptomsLabel => 'లక్షణాలు';
+
+  @override
+  String get treatmentLabel => 'చికిత్స';
+
+  @override
+  String get preventionLabel => 'నివారణ';
+
+  @override
+  String get govtAdvisoryLabel => 'ప్రభుత్వ సలహా / మూలం';
+
+  @override
+  String get nearbyVeterinarianTitle => 'సమీప పశువైద్యుడు';
+
+  @override
+  String get reportSimilarCaseBtn => 'ఇలాంటి కేసు నివేదించండి';
+
+  @override
+  String get noVetsNearAlertTitle => 'సమీపంలో పశువైద్యులు కనబడలేదు';
+
+  @override
+  String get noVetsNearAlertMsg =>
+      'ఈ హెచ్చరిక 50 కి.మీ లోపల నమోదైన పశువైద్యులు లేరు.';
+
+  @override
+  String get sharedViaAppMsg => 'జీవమిత్ర ద్వారా షేర్ చేయబడింది';
+
+  @override
+  String get reportAlertTitle => 'వ్యాధి హెచ్చరిక నివేదించండి';
+
+  @override
+  String get diseaseInfoSection => 'వ్యాధి సమాచారం';
+
+  @override
+  String get alertLocationSection => 'హెచ్చరిక లొకేషన్';
+
+  @override
+  String get alertDetailsSection => 'హెచ్చరిక వివరాలు';
+
+  @override
+  String get sourceValiditySection => 'మూలం & చెల్లుబాటు';
+
+  @override
+  String get diseaseNameLabel => 'వ్యాధి పేరు *';
+
+  @override
+  String get diseaseNameHint => 'ఉదా. కాలు నోటి వ్యాధి';
+
+  @override
+  String get diseaseNameFieldName => 'వ్యాధి పేరు';
+
+  @override
+  String get alertTitleLabel => 'హెచ్చరిక శీర్షిక *';
+
+  @override
+  String get alertTitleHint => 'ఉదా. గుంటూరులో FMD హెచ్చరిక';
+
+  @override
+  String get titleFieldName => 'శీర్షిక';
+
+  @override
+  String get districtFieldName => 'జిల్లా';
+
+  @override
+  String get stateLabel => 'రాష్ట్రం *';
+
+  @override
+  String get descriptionFieldLabel => 'వివరణ *';
+
+  @override
+  String get descriptionHint => 'లక్షణాలు మరియు వ్యాప్తి తీరును వివరించండి…';
+
+  @override
+  String get descriptionFieldName => 'వివరణ';
+
+  @override
+  String get preventionTipsLabel => 'నివారణ చిట్కాలు (ఐచ్ఛికం)';
+
+  @override
+  String get preventionHint =>
+      'రైతులు తమ జంతువులను రక్షించుకోవడానికి ఏమి చేయవచ్చు…';
+
+  @override
+  String get treatmentFieldLabel => 'చికిత్స (ఐచ్ఛికం)';
+
+  @override
+  String get treatmentHint => 'సిఫార్సు చేయబడిన చికిత్స లేదా మందు…';
+
+  @override
+  String get vetContactLabel => 'పశువైద్యుని ఫోన్ నంబర్ (ఐచ్ఛికం)';
+
+  @override
+  String get vetContactHint => '+91 98765 43210';
+
+  @override
+  String get sourceAuthorityLabel => 'మూల అధికారం *';
+
+  @override
+  String get sourceAuthorityHint => 'ఉదా. పశు సంవర్ధక శాఖ, రైతు సంఘం';
+
+  @override
+  String get sourceAuthorityFieldName => 'మూల అధికారం';
+
+  @override
+  String get alertValidUntilLabel => 'హెచ్చరిక చెల్లుబాటు వరకు';
+
+  @override
+  String get alertValidUntilHelp => 'హెచ్చరిక చెల్లుబాటు వరకు';
+
+  @override
+  String get defaultValidityMsg => 'ఈరోజు నుండి 30 రోజులు (డిఫాల్ట్)';
+
+  @override
+  String get submitAlertBtn => 'హెచ్చరిక సమర్పించండి';
+
+  @override
+  String get setLocationMsg => 'దయచేసి హెచ్చరిక లొకేషన్ సెట్ చేయండి';
+
+  @override
+  String get alertReportedMsg => 'హెచ్చరిక నివేదించబడింది. ధన్యవాదాలు!';
+
+  @override
+  String get submitFailedMsg =>
+      'సమర్పించడంలో విఫలమైంది. దయచేసి మళ్ళీ ప్రయత్నించండి.';
+
+  @override
+  String get noLocationSetMsg => 'లొకేషన్ సెట్ చేయలేదు';
+
+  @override
+  String get updateBtn => 'అప్‌డేట్';
+
+  @override
+  String get detectBtn => 'గుర్తించు';
+
+  @override
+  String get adjustOnMapBtn => 'మ్యాప్‌లో సర్దుబాటు చేయండి';
+
+  @override
+  String get pickOnMapBtn => 'మ్యాప్‌లో ఎంచుకోండి';
+
+  @override
+  String daysAgoMsg(int count) {
+    return '${count}d క్రితం';
+  }
+
+  @override
+  String hoursAgoMsg(int count) {
+    return '${count}h క్రితం';
+  }
+
+  @override
+  String minutesAgoMsg(int count) {
+    return '${count}m క్రితం';
+  }
+
+  @override
+  String get readMoreBtn => 'మరింత చదవండి';
+
+  @override
+  String get perDayAnimalSuffix => ' /రోజు/జంతువు';
+
+  @override
+  String yearsExpMsg(int count) {
+    return '$count సం. అనుభవం';
+  }
+
+  @override
+  String ratingCountMsg(String rating, int count) {
+    return '$rating ($count)';
+  }
+
+  @override
+  String sortByLabel(String mode) {
+    return 'క్రమం: $mode';
+  }
+
+  @override
+  String get areaAcresLabel => 'విస్తీర్ణం (ఎకరాలు)';
+
+  @override
+  String kmChipLabel(int km) {
+    return '$km కి.మీ';
+  }
+
+  @override
+  String noAvailableLandRadiusMsg(int radius) {
+    return '$radius కి.మీ లోపల అందుబాటులో మేత భూమి లేదు.';
+  }
+
+  @override
+  String noVetsFoundRadiusMsg(int radius) {
+    return '$radius కి.మీ లోపల పశువైద్యులు కనబడలేదు.';
+  }
+
+  @override
+  String get perAnimalPerDaySuffix => ' ప్రతి జంతువుకు రోజుకు. ';
+
+  @override
+  String get minimumExperienceLabel => 'కనీస అనుభవం (సంవత్సరాలు)';
+
+  @override
+  String ratingStarsLabel(String rating) {
+    return '$rating ★';
+  }
+
+  @override
+  String yearsShortLabel(int count) {
+    return '$count సం.';
+  }
+
+  @override
+  String get feeSuffix => ' ఫీజు';
+
+  @override
+  String ratingStarCountMsg(String rating, int count) {
+    return '$rating ★ ($count)';
+  }
+
+  @override
+  String resultsHereMsg(int count) {
+    return 'ఇక్కడ $count ఫలితాలు';
+  }
+
+  @override
+  String get diseaseAlertFallbackTitle => 'వ్యాధి హెచ్చరిక';
+
+  @override
+  String alertsHereMsg(int count) {
+    return 'ఇక్కడ $count హెచ్చరికలు';
+  }
+
+  @override
+  String issuedDateMsg(String date) {
+    return 'జారీ చేయబడింది $date';
+  }
+
+  @override
+  String validUntilDateMsg(String date) {
+    return '$date వరకు చెల్లుతుంది';
+  }
+
+  @override
+  String severitySuffixMsg(String severity) {
+    return '$severity తీవ్రత';
+  }
+
+  @override
+  String locationLineMsg(String where) {
+    return 'లొకేషన్: $where';
+  }
+
+  @override
+  String get symptomsFieldLabel => 'లక్షణాలు (ఐచ్ఛికం)';
+
+  @override
+  String get symptomsHint => 'ప్రభావిత జంతువులలో గమనించవలసిన సంకేతాలు…';
+
+  @override
+  String get stateFieldName => 'రాష్ట్రం';
 }

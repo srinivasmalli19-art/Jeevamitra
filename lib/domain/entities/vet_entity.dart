@@ -19,6 +19,9 @@ class VetEntity {
   final int reviewCount;
   final String? profileImageUrl;
   final bool isVerified;
+  final int yearsOfExperience;
+  final List<String> languages;
+  final List<String> galleryUrls;
 
   const VetEntity({
     required this.id,
@@ -41,6 +44,9 @@ class VetEntity {
     this.reviewCount = 0,
     this.profileImageUrl,
     this.isVerified = false,
+    this.yearsOfExperience = 0,
+    this.languages = const [],
+    this.galleryUrls = const [],
   });
 
   bool get isFree => consultationFee == null || consultationFee == 0;

@@ -24,6 +24,9 @@ class VetModel extends VetEntity {
     super.reviewCount,
     super.profileImageUrl,
     super.isVerified,
+    super.yearsOfExperience,
+    super.languages,
+    super.galleryUrls,
   });
 
   factory VetModel.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
@@ -38,8 +41,8 @@ class VetModel extends VetEntity {
       village: d['village'] as String? ?? '',
       district: d['district'] as String? ?? '',
       state: d['state'] as String? ?? '',
-      lat: (d['lat'] as num).toDouble(),
-      lng: (d['lng'] as num).toDouble(),
+      lat: (d['lat'] as num?)?.toDouble() ?? 0,
+      lng: (d['lng'] as num?)?.toDouble() ?? 0,
       geohash: d['geohash'] as String? ?? '',
       services: List<String>.from(d['services'] as List? ?? []),
       isGovtVet: d['isGovtVet'] as bool? ?? false,
@@ -49,6 +52,9 @@ class VetModel extends VetEntity {
       reviewCount: (d['reviewCount'] as num?)?.toInt() ?? 0,
       profileImageUrl: d['profileImageUrl'] as String?,
       isVerified: d['isVerified'] as bool? ?? false,
+      yearsOfExperience: (d['yearsOfExperience'] as num?)?.toInt() ?? 0,
+      languages: List<String>.from(d['languages'] as List? ?? []),
+      galleryUrls: List<String>.from(d['galleryUrls'] as List? ?? []),
     );
   }
 
@@ -72,5 +78,8 @@ class VetModel extends VetEntity {
         'reviewCount': reviewCount,
         if (profileImageUrl != null) 'profileImageUrl': profileImageUrl,
         'isVerified': isVerified,
+        'yearsOfExperience': yearsOfExperience,
+        'languages': languages,
+        'galleryUrls': galleryUrls,
       };
 }

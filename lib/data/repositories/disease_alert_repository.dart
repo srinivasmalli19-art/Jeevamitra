@@ -5,7 +5,12 @@ import '../../core/utils/geo_hash_helper.dart';
 import '../models/disease_alert_model.dart';
 
 class DiseaseAlertRepository {
-  final _col = FirebaseFirestore.instance
+  DiseaseAlertRepository({FirebaseFirestore? firestore})
+      : _firestore = firestore ?? FirebaseFirestore.instance;
+
+  final FirebaseFirestore _firestore;
+
+  late final _col = _firestore
       .collection(FirebaseConstants.diseaseAlerts)
       .withConverter<DiseaseAlertModel>(
         fromFirestore: (snap, _) => DiseaseAlertModel.fromFirestore(snap),
@@ -42,6 +47,10 @@ class DiseaseAlertRepository {
       return results;
     });
   }
+
+  /// Single alert by id, for the Alert Detail screen.
+  Stream<DiseaseAlertModel?> watchAlert(String id) =>
+      _col.doc(id).snapshots().map((s) => s.data());
 
   /// District-level alerts for a given district name (text match).
   Stream<List<DiseaseAlertModel>> watchByDistrict(String district) => _col

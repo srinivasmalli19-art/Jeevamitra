@@ -128,6 +128,10 @@
   "@distanceKm": {
     "placeholders": { "km": { "type": "String" } }
   },
+  "distanceMetersAway": "{m} m away",
+  "@distanceMetersAway": {
+    "placeholders": { "m": { "type": "int" } }
+  },
   "perDayPerAnimal": "₹{price}/day/animal",
   "@perDayPerAnimal": {
     "placeholders": { "price": { "type": "String" } }
@@ -220,5 +224,306 @@
   "villageInvalidMsg": "Enter a valid location",
   "otpRequiredMsg": "OTP required",
   "otpInvalidMsg": "Enter 6-digit OTP",
-  "districtRequiredMsg": "District required"
+  "districtRequiredMsg": "District required",
+
+  "clearBtn": "Clear",
+  "filtersLabel": "Filters",
+  "resetBtn": "Reset",
+  "applyFiltersBtn": "Apply Filters",
+  "anyLabel": "Any",
+  "villageFieldLabel": "Village",
+  "locationRequiredTitle": "Location Required",
+  "locationErrorTitle": "Location Error",
+  "couldNotGetLocationMsg": "Could not get your location.",
+  "enableLocationBtn": "Enable Location",
+  "couldNotOpenMapsMsg": "Could not open maps",
+  "couldNotOpenDialerMsg": "Could not open dialer",
+  "couldNotOpenLinkMsg": "Could not open this link",
+  "whatsappNotInstalledMsg": "WhatsApp not installed",
+  "navigateBtn": "Navigate",
+  "callBtn": "Call",
+  "bookBtn": "Book",
+  "viewProfileBtn": "View Profile",
+  "justNowMsg": "Just now",
+  "shareTooltip": "Share",
+  "searchEverythingTooltip": "Search Everything",
+  "mapViewTooltip": "Map View",
+  "availableTodayLabel": "Available Today",
+
+  "sortClosestLabel": "Closest",
+  "sortNewestLabel": "Newest",
+  "clearFiltersBtn": "Clear Filters",
+  "tryFewerFiltersMsg": "Try removing some filters or increasing the radius.",
+  "noLandsFoundTitle": "No Lands Found",
+  "locationNeededLandsMsg": "JeevaMitra needs your location to show nearby grazing lands.",
+  "showUnavailableLabel": "Show unavailable lands too",
+  "waterAvailableLabel": "Water Available",
+  "shadeTreesLabel": "Shade / Trees",
+  "fodderTypeLabel": "Fodder Type",
+  "maxPriceLabel": "Max Price / Day / Animal",
+  "viewDetailsBtn": "View Details",
+  "landDetailsTitle": "Land Details",
+  "landNoLongerAvailableMsg": "This land is no longer available.",
+  "farmerLabel": "Farmer",
+  "areaLabel": "Area",
+  "maxAnimalsLabel": "Max Animals",
+  "perDayLabel": "Per Day",
+  "aboutLandTitle": "About the Land",
+  "finalAmountNoteMsg": "Final amount depends on herd size and number of days.",
+  "bookThisLandBtn": "Book This Land",
+  "notAvailableForBookingMsg": "Not Available for Booking",
+
+  "sortTopRatedLabel": "Top Rated",
+  "sortExperiencedLabel": "Experienced",
+  "noVetsFoundTitle": "No Vets Found",
+  "locationNeededVetsMsg": "Enable location to find veterinarians near your herd.",
+  "filterVetsTitle": "Filter Vets",
+  "govtVetsOnlyLabel": "Government Vets Only",
+  "govtVetsOnlySubtitle": "Subsidised / free services",
+  "freeConsultationLabel": "Free Consultation",
+  "minimumRatingLabel": "Minimum Rating",
+  "specializationLabel": "Specialization",
+  "languageLabel": "Language",
+  "vetDetailsTitle": "Vet Details",
+  "vetProfileTitle": "Vet Profile",
+  "veterinarianNotFoundTitle": "Veterinarian Not Found",
+  "profileRemovedMsg": "This profile may have been removed.",
+  "verifiedVeterinarianMsg": "Verified Veterinarian",
+  "locationLabel": "Location",
+  "languagesTitle": "Languages",
+  "servicesTitle": "Services",
+  "galleryTitle": "Gallery",
+  "contactTitle": "Contact",
+  "phoneCopiedMsg": "Phone number copied",
+  "vetContactCopiedMsg": "Vet contact copied to clipboard",
+
+  "exploreMapTitle": "Explore Map",
+  "locationNeededMapMsg": "Enable location to explore lands and vets on the map.",
+  "searchMapHint": "Search village, district, land or vet...",
+  "landsChipLabel": "Lands",
+  "nothingFoundTitle": "Nothing Found",
+  "tryDifferentSearchMsg": "Try a different search, radius, or filter.",
+  "resultsWithinRadiusMsg": "{count} results within {radius} km",
+  "@resultsWithinRadiusMsg": {
+    "placeholders": {
+      "count": { "type": "int" },
+      "radius": { "type": "int" }
+    }
+  },
+  "alertsMapTitle": "Alerts Map",
+  "locationNeededAlertsMapMsg": "Enable location to see disease alerts on the map.",
+  "noActiveAlertsRadiusMsg": "No active disease alerts within {radius} km",
+  "@noActiveAlertsRadiusMsg": {
+    "placeholders": { "radius": { "type": "int" } }
+  },
+
+  "searchTitle": "Search",
+  "searchEverythingHint": "Search lands, vets, alerts, villages, districts...",
+  "searchEverythingTitle": "Search Everything",
+  "searchEverythingDesc": "Find nearby lands, vets, disease alerts, villages, and districts — all in one place.",
+  "locationNeededSearchMsg": "Enable location to search nearby lands, vets, and alerts.",
+  "noResultsTitle": "No Results",
+  "noResultsMsg": "Nothing matches \"{query}\". Try a different search.",
+  "@noResultsMsg": {
+    "placeholders": { "query": { "type": "String" } }
+  },
+  "categoryLandLabel": "Land",
+  "categoryVetLabel": "Vet",
+  "categoryAlertLabel": "Alert",
+  "categoryVillageLabel": "Village",
+  "categoryDistrictLabel": "District",
+
+  "diseaseAlertsTabLabel": "Disease Alerts",
+  "advisoryTabLabel": "Advisory",
+  "reportBtn": "Report",
+  "exploreSubtitle": "Disease alerts, advisory & farming tips",
+  "searchAdvisoryHint": "Search advisory tips...",
+  "allCategoryLabel": "All",
+  "noTipsYetTitle": "No Tips Yet",
+  "noTipsYetMsg": "Advisory tips for this category are coming soon.",
+  "categoryHealth": "Health",
+  "categoryNutrition": "Nutrition",
+  "categoryFodder": "Fodder",
+  "categoryGrazing": "Grazing",
+  "categoryFinance": "Finance",
+  "categoryWeather": "Weather",
+  "searchDiseaseAlertsHint": "Search disease alerts...",
+  "noActiveAlertsTitle": "No Active Alerts",
+  "noActiveAlertsMsg": "No disease alerts reported in your area. Stay vigilant!",
+  "noMatchesTitle": "No Matches",
+  "noMatchesMsg": "No alerts match \"{query}\". Try a different search.",
+  "@noMatchesMsg": {
+    "placeholders": { "query": { "type": "String" } }
+  },
+  "locationNeededAlertsMsg": "Enable location to see disease alerts near you.",
+  "searchAlertDashboardHint": "Search disease, title, village...",
+  "noDistrictYetTitle": "No District Yet",
+  "noDistrictYetMsg": "Set a district in Filters, or wait for nearby alerts to suggest one.",
+  "noUrgentAlertsTitle": "No Urgent Alerts",
+  "noAlertsFoundTitle": "No Alerts Found",
+  "tryRemovingFiltersMsg": "Try removing some filters or the search text.",
+  "noActiveAlertsInDistrictMsg": "No active alerts reported in {district}.",
+  "@noActiveAlertsInDistrictMsg": {
+    "placeholders": { "district": { "type": "String" } }
+  },
+  "tabNearbyLabel": "Nearby",
+  "tabDistrictLabel": "District",
+  "tabActiveLabel": "Active",
+  "tabRecentLabel": "Recent",
+  "severityCriticalLabel": "Critical",
+  "severityHighLabel": "High",
+  "severityMediumLabel": "Medium",
+  "severityLowLabel": "Low",
+  "speciesSheepLabel": "Sheep",
+  "speciesGoatLabel": "Goat",
+  "speciesCattleLabel": "Cattle",
+  "speciesAllAnimalsLabel": "All Animals",
+  "radiusLabel": "Radius",
+  "severityLabel": "Severity",
+  "affectedAnimalsLabel": "Affected Animals",
+  "issuedDateLabel": "Issued Date",
+  "issuedFromBtn": "From",
+  "issuedUntilBtn": "Until",
+  "issuedFromHelp": "Issued from",
+  "issuedUntilHelp": "Issued until",
+  "alertDetailsTitle": "Alert Details",
+  "alertNotFoundTitle": "Alert Not Found",
+  "alertRemovedMsg": "This alert may have expired or been removed.",
+  "descriptionLabel": "Description",
+  "symptomsLabel": "Symptoms",
+  "treatmentLabel": "Treatment",
+  "preventionLabel": "Prevention",
+  "govtAdvisoryLabel": "Government Advisory / Source",
+  "nearbyVeterinarianTitle": "Nearby Veterinarian",
+  "reportSimilarCaseBtn": "Report Similar Case",
+  "noVetsNearAlertTitle": "No Vets Found Nearby",
+  "noVetsNearAlertMsg": "No registered veterinarians within 50 km of this alert.",
+  "sharedViaAppMsg": "Shared via JeevaMitra",
+
+  "reportAlertTitle": "Report Disease Alert",
+  "diseaseInfoSection": "Disease Information",
+  "alertLocationSection": "Alert Location",
+  "alertDetailsSection": "Alert Details",
+  "sourceValiditySection": "Source & Validity",
+  "diseaseNameLabel": "Disease Name *",
+  "diseaseNameHint": "e.g. Foot & Mouth Disease",
+  "diseaseNameFieldName": "Disease name",
+  "alertTitleLabel": "Alert Title *",
+  "alertTitleHint": "e.g. FMD Alert in Guntur",
+  "titleFieldName": "Title",
+  "districtFieldName": "District",
+  "stateLabel": "State *",
+  "descriptionFieldLabel": "Description *",
+  "descriptionHint": "Describe the symptoms and spread pattern…",
+  "descriptionFieldName": "Description",
+  "preventionTipsLabel": "Prevention Tips (optional)",
+  "preventionHint": "What farmers can do to protect their animals…",
+  "treatmentFieldLabel": "Treatment (optional)",
+  "treatmentHint": "Recommended treatment or medication…",
+  "vetContactLabel": "Vet Contact Number (optional)",
+  "vetContactHint": "+91 98765 43210",
+  "sourceAuthorityLabel": "Source Authority *",
+  "sourceAuthorityHint": "e.g. Animal Husbandry Dept., Farmer Community",
+  "sourceAuthorityFieldName": "Source authority",
+  "alertValidUntilLabel": "Alert Valid Until",
+  "alertValidUntilHelp": "Alert valid until",
+  "defaultValidityMsg": "30 days from today (default)",
+  "submitAlertBtn": "Submit Alert",
+  "setLocationMsg": "Please set the alert location",
+  "alertReportedMsg": "Alert reported. Thank you!",
+  "submitFailedMsg": "Failed to submit. Please try again.",
+  "noLocationSetMsg": "No location set",
+  "updateBtn": "Update",
+  "detectBtn": "Detect",
+  "adjustOnMapBtn": "Adjust on Map",
+  "pickOnMapBtn": "Pick on Map",
+
+  "daysAgoMsg": "{count}d ago",
+  "@daysAgoMsg": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "hoursAgoMsg": "{count}h ago",
+  "@hoursAgoMsg": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "minutesAgoMsg": "{count}m ago",
+  "@minutesAgoMsg": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "readMoreBtn": "Read More",
+  "perDayAnimalSuffix": " /day/animal",
+  "yearsExpMsg": "{count} yrs exp",
+  "@yearsExpMsg": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "ratingCountMsg": "{rating} ({count})",
+  "@ratingCountMsg": {
+    "placeholders": {
+      "rating": { "type": "String" },
+      "count": { "type": "int" }
+    }
+  },
+  "sortByLabel": "Sort: {mode}",
+  "@sortByLabel": {
+    "placeholders": { "mode": { "type": "String" } }
+  },
+  "areaAcresLabel": "Area (acres)",
+  "kmChipLabel": "{km} km",
+  "@kmChipLabel": {
+    "placeholders": { "km": { "type": "int" } }
+  },
+  "noAvailableLandRadiusMsg": "No available grazing land within {radius} km.",
+  "@noAvailableLandRadiusMsg": {
+    "placeholders": { "radius": { "type": "int" } }
+  },
+  "noVetsFoundRadiusMsg": "No veterinarians found within {radius} km.",
+  "@noVetsFoundRadiusMsg": {
+    "placeholders": { "radius": { "type": "int" } }
+  },
+  "perAnimalPerDaySuffix": " per animal per day. ",
+  "minimumExperienceLabel": "Minimum Experience (years)",
+  "ratingStarsLabel": "{rating} ★",
+  "@ratingStarsLabel": {
+    "placeholders": { "rating": { "type": "String" } }
+  },
+  "yearsShortLabel": "{count} yrs",
+  "@yearsShortLabel": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "feeSuffix": " Fee",
+  "ratingStarCountMsg": "{rating} ★ ({count})",
+  "@ratingStarCountMsg": {
+    "placeholders": {
+      "rating": { "type": "String" },
+      "count": { "type": "int" }
+    }
+  },
+  "resultsHereMsg": "{count} results here",
+  "@resultsHereMsg": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "diseaseAlertFallbackTitle": "Disease Alert",
+  "alertsHereMsg": "{count} alerts here",
+  "@alertsHereMsg": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "issuedDateMsg": "Issued {date}",
+  "@issuedDateMsg": {
+    "placeholders": { "date": { "type": "String" } }
+  },
+  "validUntilDateMsg": "Valid until {date}",
+  "@validUntilDateMsg": {
+    "placeholders": { "date": { "type": "String" } }
+  },
+  "severitySuffixMsg": "{severity} severity",
+  "@severitySuffixMsg": {
+    "placeholders": { "severity": { "type": "String" } }
+  },
+  "locationLineMsg": "Location: {where}",
+  "@locationLineMsg": {
+    "placeholders": { "where": { "type": "String" } }
+  },
+  "symptomsFieldLabel": "Symptoms (optional)",
+  "symptomsHint": "What signs to look for in affected animals…",
+  "stateFieldName": "State"
 }

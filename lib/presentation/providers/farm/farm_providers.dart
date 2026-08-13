@@ -28,16 +28,28 @@ final farmDetailProvider =
 
 // ─── Nearby farms (shepherd discovery) ───────────────────────────────────────
 
-final nearbyFarmsProvider =
-    StreamProvider.family<List<FarmModel>, ({double lat, double lng, double radiusKm})>(
-        (ref, params) {
+// autoDispose: the (lat, lng, radiusKm) key changes every time a shepherd
+// switches the discovery radius, which previously left the old radius's
+// Firestore listener running forever (a plain .family provider is cached
+// for the app's lifetime by default) — a real, unbounded-per-session
+// listener leak. autoDispose tears each one down once nothing is watching
+// it (e.g. the radius changed or the screen was left).
+final nearbyFarmsProvider = StreamProvider.autoDispose
+    .family<List<FarmModel>, ({double lat, double lng, double radiusKm})>((ref, params) {
   final user = ref.watch(authStateProvider).valueOrNull;
   if (user == null) return Stream.value([]);
   final repo = ref.watch(farmRepositoryProvider);
+  // onlyAvailable: false — the discovery screen's own filter (default:
+  // available-only, with an opt-in "show unavailable lands too" toggle)
+  // now owns that decision client-side, alongside its other filters
+  // (fodder, amenities, price, area). Fetching the narrower set here
+  // would make that toggle a no-op, since data excluded at the query
+  // level can never reach the client filter to be included again.
   return repo.watchNearby(
     lat: params.lat,
     lng: params.lng,
     radiusKm: params.radiusKm,
+    onlyAvailable: false,
   );
 });
 

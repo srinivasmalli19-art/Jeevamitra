@@ -315,6 +315,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String distanceMetersAway(int m) {
+    return '$m m away';
+  }
+
+  @override
   String perDayPerAnimal(String price) {
     return '₹$price/day/animal';
   }
@@ -514,4 +519,711 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get districtRequiredMsg => 'District required';
+
+  @override
+  String get clearBtn => 'Clear';
+
+  @override
+  String get filtersLabel => 'Filters';
+
+  @override
+  String get resetBtn => 'Reset';
+
+  @override
+  String get applyFiltersBtn => 'Apply Filters';
+
+  @override
+  String get anyLabel => 'Any';
+
+  @override
+  String get villageFieldLabel => 'Village';
+
+  @override
+  String get locationRequiredTitle => 'Location Required';
+
+  @override
+  String get locationErrorTitle => 'Location Error';
+
+  @override
+  String get couldNotGetLocationMsg => 'Could not get your location.';
+
+  @override
+  String get enableLocationBtn => 'Enable Location';
+
+  @override
+  String get couldNotOpenMapsMsg => 'Could not open maps';
+
+  @override
+  String get couldNotOpenDialerMsg => 'Could not open dialer';
+
+  @override
+  String get couldNotOpenLinkMsg => 'Could not open this link';
+
+  @override
+  String get whatsappNotInstalledMsg => 'WhatsApp not installed';
+
+  @override
+  String get navigateBtn => 'Navigate';
+
+  @override
+  String get callBtn => 'Call';
+
+  @override
+  String get bookBtn => 'Book';
+
+  @override
+  String get viewProfileBtn => 'View Profile';
+
+  @override
+  String get justNowMsg => 'Just now';
+
+  @override
+  String get shareTooltip => 'Share';
+
+  @override
+  String get searchEverythingTooltip => 'Search Everything';
+
+  @override
+  String get mapViewTooltip => 'Map View';
+
+  @override
+  String get availableTodayLabel => 'Available Today';
+
+  @override
+  String get sortClosestLabel => 'Closest';
+
+  @override
+  String get sortNewestLabel => 'Newest';
+
+  @override
+  String get clearFiltersBtn => 'Clear Filters';
+
+  @override
+  String get tryFewerFiltersMsg =>
+      'Try removing some filters or increasing the radius.';
+
+  @override
+  String get noLandsFoundTitle => 'No Lands Found';
+
+  @override
+  String get locationNeededLandsMsg =>
+      'JeevaMitra needs your location to show nearby grazing lands.';
+
+  @override
+  String get showUnavailableLabel => 'Show unavailable lands too';
+
+  @override
+  String get waterAvailableLabel => 'Water Available';
+
+  @override
+  String get shadeTreesLabel => 'Shade / Trees';
+
+  @override
+  String get fodderTypeLabel => 'Fodder Type';
+
+  @override
+  String get maxPriceLabel => 'Max Price / Day / Animal';
+
+  @override
+  String get viewDetailsBtn => 'View Details';
+
+  @override
+  String get landDetailsTitle => 'Land Details';
+
+  @override
+  String get landNoLongerAvailableMsg => 'This land is no longer available.';
+
+  @override
+  String get farmerLabel => 'Farmer';
+
+  @override
+  String get areaLabel => 'Area';
+
+  @override
+  String get maxAnimalsLabel => 'Max Animals';
+
+  @override
+  String get perDayLabel => 'Per Day';
+
+  @override
+  String get aboutLandTitle => 'About the Land';
+
+  @override
+  String get finalAmountNoteMsg =>
+      'Final amount depends on herd size and number of days.';
+
+  @override
+  String get bookThisLandBtn => 'Book This Land';
+
+  @override
+  String get notAvailableForBookingMsg => 'Not Available for Booking';
+
+  @override
+  String get sortTopRatedLabel => 'Top Rated';
+
+  @override
+  String get sortExperiencedLabel => 'Experienced';
+
+  @override
+  String get noVetsFoundTitle => 'No Vets Found';
+
+  @override
+  String get locationNeededVetsMsg =>
+      'Enable location to find veterinarians near your herd.';
+
+  @override
+  String get filterVetsTitle => 'Filter Vets';
+
+  @override
+  String get govtVetsOnlyLabel => 'Government Vets Only';
+
+  @override
+  String get govtVetsOnlySubtitle => 'Subsidised / free services';
+
+  @override
+  String get freeConsultationLabel => 'Free Consultation';
+
+  @override
+  String get minimumRatingLabel => 'Minimum Rating';
+
+  @override
+  String get specializationLabel => 'Specialization';
+
+  @override
+  String get languageLabel => 'Language';
+
+  @override
+  String get vetDetailsTitle => 'Vet Details';
+
+  @override
+  String get vetProfileTitle => 'Vet Profile';
+
+  @override
+  String get veterinarianNotFoundTitle => 'Veterinarian Not Found';
+
+  @override
+  String get profileRemovedMsg => 'This profile may have been removed.';
+
+  @override
+  String get verifiedVeterinarianMsg => 'Verified Veterinarian';
+
+  @override
+  String get locationLabel => 'Location';
+
+  @override
+  String get languagesTitle => 'Languages';
+
+  @override
+  String get servicesTitle => 'Services';
+
+  @override
+  String get galleryTitle => 'Gallery';
+
+  @override
+  String get contactTitle => 'Contact';
+
+  @override
+  String get phoneCopiedMsg => 'Phone number copied';
+
+  @override
+  String get vetContactCopiedMsg => 'Vet contact copied to clipboard';
+
+  @override
+  String get exploreMapTitle => 'Explore Map';
+
+  @override
+  String get locationNeededMapMsg =>
+      'Enable location to explore lands and vets on the map.';
+
+  @override
+  String get searchMapHint => 'Search village, district, land or vet...';
+
+  @override
+  String get landsChipLabel => 'Lands';
+
+  @override
+  String get nothingFoundTitle => 'Nothing Found';
+
+  @override
+  String get tryDifferentSearchMsg =>
+      'Try a different search, radius, or filter.';
+
+  @override
+  String resultsWithinRadiusMsg(int count, int radius) {
+    return '$count results within $radius km';
+  }
+
+  @override
+  String get alertsMapTitle => 'Alerts Map';
+
+  @override
+  String get locationNeededAlertsMapMsg =>
+      'Enable location to see disease alerts on the map.';
+
+  @override
+  String noActiveAlertsRadiusMsg(int radius) {
+    return 'No active disease alerts within $radius km';
+  }
+
+  @override
+  String get searchTitle => 'Search';
+
+  @override
+  String get searchEverythingHint =>
+      'Search lands, vets, alerts, villages, districts...';
+
+  @override
+  String get searchEverythingTitle => 'Search Everything';
+
+  @override
+  String get searchEverythingDesc =>
+      'Find nearby lands, vets, disease alerts, villages, and districts — all in one place.';
+
+  @override
+  String get locationNeededSearchMsg =>
+      'Enable location to search nearby lands, vets, and alerts.';
+
+  @override
+  String get noResultsTitle => 'No Results';
+
+  @override
+  String noResultsMsg(String query) {
+    return 'Nothing matches \"$query\". Try a different search.';
+  }
+
+  @override
+  String get categoryLandLabel => 'Land';
+
+  @override
+  String get categoryVetLabel => 'Vet';
+
+  @override
+  String get categoryAlertLabel => 'Alert';
+
+  @override
+  String get categoryVillageLabel => 'Village';
+
+  @override
+  String get categoryDistrictLabel => 'District';
+
+  @override
+  String get diseaseAlertsTabLabel => 'Disease Alerts';
+
+  @override
+  String get advisoryTabLabel => 'Advisory';
+
+  @override
+  String get reportBtn => 'Report';
+
+  @override
+  String get exploreSubtitle => 'Disease alerts, advisory & farming tips';
+
+  @override
+  String get searchAdvisoryHint => 'Search advisory tips...';
+
+  @override
+  String get allCategoryLabel => 'All';
+
+  @override
+  String get noTipsYetTitle => 'No Tips Yet';
+
+  @override
+  String get noTipsYetMsg => 'Advisory tips for this category are coming soon.';
+
+  @override
+  String get categoryHealth => 'Health';
+
+  @override
+  String get categoryNutrition => 'Nutrition';
+
+  @override
+  String get categoryFodder => 'Fodder';
+
+  @override
+  String get categoryGrazing => 'Grazing';
+
+  @override
+  String get categoryFinance => 'Finance';
+
+  @override
+  String get categoryWeather => 'Weather';
+
+  @override
+  String get searchDiseaseAlertsHint => 'Search disease alerts...';
+
+  @override
+  String get noActiveAlertsTitle => 'No Active Alerts';
+
+  @override
+  String get noActiveAlertsMsg =>
+      'No disease alerts reported in your area. Stay vigilant!';
+
+  @override
+  String get noMatchesTitle => 'No Matches';
+
+  @override
+  String noMatchesMsg(String query) {
+    return 'No alerts match \"$query\". Try a different search.';
+  }
+
+  @override
+  String get locationNeededAlertsMsg =>
+      'Enable location to see disease alerts near you.';
+
+  @override
+  String get searchAlertDashboardHint => 'Search disease, title, village...';
+
+  @override
+  String get noDistrictYetTitle => 'No District Yet';
+
+  @override
+  String get noDistrictYetMsg =>
+      'Set a district in Filters, or wait for nearby alerts to suggest one.';
+
+  @override
+  String get noUrgentAlertsTitle => 'No Urgent Alerts';
+
+  @override
+  String get noAlertsFoundTitle => 'No Alerts Found';
+
+  @override
+  String get tryRemovingFiltersMsg =>
+      'Try removing some filters or the search text.';
+
+  @override
+  String noActiveAlertsInDistrictMsg(String district) {
+    return 'No active alerts reported in $district.';
+  }
+
+  @override
+  String get tabNearbyLabel => 'Nearby';
+
+  @override
+  String get tabDistrictLabel => 'District';
+
+  @override
+  String get tabActiveLabel => 'Active';
+
+  @override
+  String get tabRecentLabel => 'Recent';
+
+  @override
+  String get severityCriticalLabel => 'Critical';
+
+  @override
+  String get severityHighLabel => 'High';
+
+  @override
+  String get severityMediumLabel => 'Medium';
+
+  @override
+  String get severityLowLabel => 'Low';
+
+  @override
+  String get speciesSheepLabel => 'Sheep';
+
+  @override
+  String get speciesGoatLabel => 'Goat';
+
+  @override
+  String get speciesCattleLabel => 'Cattle';
+
+  @override
+  String get speciesAllAnimalsLabel => 'All Animals';
+
+  @override
+  String get radiusLabel => 'Radius';
+
+  @override
+  String get severityLabel => 'Severity';
+
+  @override
+  String get affectedAnimalsLabel => 'Affected Animals';
+
+  @override
+  String get issuedDateLabel => 'Issued Date';
+
+  @override
+  String get issuedFromBtn => 'From';
+
+  @override
+  String get issuedUntilBtn => 'Until';
+
+  @override
+  String get issuedFromHelp => 'Issued from';
+
+  @override
+  String get issuedUntilHelp => 'Issued until';
+
+  @override
+  String get alertDetailsTitle => 'Alert Details';
+
+  @override
+  String get alertNotFoundTitle => 'Alert Not Found';
+
+  @override
+  String get alertRemovedMsg => 'This alert may have expired or been removed.';
+
+  @override
+  String get descriptionLabel => 'Description';
+
+  @override
+  String get symptomsLabel => 'Symptoms';
+
+  @override
+  String get treatmentLabel => 'Treatment';
+
+  @override
+  String get preventionLabel => 'Prevention';
+
+  @override
+  String get govtAdvisoryLabel => 'Government Advisory / Source';
+
+  @override
+  String get nearbyVeterinarianTitle => 'Nearby Veterinarian';
+
+  @override
+  String get reportSimilarCaseBtn => 'Report Similar Case';
+
+  @override
+  String get noVetsNearAlertTitle => 'No Vets Found Nearby';
+
+  @override
+  String get noVetsNearAlertMsg =>
+      'No registered veterinarians within 50 km of this alert.';
+
+  @override
+  String get sharedViaAppMsg => 'Shared via JeevaMitra';
+
+  @override
+  String get reportAlertTitle => 'Report Disease Alert';
+
+  @override
+  String get diseaseInfoSection => 'Disease Information';
+
+  @override
+  String get alertLocationSection => 'Alert Location';
+
+  @override
+  String get alertDetailsSection => 'Alert Details';
+
+  @override
+  String get sourceValiditySection => 'Source & Validity';
+
+  @override
+  String get diseaseNameLabel => 'Disease Name *';
+
+  @override
+  String get diseaseNameHint => 'e.g. Foot & Mouth Disease';
+
+  @override
+  String get diseaseNameFieldName => 'Disease name';
+
+  @override
+  String get alertTitleLabel => 'Alert Title *';
+
+  @override
+  String get alertTitleHint => 'e.g. FMD Alert in Guntur';
+
+  @override
+  String get titleFieldName => 'Title';
+
+  @override
+  String get districtFieldName => 'District';
+
+  @override
+  String get stateLabel => 'State *';
+
+  @override
+  String get descriptionFieldLabel => 'Description *';
+
+  @override
+  String get descriptionHint => 'Describe the symptoms and spread pattern…';
+
+  @override
+  String get descriptionFieldName => 'Description';
+
+  @override
+  String get preventionTipsLabel => 'Prevention Tips (optional)';
+
+  @override
+  String get preventionHint => 'What farmers can do to protect their animals…';
+
+  @override
+  String get treatmentFieldLabel => 'Treatment (optional)';
+
+  @override
+  String get treatmentHint => 'Recommended treatment or medication…';
+
+  @override
+  String get vetContactLabel => 'Vet Contact Number (optional)';
+
+  @override
+  String get vetContactHint => '+91 98765 43210';
+
+  @override
+  String get sourceAuthorityLabel => 'Source Authority *';
+
+  @override
+  String get sourceAuthorityHint =>
+      'e.g. Animal Husbandry Dept., Farmer Community';
+
+  @override
+  String get sourceAuthorityFieldName => 'Source authority';
+
+  @override
+  String get alertValidUntilLabel => 'Alert Valid Until';
+
+  @override
+  String get alertValidUntilHelp => 'Alert valid until';
+
+  @override
+  String get defaultValidityMsg => '30 days from today (default)';
+
+  @override
+  String get submitAlertBtn => 'Submit Alert';
+
+  @override
+  String get setLocationMsg => 'Please set the alert location';
+
+  @override
+  String get alertReportedMsg => 'Alert reported. Thank you!';
+
+  @override
+  String get submitFailedMsg => 'Failed to submit. Please try again.';
+
+  @override
+  String get noLocationSetMsg => 'No location set';
+
+  @override
+  String get updateBtn => 'Update';
+
+  @override
+  String get detectBtn => 'Detect';
+
+  @override
+  String get adjustOnMapBtn => 'Adjust on Map';
+
+  @override
+  String get pickOnMapBtn => 'Pick on Map';
+
+  @override
+  String daysAgoMsg(int count) {
+    return '${count}d ago';
+  }
+
+  @override
+  String hoursAgoMsg(int count) {
+    return '${count}h ago';
+  }
+
+  @override
+  String minutesAgoMsg(int count) {
+    return '${count}m ago';
+  }
+
+  @override
+  String get readMoreBtn => 'Read More';
+
+  @override
+  String get perDayAnimalSuffix => ' /day/animal';
+
+  @override
+  String yearsExpMsg(int count) {
+    return '$count yrs exp';
+  }
+
+  @override
+  String ratingCountMsg(String rating, int count) {
+    return '$rating ($count)';
+  }
+
+  @override
+  String sortByLabel(String mode) {
+    return 'Sort: $mode';
+  }
+
+  @override
+  String get areaAcresLabel => 'Area (acres)';
+
+  @override
+  String kmChipLabel(int km) {
+    return '$km km';
+  }
+
+  @override
+  String noAvailableLandRadiusMsg(int radius) {
+    return 'No available grazing land within $radius km.';
+  }
+
+  @override
+  String noVetsFoundRadiusMsg(int radius) {
+    return 'No veterinarians found within $radius km.';
+  }
+
+  @override
+  String get perAnimalPerDaySuffix => ' per animal per day. ';
+
+  @override
+  String get minimumExperienceLabel => 'Minimum Experience (years)';
+
+  @override
+  String ratingStarsLabel(String rating) {
+    return '$rating ★';
+  }
+
+  @override
+  String yearsShortLabel(int count) {
+    return '$count yrs';
+  }
+
+  @override
+  String get feeSuffix => ' Fee';
+
+  @override
+  String ratingStarCountMsg(String rating, int count) {
+    return '$rating ★ ($count)';
+  }
+
+  @override
+  String resultsHereMsg(int count) {
+    return '$count results here';
+  }
+
+  @override
+  String get diseaseAlertFallbackTitle => 'Disease Alert';
+
+  @override
+  String alertsHereMsg(int count) {
+    return '$count alerts here';
+  }
+
+  @override
+  String issuedDateMsg(String date) {
+    return 'Issued $date';
+  }
+
+  @override
+  String validUntilDateMsg(String date) {
+    return 'Valid until $date';
+  }
+
+  @override
+  String severitySuffixMsg(String severity) {
+    return '$severity severity';
+  }
+
+  @override
+  String locationLineMsg(String where) {
+    return 'Location: $where';
+  }
+
+  @override
+  String get symptomsFieldLabel => 'Symptoms (optional)';
+
+  @override
+  String get symptomsHint => 'What signs to look for in affected animals…';
+
+  @override
+  String get stateFieldName => 'State';
 }

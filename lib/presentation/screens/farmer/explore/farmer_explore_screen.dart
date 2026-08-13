@@ -1,19 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/constants/route_constants.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
-import '../../../../data/models/disease_alert_model.dart';
-import '../../../providers/alerts/disease_alert_providers.dart';
-import '../../../providers/location_provider.dart';
-import '../../../widgets/common/jm_empty_state.dart';
-import '../../../widgets/common/jm_error_state.dart';
-import '../../../widgets/common/jm_loading.dart';
+import '../../../../generated/l10n/app_localizations.dart';
 import '../../../widgets/common/responsive_center.dart';
-import '../../../widgets/common/standard_app_bar.dart';
+import '../../../widgets/explore/category_card.dart';
+import '../../../widgets/explore/empty_state_card.dart';
+import '../../../widgets/explore/explore_header.dart';
+import '../../../widgets/explore/search_card.dart';
+import '../../shared/alerts/alert_dashboard.dart';
 
 class FarmerExploreScreen extends ConsumerStatefulWidget {
   const FarmerExploreScreen({super.key});
@@ -31,12 +29,6 @@ class _FarmerExploreScreenState extends ConsumerState<FarmerExploreScreen>
   void initState() {
     super.initState();
     _tabs = TabController(length: 2, vsync: this);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final loc = ref.read(locationProvider);
-      if (!loc.hasValue || loc.valueOrNull == null) {
-        ref.read(locationProvider.notifier).fetch();
-      }
-    });
   }
 
   @override
@@ -45,284 +37,66 @@ class _FarmerExploreScreenState extends ConsumerState<FarmerExploreScreen>
     super.dispose();
   }
 
+  // Fixed-height (non-collapsing) hero, unlike the Dashboard's SliverAppBar
+  // — deliberate: Advisory nests its own category TabBarView inside this
+  // tab, and combining that with an outer collapsing NestedScrollView risks
+  // a genuine scroll-coordination conflict between the two independent
+  // scrollables. A fixed header keeps the same visual language (gradient,
+  // motif, overlay, typography) without that risk.
+  static const _headerHeight = 150.0;
+
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
     return Scaffold(
-      appBar: StandardAppBar(
-        title: 'Explore',
-        bottom: TabBar(
-          controller: _tabs,
-          labelColor: Colors.white,
-          unselectedLabelColor: Colors.white70,
-          indicatorColor: Colors.white,
-          tabs: const [
-            Tab(icon: Icon(Icons.coronavirus_rounded), text: 'Disease Alerts'),
-            Tab(icon: Icon(Icons.tips_and_updates_rounded), text: 'Advisory'),
-          ],
-        ),
-      ),
       floatingActionButton: AnimatedBuilder(
         animation: _tabs,
         builder: (_, __) => _tabs.index == 0
             ? FloatingActionButton.extended(
                 onPressed: () => context.push(RouteConstants.reportAlert),
                 icon: const Icon(Icons.add_alert_rounded),
-                label: const Text('Report'),
+                label: Text(loc.reportBtn),
                 heroTag: 'report_alert_fab',
               )
             : const SizedBox.shrink(),
       ),
-      body: TabBarView(
-        controller: _tabs,
-        children: const [
-          _DiseaseAlertsTab(),
-          _AdvisoryTab(),
-        ],
-      ),
-    );
-  }
-}
-
-// ─── Disease Alerts tab ───────────────────────────────────────────────────────
-
-class _DiseaseAlertsTab extends ConsumerWidget {
-  const _DiseaseAlertsTab();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final locAsync = ref.watch(locationProvider);
-
-    if (locAsync.isLoading) {
-      return const Center(child: JmLoading());
-    }
-    if (locAsync.hasError || locAsync.valueOrNull == null) {
-      return _LocationPrompt(
-        onEnable: () => ref.read(locationProvider.notifier).fetch(),
-      );
-    }
-
-    final loc = locAsync.value!;
-    final alertsAsync = ref.watch(nearbyAlertsProvider((
-      lat: loc.lat,
-      lng: loc.lng,
-      radiusKm: 150,
-    )));
-
-    return alertsAsync.when(
-      loading: () => const JmShimmerList(count: 3, cardHeight: 120),
-      error: (e, _) => JmErrorState(
-        message: e.toString(),
-        onRetry: () => ref.invalidate(nearbyAlertsProvider),
-      ),
-      data: (alerts) {
-        if (alerts.isEmpty) {
-          return const JmEmptyState(
-            icon: Icons.check_circle_outline_rounded,
-            title: 'No Active Alerts',
-            subtitle: 'No disease alerts reported in your area. Stay vigilant!',
-          );
-        }
-        return ResponsiveCenter(
-          child: ListView.separated(
-            padding: AppSpacing.screenPadding,
-            itemCount: alerts.length,
-            separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.md),
-            itemBuilder: (_, i) => _AlertCard(alert: alerts[i]),
-          ),
-        );
-      },
-    );
-  }
-}
-
-class _AlertCard extends StatelessWidget {
-  final DiseaseAlertModel alert;
-  const _AlertCard({required this.alert});
-
-  @override
-  Widget build(BuildContext context) {
-    final (bg, border, textColor) = _severityColors(alert.severity);
-    return Container(
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: AppSpacing.cardRadius,
-        border: Border.all(color: border, width: 1.5),
-      ),
-      child: Theme(
-        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
-        child: ExpansionTile(
-          leading: _SeverityIcon(severity: alert.severity),
-          title: Text(
-            alert.title,
-            style: Theme.of(context)
-                .textTheme
-                .titleSmall
-                ?.copyWith(color: textColor),
-          ),
-          subtitle: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                '${alert.disease} · ${alert.affectedSpecies}',
-                style: Theme.of(context)
-                    .textTheme
-                    .bodySmall
-                    ?.copyWith(color: textColor.withAlpha(180)),
-              ),
-              Text(
-                '${alert.district}, ${alert.state} · ${_age(alert.issuedAt)}',
-                style: Theme.of(context)
-                    .textTheme
-                    .bodySmall
-                    ?.copyWith(color: textColor.withAlpha(140)),
-              ),
-            ],
-          ),
-          childrenPadding: const EdgeInsets.fromLTRB(
-              AppSpacing.base, 0, AppSpacing.base, AppSpacing.base),
-          children: [
-            const Divider(),
-            Text(alert.description,
-                style: Theme.of(context).textTheme.bodyMedium),
-            if (alert.prevention != null) ...[
-              const SizedBox(height: AppSpacing.md),
-              _InfoBlock(
-                icon: Icons.shield_rounded,
-                label: 'Prevention',
-                text: alert.prevention!,
-                color: AppColors.success,
-              ),
-            ],
-            if (alert.treatment != null) ...[
-              const SizedBox(height: AppSpacing.sm),
-              _InfoBlock(
-                icon: Icons.healing_rounded,
-                label: 'Treatment',
-                text: alert.treatment!,
-                color: AppColors.info,
-              ),
-            ],
-            if (alert.vetContactPhone != null) ...[
-              const SizedBox(height: AppSpacing.sm),
-              OutlinedButton.icon(
-                onPressed: () async {
-                  final uri = Uri.parse('tel:${alert.vetContactPhone}');
-                  if (await canLaunchUrl(uri)) await launchUrl(uri);
-                },
-                icon: const Icon(Icons.phone_rounded, size: 16),
-                label: Text('Call Vet: ${alert.vetContactPhone}'),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: AppColors.primary,
-                  visualDensity: VisualDensity.compact,
-                ),
-              ),
-            ],
-            const SizedBox(height: AppSpacing.xs),
-            Text(
-              'Source: ${alert.sourceAuthority}',
-              style: Theme.of(context)
-                  .textTheme
-                  .bodySmall
-                  ?.copyWith(color: AppColors.textDisabled),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  (Color bg, Color border, Color text) _severityColors(String severity) {
-    return switch (severity) {
-      'critical' => (
-          AppColors.errorContainer,
-          AppColors.error,
-          AppColors.error,
-        ),
-      'high' => (
-          AppColors.warningContainer,
-          AppColors.warning,
-          AppColors.warning,
-        ),
-      'medium' => (
-          AppColors.infoContainer,
-          AppColors.info,
-          AppColors.info,
-        ),
-      _ => (
-          AppColors.surfaceVariant,
-          AppColors.outline,
-          AppColors.textSecondary,
-        ),
-    };
-  }
-
-  String _age(DateTime dt) {
-    final diff = DateTime.now().difference(dt);
-    if (diff.inDays > 0) return '${diff.inDays}d ago';
-    if (diff.inHours > 0) return '${diff.inHours}h ago';
-    return 'Just now';
-  }
-}
-
-class _SeverityIcon extends StatelessWidget {
-  final String severity;
-  const _SeverityIcon({required this.severity});
-
-  @override
-  Widget build(BuildContext context) {
-    final (icon, color) = switch (severity) {
-      'critical' => (Icons.dangerous_rounded, AppColors.error),
-      'high' => (Icons.warning_rounded, AppColors.warning),
-      'medium' => (Icons.info_rounded, AppColors.info),
-      _ => (Icons.info_outline_rounded, AppColors.textSecondary),
-    };
-    return Container(
-      width: 40,
-      height: 40,
-      decoration: BoxDecoration(
-        color: color.withAlpha(26),
-        shape: BoxShape.circle,
-      ),
-      child: Icon(icon, color: color, size: 22),
-    );
-  }
-}
-
-class _InfoBlock extends StatelessWidget {
-  final IconData icon;
-  final String label, text;
-  final Color color;
-  const _InfoBlock(
-      {required this.icon,
-      required this.label,
-      required this.text,
-      required this.color});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: AppSpacing.cardPadding,
-      decoration: BoxDecoration(
-        color: color.withAlpha(20),
-        borderRadius: AppSpacing.cardRadius,
-        border: Border.all(color: color.withAlpha(60)),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      body: Column(
         children: [
-          Icon(icon, size: 18, color: color),
-          const SizedBox(width: AppSpacing.sm),
+          SizedBox(
+            height: _headerHeight,
+            width: double.infinity,
+            child: ExploreHeader(
+              title: loc.explore,
+              subtitle: loc.exploreSubtitle,
+              icon: Icons.coronavirus_rounded,
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.search_rounded, color: Colors.white),
+                  tooltip: loc.searchEverythingTooltip,
+                  onPressed: () => context.push(RouteConstants.unifiedSearch),
+                ),
+              ],
+            ),
+          ),
+          Material(
+            color: AppColors.primaryDark,
+            child: TabBar(
+              controller: _tabs,
+              labelColor: Colors.white,
+              unselectedLabelColor: Colors.white70,
+              indicatorColor: Colors.white,
+              tabs: [
+                Tab(icon: const Icon(Icons.coronavirus_rounded), text: loc.diseaseAlertsTabLabel),
+                Tab(icon: const Icon(Icons.tips_and_updates_rounded), text: loc.advisoryTabLabel),
+              ],
+            ),
+          ),
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(label,
-                    style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                        color: color)),
-                const SizedBox(height: 2),
-                Text(text, style: Theme.of(context).textTheme.bodySmall),
+            child: TabBarView(
+              controller: _tabs,
+              children: const [
+                AlertDashboard(),
+                _AdvisoryTab(),
               ],
             ),
           ),
@@ -332,47 +106,31 @@ class _InfoBlock extends StatelessWidget {
   }
 }
 
-class _LocationPrompt extends StatelessWidget {
-  final VoidCallback onEnable;
-  const _LocationPrompt({required this.onEnable});
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: AppSpacing.screenPadding,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.location_off_rounded,
-                size: 64, color: AppColors.textDisabled),
-            const SizedBox(height: AppSpacing.base),
-            Text('Location Required',
-                style: Theme.of(context).textTheme.titleMedium),
-            const SizedBox(height: AppSpacing.sm),
-            Text(
-              'Enable location to see disease alerts near your farm.',
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-            const SizedBox(height: AppSpacing.xl),
-            FilledButton.icon(
-              onPressed: onEnable,
-              icon: const Icon(Icons.my_location_rounded),
-              label: const Text('Enable Location'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 // ─── Advisory tab ─────────────────────────────────────────────────────────────
 
-class _AdvisoryTab extends StatelessWidget {
+/// Localized display label for a tip's category. The underlying
+/// [_Tip.category] string stays English — it's also the lookup key into
+/// [_AdvisoryTabState._categoryIcons]/`_categoryColors` and the value
+/// `_categories` filters on — only the text shown to the user changes.
+String _categoryLabel(String category, AppLocalizations loc) => switch (category) {
+      'Health' => loc.categoryHealth,
+      'Nutrition' => loc.categoryNutrition,
+      'Fodder' => loc.categoryFodder,
+      'Grazing' => loc.categoryGrazing,
+      'Finance' => loc.categoryFinance,
+      'Weather' => loc.categoryWeather,
+      _ => category,
+    };
+
+class _AdvisoryTab extends StatefulWidget {
   const _AdvisoryTab();
 
+  @override
+  State<_AdvisoryTab> createState() => _AdvisoryTabState();
+}
+
+class _AdvisoryTabState extends State<_AdvisoryTab>
+    with SingleTickerProviderStateMixin {
   static const _tips = [
     _Tip(
       icon: Icons.vaccines_rounded,
@@ -431,36 +189,94 @@ class _AdvisoryTab extends StatelessWidget {
       category: 'Weather',
     ),
   ];
+  late final List<String> _categories =
+      _tips.map((t) => t.category).toSet().toList();
+  late final TabController _categoryTabs =
+      TabController(length: _categories.length + 1, vsync: this);
+
+  @override
+  void initState() {
+    super.initState();
+    _categoryTabs.addListener(() {
+      if (!_categoryTabs.indexIsChanging) setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    _categoryTabs.dispose();
+    super.dispose();
+  }
+
+  static const _categoryIcons = {
+    'Health': Icons.medical_services_rounded,
+    'Nutrition': Icons.water_drop_rounded,
+    'Fodder': Icons.grass_rounded,
+    'Grazing': Icons.landscape_rounded,
+    'Finance': Icons.currency_rupee_rounded,
+    'Weather': Icons.thermostat_rounded,
+  };
+
+  static const _categoryColors = {
+    'Health': AppColors.success,
+    'Nutrition': AppColors.info,
+    'Fodder': AppColors.primary,
+    'Grazing': AppColors.secondary,
+    'Finance': AppColors.primary,
+    'Weather': AppColors.warning,
+  };
 
   @override
   Widget build(BuildContext context) {
-    final categories = _tips.map((t) => t.category).toSet().toList();
-
-    return DefaultTabController(
-      length: categories.length + 1,
-      child: Column(
-        children: [
-          Container(
-            color: AppColors.surface,
-            child: TabBar(
-              isScrollable: true,
-              tabAlignment: TabAlignment.start,
-              tabs: [
-                const Tab(text: 'All'),
-                ...categories.map((c) => Tab(text: c)),
-              ],
+    final loc = AppLocalizations.of(context);
+    return ResponsiveCenter(
+      child: Padding(
+        padding: AppSpacing.screenPadding,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            SearchCard(hint: loc.searchAdvisoryHint),
+            const SizedBox(height: AppSpacing.base),
+            SizedBox(
+              height: 92,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: _categories.length + 1,
+                separatorBuilder: (_, __) => const SizedBox(width: AppSpacing.sm),
+                itemBuilder: (_, i) {
+                  if (i == 0) {
+                    return CategoryCard(
+                      icon: Icons.apps_rounded,
+                      label: loc.allCategoryLabel,
+                      color: AppColors.primary,
+                      selected: _categoryTabs.index == 0,
+                      onTap: () => setState(() => _categoryTabs.animateTo(0)),
+                    );
+                  }
+                  final category = _categories[i - 1];
+                  return CategoryCard(
+                    icon: _categoryIcons[category] ?? Icons.tips_and_updates_rounded,
+                    label: _categoryLabel(category, loc),
+                    color: _categoryColors[category] ?? AppColors.primary,
+                    selected: _categoryTabs.index == i,
+                    onTap: () => setState(() => _categoryTabs.animateTo(i)),
+                  );
+                },
+              ),
             ),
-          ),
-          Expanded(
-            child: TabBarView(
-              children: [
-                _TipList(tips: _tips),
-                ...categories.map((c) => _TipList(
-                    tips: _tips.where((t) => t.category == c).toList())),
-              ],
+            const SizedBox(height: AppSpacing.base),
+            Expanded(
+              child: TabBarView(
+                controller: _categoryTabs,
+                children: [
+                  _TipList(tips: _tips, loc: loc),
+                  ..._categories.map((c) =>
+                      _TipList(tips: _tips.where((t) => t.category == c).toList(), loc: loc)),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -468,24 +284,30 @@ class _AdvisoryTab extends StatelessWidget {
 
 class _TipList extends StatelessWidget {
   final List<_Tip> tips;
-  const _TipList({required this.tips});
+  final AppLocalizations loc;
+  const _TipList({required this.tips, required this.loc});
 
   @override
   Widget build(BuildContext context) {
-    return ResponsiveCenter(
-      child: ListView.separated(
-        padding: AppSpacing.screenPadding,
-        itemCount: tips.length,
-        separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.md),
-        itemBuilder: (_, i) => _TipCard(tip: tips[i]),
-      ),
+    if (tips.isEmpty) {
+      return EmptyStateCard(
+        icon: Icons.tips_and_updates_outlined,
+        title: loc.noTipsYetTitle,
+        subtitle: loc.noTipsYetMsg,
+      );
+    }
+    return ListView.separated(
+      itemCount: tips.length,
+      separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.md),
+      itemBuilder: (_, i) => _TipCard(tip: tips[i], loc: loc),
     );
   }
 }
 
 class _TipCard extends StatelessWidget {
   final _Tip tip;
-  const _TipCard({required this.tip});
+  final AppLocalizations loc;
+  const _TipCard({required this.tip, required this.loc});
 
   @override
   Widget build(BuildContext context) {
@@ -527,7 +349,7 @@ class _TipCard extends StatelessWidget {
                               BorderRadius.circular(AppSpacing.radiusFull),
                         ),
                         child: Text(
-                          tip.category,
+                          _categoryLabel(tip.category, loc),
                           style: TextStyle(
                               fontSize: 10,
                               color: tip.color,

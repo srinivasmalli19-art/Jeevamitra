@@ -2,12 +2,24 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../data/models/disease_alert_model.dart';
 import '../../../data/repositories/disease_alert_repository.dart';
+import '../auth/auth_provider.dart';
 
 final diseaseAlertRepositoryProvider =
     Provider<DiseaseAlertRepository>((_) => DiseaseAlertRepository());
 
-final nearbyAlertsProvider = StreamProvider.family<List<DiseaseAlertModel>,
+// Auth-gated the same way nearbyFarmsProvider already was (see that
+// provider's comment): previously this queried Firestore regardless of
+// auth state, relying entirely on the router's redirect guard. Watching
+// unauthenticated fires a query Firestore rules would reject anyway,
+// surfacing as a RetryCard error instead of an empty state — both the
+// Farmer Explore tab and the shepherd-facing alert map/search reach this
+// provider, and both routes are already auth-guarded, so this is
+// defense-in-depth, not a behavior change for any real navigation path.
+final nearbyAlertsProvider = StreamProvider.autoDispose.family<
+    List<DiseaseAlertModel>,
     ({double lat, double lng, double radiusKm})>((ref, params) {
+  final user = ref.watch(authStateProvider).valueOrNull;
+  if (user == null) return Stream.value([]);
   return ref.watch(diseaseAlertRepositoryProvider).watchNearby(
         lat: params.lat,
         lng: params.lng,
@@ -15,9 +27,16 @@ final nearbyAlertsProvider = StreamProvider.family<List<DiseaseAlertModel>,
       );
 });
 
-final districtAlertsProvider =
-    StreamProvider.family<List<DiseaseAlertModel>, String>((ref, district) {
+final districtAlertsProvider = StreamProvider.autoDispose
+    .family<List<DiseaseAlertModel>, String>((ref, district) {
+  final user = ref.watch(authStateProvider).valueOrNull;
+  if (user == null) return Stream.value([]);
   return ref.watch(diseaseAlertRepositoryProvider).watchByDistrict(district);
+});
+
+final alertDetailProvider =
+    StreamProvider.autoDispose.family<DiseaseAlertModel?, String>((ref, alertId) {
+  return ref.watch(diseaseAlertRepositoryProvider).watchAlert(alertId);
 });
 
 // ── Create / manage alerts ────────────────────────────────────────────────────

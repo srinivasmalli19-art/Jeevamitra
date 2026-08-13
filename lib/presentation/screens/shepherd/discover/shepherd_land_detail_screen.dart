@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/constants/route_constants.dart';
-import '../../../../core/services/location_service.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/utils/distance_formatter.dart';
+import '../../../../core/utils/firebase_error_translator.dart';
+import '../../../../core/utils/geo_hash_helper.dart';
+import '../../../../core/utils/url_launch_helper.dart';
+import '../../../../generated/l10n/app_localizations.dart';
 import '../../../providers/farm/farm_providers.dart';
 import '../../../providers/location_provider.dart';
 import '../../../widgets/common/cached_farm_image.dart';
@@ -20,34 +25,36 @@ class ShepherdLandDetailScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final loc = AppLocalizations.of(context);
     final farmAsync = ref.watch(farmDetailProvider(farmId));
     final locAsync = ref.watch(locationProvider);
 
     return farmAsync.when(
       loading: () => const Scaffold(body: Center(child: JmLoading())),
       error: (e, _) => Scaffold(
-        appBar: AppBar(title: const Text('Land Details')),
+        appBar: AppBar(title: Text(loc.landDetailsTitle)),
         body: JmErrorState(
-          message: e.toString(),
+          message: friendlyFirebaseMessage(e),
           onRetry: () => ref.invalidate(farmDetailProvider(farmId)),
         ),
       ),
       data: (farm) {
         if (farm == null) {
           return Scaffold(
-            appBar: AppBar(title: const Text('Land Details')),
-            body: const Center(child: Text('This land is no longer available.')),
+            appBar: AppBar(title: Text(loc.landDetailsTitle)),
+            body: Center(child: Text(loc.landNoLongerAvailableMsg)),
           );
         }
 
-        // Distance from shepherd's current location
+        // Distance from shepherd's current location — GeoHashHelper.distanceKm,
+        // the same Haversine formula the repository uses to filter/sort
+        // nearby results, so a card's displayed distance can never disagree
+        // with the one shown here for the same farm.
         String? distLabel;
-        final loc = locAsync.valueOrNull;
-        if (loc != null) {
-          final km = LocationService()
-              .distanceBetween(loc.lat, loc.lng, farm.lat, farm.lng);
-          distLabel =
-              km < 1 ? '${(km * 1000).toInt()} m away' : '${km.toStringAsFixed(1)} km away';
+        final userLoc = locAsync.valueOrNull;
+        if (userLoc != null) {
+          final km = GeoHashHelper.distanceKm(userLoc.lat, userLoc.lng, farm.lat, farm.lng);
+          distLabel = formatDistanceAway(km, loc);
         }
 
         return Scaffold(
@@ -66,7 +73,16 @@ class ShepherdLandDetailScreen extends ConsumerWidget {
                               urls: farm.imageUrls,
                               initialIndex: i,
                             ),
-                            child: CachedFarmImage(url: farm.imageUrls[i]),
+                            // Only the first image shares the discovery
+                            // card's Hero tag — Hero requires exactly one
+                            // matching pair per navigation, and the card
+                            // only ever shows imageUrls.first.
+                            child: i == 0
+                                ? Hero(
+                                    tag: 'land-image-${farm.id}',
+                                    child: CachedFarmImage(url: farm.imageUrls[i]),
+                                  )
+                                : CachedFarmImage(url: farm.imageUrls[i]),
                           ),
                         )
                       : _placeholder(),
@@ -112,7 +128,7 @@ class ShepherdLandDetailScreen extends ConsumerWidget {
                             ),
                           ),
                           JmBadge(
-                            label: farm.isAvailable ? 'Available' : 'Unavailable',
+                            label: farm.isAvailable ? loc.availableNow : loc.notAvailable,
                             variant: farm.isAvailable
                                 ? JmBadgeVariant.success
                                 : JmBadgeVariant.neutral,
@@ -141,7 +157,7 @@ class ShepherdLandDetailScreen extends ConsumerWidget {
                       if (farm.ownerName.isNotEmpty) ...[
                         _InfoRow(
                           icon: Icons.person_rounded,
-                          label: 'Farmer',
+                          label: loc.farmerLabel,
                           value: farm.ownerName,
                         ),
                         const SizedBox(height: AppSpacing.xl),
@@ -152,15 +168,15 @@ class ShepherdLandDetailScreen extends ConsumerWidget {
                           Expanded(
                             child: _StatCard(
                               icon: Icons.landscape_rounded,
-                              label: 'Area',
-                              value: '${farm.areaInAcres.toStringAsFixed(1)} acres',
+                              label: loc.areaLabel,
+                              value: loc.acres(farm.areaInAcres.toStringAsFixed(1)),
                             ),
                           ),
                           const SizedBox(width: AppSpacing.sm),
                           Expanded(
                             child: _StatCard(
                               icon: Icons.groups_rounded,
-                              label: 'Max Animals',
+                              label: loc.maxAnimalsLabel,
                               value: '${farm.maxAnimals}',
                             ),
                           ),
@@ -168,7 +184,7 @@ class ShepherdLandDetailScreen extends ConsumerWidget {
                           Expanded(
                             child: _StatCard(
                               icon: Icons.currency_rupee_rounded,
-                              label: 'Per Day',
+                              label: loc.perDayLabel,
                               value:
                                   '₹${farm.pricePerDayPerAnimal.toStringAsFixed(0)}',
                             ),
@@ -178,7 +194,7 @@ class ShepherdLandDetailScreen extends ConsumerWidget {
                       const SizedBox(height: AppSpacing.xl),
                       // Description
                       if (farm.description.isNotEmpty) ...[
-                        Text('About the Land',
+                        Text(loc.aboutLandTitle,
                             style: Theme.of(context).textTheme.titleMedium),
                         const SizedBox(height: AppSpacing.sm),
                         Text(farm.description,
@@ -187,7 +203,7 @@ class ShepherdLandDetailScreen extends ConsumerWidget {
                       ],
                       // Fodder types
                       if (farm.fodderTypes.isNotEmpty) ...[
-                        Text('Fodder Available',
+                        Text(loc.fodderTypes,
                             style: Theme.of(context).textTheme.titleMedium),
                         const SizedBox(height: AppSpacing.sm),
                         Wrap(
@@ -204,7 +220,7 @@ class ShepherdLandDetailScreen extends ConsumerWidget {
                         const SizedBox(height: AppSpacing.xl),
                       ],
                       // Amenities
-                      Text('Amenities',
+                      Text(loc.amenities,
                           style: Theme.of(context).textTheme.titleMedium),
                       const SizedBox(height: AppSpacing.sm),
                       Wrap(
@@ -213,19 +229,19 @@ class ShepherdLandDetailScreen extends ConsumerWidget {
                         children: [
                           _AmenityChip(
                               icon: Icons.water_drop_rounded,
-                              label: 'Water',
+                              label: loc.water,
                               active: farm.hasWater),
                           _AmenityChip(
                               icon: Icons.park_rounded,
-                              label: 'Shade',
+                              label: loc.shade,
                               active: farm.hasShade),
                           _AmenityChip(
                               icon: Icons.fence_rounded,
-                              label: 'Fencing',
+                              label: loc.fencing,
                               active: farm.hasFencing),
                           _AmenityChip(
                               icon: Icons.medical_services_rounded,
-                              label: 'Vet Nearby',
+                              label: loc.vetNearby,
                               active: farm.hasVetNearby),
                         ],
                       ),
@@ -244,8 +260,8 @@ class ShepherdLandDetailScreen extends ConsumerWidget {
                             const SizedBox(width: AppSpacing.md),
                             Expanded(
                               child: Text(
-                                '₹${farm.pricePerDayPerAnimal.toStringAsFixed(0)} per animal per day. '
-                                'Final amount depends on herd size and number of days.',
+                                '₹${farm.pricePerDayPerAnimal.toStringAsFixed(0)}'
+                                '${loc.perAnimalPerDaySuffix}${loc.finalAmountNoteMsg}',
                                 style: Theme.of(context)
                                     .textTheme
                                     .bodySmall
@@ -262,38 +278,59 @@ class ShepherdLandDetailScreen extends ConsumerWidget {
               ),
             ],
           ),
-          bottomNavigationBar: farm.isAvailable
-              ? Padding(
-                  padding: AppSpacing.screenPadding
-                      .copyWith(bottom: AppSpacing.xl),
-                  child: FilledButton.icon(
-                    onPressed: () =>
-                        context.push(RouteConstants.shepherdBook(farmId)),
-                    icon: const Icon(Icons.calendar_month_rounded),
-                    label: const Text('Book This Land'),
-                    style: FilledButton.styleFrom(
-                      minimumSize:
-                          const Size(double.infinity, AppSpacing.buttonHeight),
-                      backgroundColor: AppColors.secondary,
-                    ),
-                  ),
-                )
-              : Padding(
-                  padding: AppSpacing.screenPadding
-                      .copyWith(bottom: AppSpacing.xl),
-                  child: OutlinedButton(
-                    onPressed: null,
+          bottomNavigationBar: Padding(
+            padding: AppSpacing.screenPadding.copyWith(bottom: AppSpacing.xl),
+            child: Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () => _navigate(context, farm.lat, farm.lng, loc),
+                    icon: const Icon(Icons.directions_rounded),
+                    label: Text(loc.navigateBtn),
                     style: OutlinedButton.styleFrom(
-                      minimumSize:
-                          const Size(double.infinity, AppSpacing.buttonHeight),
+                      minimumSize: const Size(0, AppSpacing.buttonHeight),
+                      foregroundColor: AppColors.primary,
                     ),
-                    child: const Text('Not Available for Booking'),
                   ),
                 ),
+                const SizedBox(width: AppSpacing.sm),
+                Expanded(
+                  flex: 2,
+                  child: farm.isAvailable
+                      ? FilledButton.icon(
+                          onPressed: () =>
+                              context.push(RouteConstants.shepherdBook(farmId)),
+                          icon: const Icon(Icons.calendar_month_rounded),
+                          label: Text(loc.bookThisLandBtn),
+                          style: FilledButton.styleFrom(
+                            minimumSize: const Size(0, AppSpacing.buttonHeight),
+                            backgroundColor: AppColors.secondary,
+                          ),
+                        )
+                      : OutlinedButton(
+                          onPressed: null,
+                          style: OutlinedButton.styleFrom(
+                            minimumSize: const Size(0, AppSpacing.buttonHeight),
+                          ),
+                          child: Text(loc.notAvailableForBookingMsg),
+                        ),
+                ),
+              ],
+            ),
+          ),
         );
       },
     );
   }
+
+  Future<void> _navigate(
+          BuildContext context, double lat, double lng, AppLocalizations loc) =>
+      launchExternalUrl(
+        context,
+        mapsSearchUri(lat, lng),
+        mode: LaunchMode.externalApplication,
+        failureMessage: loc.couldNotOpenMapsMsg,
+      );
 
   Widget _placeholder() => Container(
         color: AppColors.surfaceVariant,

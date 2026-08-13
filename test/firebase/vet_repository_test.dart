@@ -78,5 +78,65 @@ void main() {
       final vet = await repo.watchVet('does-not-exist').first;
       expect(vet, isNull);
     });
+
+    test('older documents without yearsOfExperience/languages/galleryUrls load with safe defaults',
+        () async {
+      // Simulates a vet doc written before Batch 2C added these fields.
+      final legacyDoc = _vet(id: 'legacy', lat: originLat, lng: originLng).toFirestore()
+        ..remove('yearsOfExperience')
+        ..remove('languages')
+        ..remove('galleryUrls');
+      final ref = await firestore.collection('vets').add(legacyDoc);
+
+      final vet = await repo.watchVet(ref.id).first;
+
+      expect(vet, isNotNull);
+      expect(vet!.yearsOfExperience, 0);
+      expect(vet.languages, isEmpty);
+      expect(vet.galleryUrls, isEmpty);
+    });
+
+    test('a document missing lat/lng loads with a safe 0,0 default instead of throwing', () async {
+      // Matches FarmModel.fromFirestore's nullable-safe cast pattern —
+      // VetModel used to do `(d['lat'] as num).toDouble()` (non-nullable),
+      // which would throw a type-cast error on a malformed/legacy doc
+      // instead of degrading gracefully.
+      final malformedDoc = _vet(id: 'malformed', lat: originLat, lng: originLng).toFirestore()
+        ..remove('lat')
+        ..remove('lng');
+      final ref = await firestore.collection('vets').add(malformedDoc);
+
+      final vet = await repo.watchVet(ref.id).first;
+
+      expect(vet, isNotNull);
+      expect(vet!.lat, 0);
+      expect(vet.lng, 0);
+    });
+
+    test('round-trips yearsOfExperience/languages/galleryUrls through Firestore', () async {
+      final withNewFields = VetModel(
+        id: '',
+        name: 'Dr. Rao',
+        qualification: 'MVSc',
+        specialization: 'Surgery',
+        phone: '+919876500001',
+        village: 'Narasaraopet',
+        district: 'Guntur',
+        state: 'Andhra Pradesh',
+        lat: originLat,
+        lng: originLng,
+        geohash: GeoHashHelper.encode(originLat, originLng),
+        yearsOfExperience: 12,
+        languages: const ['Telugu', 'English'],
+        galleryUrls: const ['https://example.com/clinic1.jpg'],
+      );
+      final ref = await firestore.collection('vets').add(withNewFields.toFirestore());
+
+      final vet = await repo.watchVet(ref.id).first;
+
+      expect(vet!.yearsOfExperience, 12);
+      expect(vet.languages, ['Telugu', 'English']);
+      expect(vet.galleryUrls, ['https://example.com/clinic1.jpg']);
+    });
   });
 }
