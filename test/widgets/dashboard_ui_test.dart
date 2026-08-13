@@ -63,6 +63,42 @@ void main() {
       );
       expect(tester.takeException(), isNull);
     });
+
+    testWidgets(
+        'does not overflow with a long name, subtitle icon, and trailing '
+        'action icons on a narrow width (matches the dashboard header)',
+        (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SizedBox(
+              height: 150,
+              width: 320,
+              child: HeroBanner(
+                name: 'Hello, Venkata Narasimha Rao Chowdary!',
+                subtitle: 'Anantapur District, Andhra Pradesh',
+                subtitleIcon: Icons.location_on_rounded,
+                actions: [
+                  IconButton(
+                    onPressed: () {},
+                    icon: const Icon(Icons.mic_rounded, color: Colors.white),
+                  ),
+                  IconButton(
+                    onPressed: () {},
+                    icon: const Badge(
+                      label: Text('9+'),
+                      child: Icon(Icons.notifications_outlined,
+                          color: Colors.white),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+      expect(tester.takeException(), isNull);
+    });
   });
 
   group('StandardAppBar', () {
@@ -116,12 +152,14 @@ void main() {
           home: Scaffold(
             body: Row(
               children: [
-                DashboardStatCard(
-                  label: 'My Lands',
-                  value: '3',
-                  icon: Icons.landscape_rounded,
-                  color: Colors.green,
-                  onTap: () => tapped = true,
+                Expanded(
+                  child: DashboardStatCard(
+                    label: 'My Lands',
+                    value: '3',
+                    icon: Icons.landscape_rounded,
+                    color: Colors.green,
+                    onTap: () => tapped = true,
+                  ),
                 ),
               ],
             ),
@@ -142,12 +180,14 @@ void main() {
           home: Scaffold(
             body: Row(
               children: [
-                DashboardStatCard(
-                  label: 'Pending',
-                  value: '2',
-                  icon: Icons.hourglass_top_rounded,
-                  color: Colors.orange,
-                  badge: true,
+                Expanded(
+                  child: DashboardStatCard(
+                    label: 'Pending',
+                    value: '2',
+                    icon: Icons.hourglass_top_rounded,
+                    color: Colors.orange,
+                    badge: true,
+                  ),
                 ),
               ],
             ),
@@ -164,13 +204,48 @@ void main() {
           home: Scaffold(
             body: SizedBox(
               width: 90,
-              child: Row(
+              child: DashboardStatCard(
+                label: 'Total Earnings This Season',
+                value: '₹1,23,45,678',
+                icon: Icons.currency_rupee_rounded,
+                color: Colors.brown,
+              ),
+            ),
+          ),
+        ),
+      );
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets(
+        'sizes to a fixed width inside a Wrap (the narrow-phone 2x2 '
+        'overview layout) without needing a Flex ancestor', (tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: SizedBox(
+              width: 300,
+              child: Wrap(
+                spacing: 8,
+                runSpacing: 8,
                 children: [
-                  DashboardStatCard(
-                    label: 'Total Earnings This Season',
-                    value: '₹1,23,45,678',
-                    icon: Icons.currency_rupee_rounded,
-                    color: Colors.brown,
+                  SizedBox(
+                    width: 146,
+                    child: DashboardStatCard(
+                      label: 'My Lands',
+                      value: '3',
+                      icon: Icons.landscape_rounded,
+                      color: Colors.green,
+                    ),
+                  ),
+                  SizedBox(
+                    width: 146,
+                    child: DashboardStatCard(
+                      label: 'Earnings',
+                      value: '₹12.3K',
+                      icon: Icons.currency_rupee_rounded,
+                      color: Colors.brown,
+                    ),
                   ),
                 ],
               ),
@@ -178,6 +253,7 @@ void main() {
           ),
         ),
       );
+      expect(find.text('₹12.3K'), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
   });

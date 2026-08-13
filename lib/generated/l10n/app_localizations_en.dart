@@ -244,6 +244,45 @@ class AppLocalizationsEn extends AppLocalizations {
   String get bookingCancelled => 'Cancelled';
 
   @override
+  String get historyLabel => 'History';
+
+  @override
+  String get rejectBtn => 'Reject';
+
+  @override
+  String get acceptBtn => 'Accept';
+
+  @override
+  String animalsCountLabel(int count) {
+    return '$count animals';
+  }
+
+  @override
+  String get noPendingRequestsTitle => 'No Pending Requests';
+
+  @override
+  String get noPendingRequestsSubtitle =>
+      'New booking requests from shepherds will appear here';
+
+  @override
+  String get noActiveBookingsTitle => 'No Active Bookings';
+
+  @override
+  String get noActiveBookingsSubtitle =>
+      'Confirmed and ongoing bookings will appear here';
+
+  @override
+  String get noHistoryYetTitle => 'No History Yet';
+
+  @override
+  String get noHistoryYetSubtitle =>
+      'Completed and cancelled bookings will appear here';
+
+  @override
+  String get bookLandToSeeBookingsMsg =>
+      'Book a grazing land from Discover to see your bookings here';
+
+  @override
   String get nearbyVets => 'Vets Nearby';
 
   @override
@@ -296,6 +335,25 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noNotifications => 'No notifications yet';
+
+  @override
+  String get noNotificationsSubtitle =>
+      'Booking updates and alerts will appear here';
+
+  @override
+  String get markAllReadBtn => 'Mark all as read';
+
+  @override
+  String get todayLabel => 'Today';
+
+  @override
+  String get yesterdayLabel => 'Yesterday';
+
+  @override
+  String get thisWeekLabel => 'This week';
+
+  @override
+  String get earlierLabel => 'Earlier';
 
   @override
   String get settings => 'Settings';
@@ -604,6 +662,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noLandsFoundTitle => 'No Lands Found';
+
+  @override
+  String get noLandsYetTitle => 'No lands yet';
+
+  @override
+  String get noLandsYetSubtitle =>
+      'Add your farmland to start receiving bookings from shepherds';
 
   @override
   String get locationNeededLandsMsg =>

@@ -245,6 +245,45 @@ class AppLocalizationsTe extends AppLocalizations {
   String get bookingCancelled => 'రద్దు చేయబడింది';
 
   @override
+  String get historyLabel => 'చరిత్ర';
+
+  @override
+  String get rejectBtn => 'తిరస్కరించు';
+
+  @override
+  String get acceptBtn => 'అంగీకరించు';
+
+  @override
+  String animalsCountLabel(int count) {
+    return '$count జంతువులు';
+  }
+
+  @override
+  String get noPendingRequestsTitle => 'పెండింగ్ అభ్యర్థనలు లేవు';
+
+  @override
+  String get noPendingRequestsSubtitle =>
+      'గొర్రెల కాపరుల నుండి బుకింగ్ అభ్యర్థనలు ఇక్కడ కనిపిస్తాయి';
+
+  @override
+  String get noActiveBookingsTitle => 'యాక్టివ్ బుకింగ్‌లు లేవు';
+
+  @override
+  String get noActiveBookingsSubtitle =>
+      'నిర్ధారించిన మరియు జరుగుతున్న బుకింగ్‌లు ఇక్కడ కనిపిస్తాయి';
+
+  @override
+  String get noHistoryYetTitle => 'ఇంకా చరిత్ర లేదు';
+
+  @override
+  String get noHistoryYetSubtitle =>
+      'పూర్తయిన మరియు రద్దు చేసిన బుకింగ్‌లు ఇక్కడ కనిపిస్తాయి';
+
+  @override
+  String get bookLandToSeeBookingsMsg =>
+      'మీ బుకింగ్‌లను ఇక్కడ చూడటానికి డిస్కవర్ నుండి మేత భూమిని బుక్ చేయండి';
+
+  @override
   String get nearbyVets => 'దగ్గర్లో పశువైద్యులు';
 
   @override
@@ -297,6 +336,25 @@ class AppLocalizationsTe extends AppLocalizations {
 
   @override
   String get noNotifications => 'నోటిఫికేషన్లు లేవు';
+
+  @override
+  String get noNotificationsSubtitle =>
+      'బుకింగ్ అప్‌డేట్‌లు మరియు అలర్ట్‌లు ఇక్కడ కనిపిస్తాయి';
+
+  @override
+  String get markAllReadBtn => 'అన్నీ చదివినట్లు గుర్తించు';
+
+  @override
+  String get todayLabel => 'ఈరోజు';
+
+  @override
+  String get yesterdayLabel => 'నిన్న';
+
+  @override
+  String get thisWeekLabel => 'ఈ వారం';
+
+  @override
+  String get earlierLabel => 'గతంలో';
 
   @override
   String get settings => 'సెట్టింగ్‌లు';
@@ -610,6 +668,13 @@ class AppLocalizationsTe extends AppLocalizations {
 
   @override
   String get noLandsFoundTitle => 'భూములు కనబడలేదు';
+
+  @override
+  String get noLandsYetTitle => 'ఇంకా భూములు లేవు';
+
+  @override
+  String get noLandsYetSubtitle =>
+      'గొర్రెల కాపరుల నుండి బుకింగ్‌లు పొందడానికి మీ భూమిని జోడించండి';
 
   @override
   String get locationNeededLandsMsg =>

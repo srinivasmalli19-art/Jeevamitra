@@ -1,16 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 
 import '../../../../core/constants/route_constants.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_shadows.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/utils/firebase_error_translator.dart';
 import '../../../../data/models/booking_model.dart';
+import '../../../../generated/l10n/app_localizations.dart';
 import '../../../providers/booking/booking_providers.dart';
 import '../../../widgets/common/jm_badge.dart';
 import '../../../widgets/common/jm_empty_state.dart';
 import '../../../widgets/common/jm_error_state.dart';
 import '../../../widgets/common/jm_loading.dart';
+import '../../../widgets/common/responsive_center.dart';
+import '../../../widgets/common/standard_app_bar.dart';
 
 class ShepherdBookingsScreen extends ConsumerWidget {
   const ShepherdBookingsScreen({super.key});
@@ -18,29 +24,31 @@ class ShepherdBookingsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final bookingsAsync = ref.watch(shepherdBookingsProvider);
+    final loc = AppLocalizations.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('My Bookings')),
+      appBar: StandardAppBar(title: loc.bookings),
       body: bookingsAsync.when(
-        loading: () => const Center(child: JmLoading()),
+        loading: () => const JmShimmerList(count: 3, cardHeight: 110),
         error: (e, _) => JmErrorState(
-          message: e.toString(),
+          message: friendlyFirebaseMessage(e),
           onRetry: () => ref.invalidate(shepherdBookingsProvider),
         ),
         data: (bookings) => bookings.isEmpty
-            ? const JmEmptyState(
+            ? JmEmptyState(
                 icon: Icons.calendar_month_rounded,
-                title: 'No Bookings Yet',
-                subtitle:
-                    'Book a grazing land from Discover to see your bookings here.',
+                title: loc.noBookingsYetTitle,
+                subtitle: loc.bookLandToSeeBookingsMsg,
               )
-            : ListView.separated(
-                padding: AppSpacing.screenPadding,
-                itemCount: bookings.length,
-                separatorBuilder: (_, __) =>
-                    const SizedBox(height: AppSpacing.md),
-                itemBuilder: (_, i) =>
-                    _ShepherdBookingCard(booking: bookings[i]),
+            : ResponsiveCenter(
+                child: ListView.separated(
+                  padding: AppSpacing.screenPadding,
+                  itemCount: bookings.length,
+                  separatorBuilder: (_, __) =>
+                      const SizedBox(height: AppSpacing.md),
+                  itemBuilder: (_, i) =>
+                      _ShepherdBookingCard(booking: bookings[i]),
+                ),
               ),
       ),
     );
@@ -53,16 +61,19 @@ class _ShepherdBookingCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(
+    final loc = AppLocalizations.of(context);
+
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.surface,
         borderRadius: AppSpacing.cardRadius,
-        side: const BorderSide(color: AppColors.outline),
+        boxShadow: AppShadows.sm,
+        border: Border.all(color: AppColors.outline),
       ),
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: () =>
             context.push(RouteConstants.bookingDetail('shepherd', booking.id)),
-        borderRadius: AppSpacing.cardRadius,
         child: Padding(
           padding: AppSpacing.cardPadding,
           child: Column(
@@ -76,7 +87,8 @@ class _ShepherdBookingCard extends ConsumerWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis),
                   ),
-                  _statusBadge(booking.status),
+                  const SizedBox(width: AppSpacing.sm),
+                  _statusBadge(booking.status, loc),
                 ],
               ),
               const SizedBox(height: AppSpacing.xs),
@@ -85,8 +97,12 @@ class _ShepherdBookingCard extends ConsumerWidget {
                   const Icon(Icons.location_on_rounded,
                       size: 13, color: AppColors.textSecondary),
                   const SizedBox(width: 3),
-                  Text(booking.farmVillage,
-                      style: Theme.of(context).textTheme.bodySmall),
+                  Expanded(
+                    child: Text(booking.farmVillage,
+                        style: Theme.of(context).textTheme.bodySmall,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis),
+                  ),
                 ],
               ),
               const SizedBox(height: AppSpacing.sm),
@@ -96,16 +112,22 @@ class _ShepherdBookingCard extends ConsumerWidget {
                       size: 13, color: AppColors.textSecondary),
                   const SizedBox(width: 3),
                   Text(
-                    '${_fmt(booking.checkIn)} → ${_fmt(booking.checkOut)}',
+                    '${DateFormat('d MMM').format(booking.checkIn)} → '
+                    '${DateFormat('d MMM').format(booking.checkOut)}',
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                   const Spacer(),
-                  Text(
-                    '${booking.animalCount} animals · ₹${booking.totalAmount.toStringAsFixed(0)}',
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodySmall
-                        ?.copyWith(color: AppColors.primary, fontWeight: FontWeight.w600),
+                  Flexible(
+                    child: Text(
+                      '${loc.animalsCountLabel(booking.animalCount)} · '
+                      '₹${booking.totalAmount.toStringAsFixed(0)}',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.end,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.w600),
+                    ),
                   ),
                 ],
               ),
@@ -116,20 +138,14 @@ class _ShepherdBookingCard extends ConsumerWidget {
     );
   }
 
-  Widget _statusBadge(String status) {
+  Widget _statusBadge(String status, AppLocalizations loc) {
     final (label, variant) = switch (status) {
-      'pending' => ('Pending', JmBadgeVariant.warning),
-      'confirmed' => ('Confirmed', JmBadgeVariant.info),
-      'active' => ('Active', JmBadgeVariant.success),
-      'completed' => ('Completed', JmBadgeVariant.neutral),
-      _ => ('Cancelled', JmBadgeVariant.error),
+      'pending' => (loc.bookingPending, JmBadgeVariant.warning),
+      'confirmed' => (loc.bookingConfirmed, JmBadgeVariant.info),
+      'active' => (loc.bookingActive, JmBadgeVariant.success),
+      'completed' => (loc.bookingCompleted, JmBadgeVariant.neutral),
+      _ => (loc.bookingCancelled, JmBadgeVariant.error),
     };
     return JmBadge(label: label, variant: variant, small: true);
-  }
-
-  String _fmt(DateTime d) {
-    const m = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    return '${d.day} ${m[d.month]}';
   }
 }

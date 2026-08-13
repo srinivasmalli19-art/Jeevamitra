@@ -93,6 +93,20 @@
   "bookingActive": "యాక్టివ్",
   "bookingCompleted": "పూర్తయింది",
   "bookingCancelled": "రద్దు చేయబడింది",
+  "historyLabel": "చరిత్ర",
+  "rejectBtn": "తిరస్కరించు",
+  "acceptBtn": "అంగీకరించు",
+  "animalsCountLabel": "{count} జంతువులు",
+  "@animalsCountLabel": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "noPendingRequestsTitle": "పెండింగ్ అభ్యర్థనలు లేవు",
+  "noPendingRequestsSubtitle": "గొర్రెల కాపరుల నుండి బుకింగ్ అభ్యర్థనలు ఇక్కడ కనిపిస్తాయి",
+  "noActiveBookingsTitle": "యాక్టివ్ బుకింగ్‌లు లేవు",
+  "noActiveBookingsSubtitle": "నిర్ధారించిన మరియు జరుగుతున్న బుకింగ్‌లు ఇక్కడ కనిపిస్తాయి",
+  "noHistoryYetTitle": "ఇంకా చరిత్ర లేదు",
+  "noHistoryYetSubtitle": "పూర్తయిన మరియు రద్దు చేసిన బుకింగ్‌లు ఇక్కడ కనిపిస్తాయి",
+  "bookLandToSeeBookingsMsg": "మీ బుకింగ్‌లను ఇక్కడ చూడటానికి డిస్కవర్ నుండి మేత భూమిని బుక్ చేయండి",
 
   "nearbyVets": "దగ్గర్లో పశువైద్యులు",
   "govtVet": "ప్రభుత్వ పశువైద్యుడు",
@@ -116,6 +130,12 @@
 
   "notifications": "నోటిఫికేషన్లు",
   "noNotifications": "నోటిఫికేషన్లు లేవు",
+  "noNotificationsSubtitle": "బుకింగ్ అప్‌డేట్‌లు మరియు అలర్ట్‌లు ఇక్కడ కనిపిస్తాయి",
+  "markAllReadBtn": "అన్నీ చదివినట్లు గుర్తించు",
+  "todayLabel": "ఈరోజు",
+  "yesterdayLabel": "నిన్న",
+  "thisWeekLabel": "ఈ వారం",
+  "earlierLabel": "గతంలో",
 
   "settings": "సెట్టింగ్‌లు",
   "language": "భాష",
@@ -253,6 +273,8 @@
   "clearFiltersBtn": "ఫిల్టర్‌లు క్లియర్ చేయి",
   "tryFewerFiltersMsg": "కొన్ని ఫిల్టర్‌లు తీసివేయండి లేదా రేడియస్ పెంచండి.",
   "noLandsFoundTitle": "భూములు కనబడలేదు",
+  "noLandsYetTitle": "ఇంకా భూములు లేవు",
+  "noLandsYetSubtitle": "గొర్రెల కాపరుల నుండి బుకింగ్‌లు పొందడానికి మీ భూమిని జోడించండి",
   "locationNeededLandsMsg": "సమీపంలోని మేత భూములను చూపించడానికి జీవమిత్రకు మీ లొకేషన్ కావాలి.",
   "showUnavailableLabel": "అందుబాటులో లేని భూములను కూడా చూపించు",
   "waterAvailableLabel": "నీరు అందుబాటులో",

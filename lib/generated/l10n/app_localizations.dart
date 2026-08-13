@@ -556,6 +556,72 @@ abstract class AppLocalizations {
   /// **'Cancelled'**
   String get bookingCancelled;
 
+  /// No description provided for @historyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'History'**
+  String get historyLabel;
+
+  /// No description provided for @rejectBtn.
+  ///
+  /// In en, this message translates to:
+  /// **'Reject'**
+  String get rejectBtn;
+
+  /// No description provided for @acceptBtn.
+  ///
+  /// In en, this message translates to:
+  /// **'Accept'**
+  String get acceptBtn;
+
+  /// No description provided for @animalsCountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} animals'**
+  String animalsCountLabel(int count);
+
+  /// No description provided for @noPendingRequestsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No Pending Requests'**
+  String get noPendingRequestsTitle;
+
+  /// No description provided for @noPendingRequestsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New booking requests from shepherds will appear here'**
+  String get noPendingRequestsSubtitle;
+
+  /// No description provided for @noActiveBookingsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No Active Bookings'**
+  String get noActiveBookingsTitle;
+
+  /// No description provided for @noActiveBookingsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirmed and ongoing bookings will appear here'**
+  String get noActiveBookingsSubtitle;
+
+  /// No description provided for @noHistoryYetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No History Yet'**
+  String get noHistoryYetTitle;
+
+  /// No description provided for @noHistoryYetSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed and cancelled bookings will appear here'**
+  String get noHistoryYetSubtitle;
+
+  /// No description provided for @bookLandToSeeBookingsMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Book a grazing land from Discover to see your bookings here'**
+  String get bookLandToSeeBookingsMsg;
+
   /// No description provided for @nearbyVets.
   ///
   /// In en, this message translates to:
@@ -663,6 +729,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No notifications yet'**
   String get noNotifications;
+
+  /// No description provided for @noNotificationsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Booking updates and alerts will appear here'**
+  String get noNotificationsSubtitle;
+
+  /// No description provided for @markAllReadBtn.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark all as read'**
+  String get markAllReadBtn;
+
+  /// No description provided for @todayLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get todayLabel;
+
+  /// No description provided for @yesterdayLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Yesterday'**
+  String get yesterdayLabel;
+
+  /// No description provided for @thisWeekLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'This week'**
+  String get thisWeekLabel;
+
+  /// No description provided for @earlierLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Earlier'**
+  String get earlierLabel;
 
   /// No description provided for @settings.
   ///
@@ -1221,6 +1323,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No Lands Found'**
   String get noLandsFoundTitle;
+
+  /// No description provided for @noLandsYetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No lands yet'**
+  String get noLandsYetTitle;
+
+  /// No description provided for @noLandsYetSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add your farmland to start receiving bookings from shepherds'**
+  String get noLandsYetSubtitle;
 
   /// No description provided for @locationNeededLandsMsg.
   ///

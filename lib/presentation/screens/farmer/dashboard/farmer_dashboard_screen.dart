@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 
 import '../../../../core/constants/route_constants.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_shadows.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../data/models/booking_model.dart';
 import '../../../../generated/l10n/app_localizations.dart';
@@ -17,6 +18,7 @@ import '../../../widgets/common/hero_banner.dart';
 import '../../../widgets/common/jm_badge.dart';
 import '../../../widgets/common/jm_loading.dart';
 import '../../../widgets/common/responsive_center.dart';
+import '../../../widgets/explore/empty_state_card.dart';
 
 JmBadgeVariant _bookingVariant(String status) => switch (status) {
       'pending' => JmBadgeVariant.warning,
@@ -112,6 +114,7 @@ class _Header extends ConsumerWidget {
         background: HeroBanner(
           name: loc.greetingName(name),
           subtitle: village,
+          subtitleIcon: village != null ? Icons.location_on_rounded : null,
         ),
       ),
     );
@@ -170,23 +173,37 @@ class _ActionChip extends StatelessWidget {
   Widget build(BuildContext context) {
     return Expanded(
       child: Material(
-        color: color.withAlpha(26),
+        color: AppColors.surface,
         borderRadius: AppSpacing.cardRadius,
         child: InkWell(
           borderRadius: AppSpacing.cardRadius,
           onTap: onTap,
           child: Container(
-            padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+            constraints: const BoxConstraints(minHeight: 84),
+            padding: const EdgeInsets.symmetric(
+                vertical: AppSpacing.md, horizontal: AppSpacing.xs),
             decoration: BoxDecoration(
               borderRadius: AppSpacing.cardRadius,
-              border: Border.all(color: color.withAlpha(77)),
+              boxShadow: AppShadows.sm,
+              border: Border.all(color: color.withAlpha(60)),
             ),
             child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(icon, color: color, size: 26),
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: color.withAlpha(26),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(icon, color: color, size: 20),
+                ),
                 const SizedBox(height: AppSpacing.xs),
                 Text(
                   label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontSize: 11,
                     color: color,
@@ -227,45 +244,63 @@ class _OverviewStats extends ConsumerWidget {
     final fmt = NumberFormat.compact(locale: 'en_IN');
     final loc = AppLocalizations.of(context);
 
+    final cards = [
+      DashboardStatCard(
+        label: loc.myLands,
+        value: '$totalLands',
+        icon: Icons.landscape_rounded,
+        color: AppColors.primary,
+        onTap: () => context.go(RouteConstants.farmerLands),
+      ),
+      DashboardStatCard(
+        label: loc.bookingPending,
+        value: '$pendingCount',
+        icon: Icons.hourglass_top_rounded,
+        color: AppColors.warning,
+        badge: pendingCount > 0,
+        onTap: () => context.go(RouteConstants.farmerBookings),
+      ),
+      DashboardStatCard(
+        label: loc.bookingActive,
+        value: '$activeCount',
+        icon: Icons.play_circle_rounded,
+        color: AppColors.success,
+        onTap: () => context.go(RouteConstants.farmerBookings),
+      ),
+      DashboardStatCard(
+        label: loc.earningsLabel,
+        value: '₹${fmt.format(earnings)}',
+        icon: Icons.currency_rupee_rounded,
+        color: AppColors.secondary,
+      ),
+    ];
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(loc.overviewLabel, style: Theme.of(context).textTheme.titleLarge),
         const SizedBox(height: AppSpacing.md),
-        Row(
-          children: [
-            DashboardStatCard(
-              label: loc.myLands,
-              value: '$totalLands',
-              icon: Icons.landscape_rounded,
-              color: AppColors.primary,
-              onTap: () => context.go(RouteConstants.farmerLands),
-            ),
-            const SizedBox(width: AppSpacing.sm),
-            DashboardStatCard(
-              label: loc.bookingPending,
-              value: '$pendingCount',
-              icon: Icons.hourglass_top_rounded,
-              color: AppColors.warning,
-              badge: pendingCount > 0,
-              onTap: () => context.go(RouteConstants.farmerBookings),
-            ),
-            const SizedBox(width: AppSpacing.sm),
-            DashboardStatCard(
-              label: loc.bookingActive,
-              value: '$activeCount',
-              icon: Icons.play_circle_rounded,
-              color: AppColors.success,
-              onTap: () => context.go(RouteConstants.farmerBookings),
-            ),
-            const SizedBox(width: AppSpacing.sm),
-            DashboardStatCard(
-              label: loc.earningsLabel,
-              value: '₹${fmt.format(earnings)}',
-              icon: Icons.currency_rupee_rounded,
-              color: AppColors.secondary,
-            ),
-          ],
+        LayoutBuilder(
+          builder: (context, constraints) {
+            // Below ~392px of content width a 4-across row leaves each card
+            // too narrow for its bold value text (e.g. "₹12.3K") to render
+            // without ellipsizing, so fall back to a 2x2 wrap.
+            const minCardWidth = 92.0;
+            const gap = AppSpacing.sm;
+            final fourAcross = (constraints.maxWidth - gap * 3) / 4;
+            final perRow = fourAcross >= minCardWidth ? 4 : 2;
+            final cardWidth =
+                (constraints.maxWidth - gap * (perRow - 1)) / perRow;
+
+            return Wrap(
+              spacing: gap,
+              runSpacing: gap,
+              children: [
+                for (final card in cards)
+                  SizedBox(width: cardWidth, child: card),
+              ],
+            );
+          },
         ),
       ],
     );
@@ -385,30 +420,10 @@ class _EmptyBookings extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context);
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: AppSpacing.xxl),
-      child: Column(
-        children: [
-          const Icon(Icons.event_note_rounded,
-              size: 48, color: AppColors.textDisabled),
-          const SizedBox(height: AppSpacing.md),
-          Text(
-            loc.noBookingsYetTitle,
-            style: Theme.of(context)
-                .textTheme
-                .bodyMedium
-                ?.copyWith(color: AppColors.textSecondary),
-          ),
-          const SizedBox(height: AppSpacing.xs),
-          Text(
-            loc.noBookingsYetSubtitle,
-            style: Theme.of(context)
-                .textTheme
-                .bodySmall
-                ?.copyWith(color: AppColors.textDisabled),
-          ),
-        ],
-      ),
+    return EmptyStateCard(
+      icon: Icons.event_note_rounded,
+      title: loc.noBookingsYetTitle,
+      subtitle: loc.noBookingsYetSubtitle,
     );
   }
 }
@@ -465,11 +480,15 @@ class _BookingRow extends StatelessWidget {
                   children: [
                     Text(
                       booking.shepherdName,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: Theme.of(context).textTheme.titleSmall,
                     ),
                     Text(
                       loc.bookingSummaryMsg(booking.animalCount, dateStr,
                           fmt.format(booking.totalAmount)),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             color: AppColors.textSecondary,
                           ),

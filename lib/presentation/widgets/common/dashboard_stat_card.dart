@@ -7,6 +7,10 @@ import '../../../core/theme/app_spacing.dart';
 /// Modernized statistic tile used on dashboard-style overview rows: a
 /// colored icon chip, a bold value, and a muted label, with an optional
 /// "needs attention" badge dot and an optional tap target.
+///
+/// Sizes to its incoming constraints rather than forcing [Expanded] itself,
+/// so callers can place it directly in a [Row] (wrap it in `Expanded`) or in
+/// a width-aware [Wrap]/grid (wrap it in a fixed-width `SizedBox`).
 class DashboardStatCard extends StatelessWidget {
   final String label;
   final String value;
@@ -27,78 +31,76 @@ class DashboardStatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: Material(
-        color: AppColors.surface,
+    return Material(
+      color: AppColors.surface,
+      borderRadius: AppSpacing.cardRadius,
+      child: InkWell(
         borderRadius: AppSpacing.cardRadius,
-        child: InkWell(
-          borderRadius: AppSpacing.cardRadius,
-          onTap: onTap,
-          child: Container(
-            padding: const EdgeInsets.symmetric(
-                vertical: AppSpacing.base, horizontal: AppSpacing.md),
-            decoration: BoxDecoration(
-              borderRadius: AppSpacing.cardRadius,
-              boxShadow: AppShadows.sm,
-              border: Border.all(
-                color: badge ? color.withAlpha(140) : AppColors.outline,
-                width: badge ? 1.5 : 1,
-              ),
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(
+              vertical: AppSpacing.base, horizontal: AppSpacing.md),
+          decoration: BoxDecoration(
+            borderRadius: AppSpacing.cardRadius,
+            boxShadow: AppShadows.sm,
+            border: Border.all(
+              color: badge ? color.withAlpha(140) : AppColors.outline,
+              width: badge ? 1.5 : 1,
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    Container(
-                      width: 34,
-                      height: 34,
-                      decoration: BoxDecoration(
-                        color: color.withAlpha(26),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(icon, color: color, size: 18),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Container(
+                    width: 34,
+                    height: 34,
+                    decoration: BoxDecoration(
+                      color: color.withAlpha(26),
+                      shape: BoxShape.circle,
                     ),
-                    if (badge)
-                      Positioned(
-                        right: -2,
-                        top: -2,
-                        child: Container(
-                          width: 9,
-                          height: 9,
-                          decoration: BoxDecoration(
-                            color: color,
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                                color: AppColors.surface, width: 1.5),
-                          ),
+                    child: Icon(icon, color: color, size: 18),
+                  ),
+                  if (badge)
+                    Positioned(
+                      right: -2,
+                      top: -2,
+                      child: Container(
+                        width: 9,
+                        height: 9,
+                        decoration: BoxDecoration(
+                          color: color,
+                          shape: BoxShape.circle,
+                          border:
+                              Border.all(color: AppColors.surface, width: 1.5),
                         ),
                       ),
-                  ],
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                Text(
-                  value,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.textPrimary,
-                      ),
-                ),
-                const SizedBox(height: 1),
-                Text(
-                  label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context)
-                      .textTheme
-                      .bodySmall
-                      ?.copyWith(fontSize: 11, color: AppColors.textSecondary),
-                ),
-              ],
-            ),
+                    ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              Text(
+                value,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textPrimary,
+                    ),
+              ),
+              const SizedBox(height: 1),
+              Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context)
+                    .textTheme
+                    .bodySmall
+                    ?.copyWith(fontSize: 11, color: AppColors.textSecondary),
+              ),
+            ],
           ),
         ),
       ),

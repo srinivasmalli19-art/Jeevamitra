@@ -5,12 +5,15 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/constants/route_constants.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_shadows.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../../core/utils/validators.dart';
 import '../../../generated/l10n/app_localizations.dart';
 import '../../providers/auth/auth_provider.dart';
 import '../../providers/booking/booking_providers.dart';
 import '../../providers/farm/farm_providers.dart';
 import '../../providers/locale_provider.dart';
+import '../../widgets/common/dashboard_stat_card.dart';
 import '../../widgets/common/responsive_center.dart';
 import '../../widgets/common/standard_app_bar.dart';
 
@@ -27,6 +30,7 @@ class ProfileScreen extends ConsumerStatefulWidget {
 class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   bool _editing = false;
   bool _saving = false;
+  final _formKey = GlobalKey<FormState>();
 
   late final _nameCtrl = TextEditingController();
   late final _villageCtrl = TextEditingController();
@@ -48,7 +52,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }
 
   Future<void> _saveEdit(String uid) async {
-    if (_nameCtrl.text.trim().isEmpty) return;
+    if (!_formKey.currentState!.validate()) return;
     setState(() => _saving = true);
     final ok = await ref.read(authNotifierProvider.notifier).updateProfile(
           uid: uid,
@@ -116,6 +120,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       appBar: StandardAppBar(
         title: loc.profile,
         actions: [
+          IconButton(
+            icon: const Icon(Icons.settings_outlined),
+            tooltip: loc.settings,
+            onPressed: () => context.push(RouteConstants.settings),
+          ),
           if (!_editing)
             IconButton(
               icon: const Icon(Icons.edit_rounded),
@@ -138,35 +147,63 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           children: [
             const SizedBox(height: AppSpacing.base),
             // ── Avatar + name header ─────────────────────────────────────────
-            Center(
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(
+                  vertical: AppSpacing.xl, horizontal: AppSpacing.base),
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                borderRadius: AppSpacing.cardRadius,
+                boxShadow: AppShadows.sm,
+                border: Border.all(color: AppColors.outline),
+              ),
               child: Column(
                 children: [
-                  CircleAvatar(
-                    radius: 44,
-                    backgroundColor: widget.role == 'farmer'
-                        ? AppColors.primaryContainer
-                        : AppColors.secondaryContainer,
-                    child: Text(
-                      (userDoc?.name.isNotEmpty == true)
-                          ? userDoc!.name[0].toUpperCase()
-                          : '?',
-                      style: TextStyle(
-                        fontSize: 36,
-                        fontWeight: FontWeight.w700,
-                        color: widget.role == 'farmer'
-                            ? AppColors.primary
-                            : AppColors.secondary,
+                  Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: (widget.role == 'farmer'
+                                ? AppColors.primary
+                                : AppColors.secondary)
+                            .withAlpha(60),
+                        width: 2,
+                      ),
+                    ),
+                    child: CircleAvatar(
+                      radius: 44,
+                      backgroundColor: widget.role == 'farmer'
+                          ? AppColors.primaryContainer
+                          : AppColors.secondaryContainer,
+                      child: Text(
+                        (userDoc?.name.isNotEmpty == true)
+                            ? userDoc!.name[0].toUpperCase()
+                            : '?',
+                        style: TextStyle(
+                          fontSize: 36,
+                          fontWeight: FontWeight.w700,
+                          color: widget.role == 'farmer'
+                              ? AppColors.primary
+                              : AppColors.secondary,
+                        ),
                       ),
                     ),
                   ),
                   const SizedBox(height: AppSpacing.md),
                   Text(
                     userDoc?.name ?? '—',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                   const SizedBox(height: AppSpacing.xs),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                  Wrap(
+                    alignment: WrapAlignment.center,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    spacing: AppSpacing.sm,
+                    runSpacing: 4,
                     children: [
                       Container(
                         padding: const EdgeInsets.symmetric(
@@ -191,14 +228,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                           ),
                         ),
                       ),
-                      const SizedBox(width: AppSpacing.sm),
-                      Text(
-                        userDoc?.phone ?? '',
-                        style: Theme.of(context)
-                            .textTheme
-                            .bodySmall
-                            ?.copyWith(color: AppColors.textSecondary),
-                      ),
+                      if (userDoc?.phone.isNotEmpty == true)
+                        Text(
+                          userDoc!.phone,
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodySmall
+                              ?.copyWith(color: AppColors.textSecondary),
+                        ),
                     ],
                   ),
                 ],
@@ -212,28 +249,36 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             if (_editing) ...[
               _SectionHeader(loc.editProfileTitle),
               const SizedBox(height: AppSpacing.sm),
-              TextField(
-                controller: _nameCtrl,
-                decoration: InputDecoration(
-                  labelText: loc.yourName,
-                  prefixIcon: const Icon(Icons.person_rounded),
-                ),
-                textCapitalization: TextCapitalization.words,
-              ),
-              const SizedBox(height: AppSpacing.md),
-              TextField(
-                controller: _villageCtrl,
-                decoration: InputDecoration(
-                  labelText: loc.yourVillage,
-                  prefixIcon: const Icon(Icons.location_city_rounded),
-                ),
-              ),
-              const SizedBox(height: AppSpacing.md),
-              TextField(
-                controller: _districtCtrl,
-                decoration: InputDecoration(
-                  labelText: loc.yourDistrict,
-                  prefixIcon: const Icon(Icons.map_rounded),
+              Form(
+                key: _formKey,
+                child: Column(
+                  children: [
+                    TextFormField(
+                      controller: _nameCtrl,
+                      decoration: InputDecoration(
+                        labelText: loc.yourName,
+                        prefixIcon: const Icon(Icons.person_rounded),
+                      ),
+                      textCapitalization: TextCapitalization.words,
+                      validator: (v) => Validators.name(v, loc),
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+                    TextFormField(
+                      controller: _villageCtrl,
+                      decoration: InputDecoration(
+                        labelText: loc.yourVillage,
+                        prefixIcon: const Icon(Icons.location_city_rounded),
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+                    TextFormField(
+                      controller: _districtCtrl,
+                      decoration: InputDecoration(
+                        labelText: loc.yourDistrict,
+                        prefixIcon: const Icon(Icons.map_rounded),
+                      ),
+                    ),
+                  ],
                 ),
               ),
               const SizedBox(height: AppSpacing.base),
@@ -336,26 +381,28 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     required String body,
     required String confirmLabel,
     required bool destructive,
-  }) =>
-      showDialog<bool>(
-        context: context,
-        builder: (_) => AlertDialog(
-          title: Text(title),
-          content: Text(body),
-          actions: [
-            TextButton(
-                onPressed: () => Navigator.pop(context, false),
-                child: const Text('Cancel')),
-            TextButton(
-              onPressed: () => Navigator.pop(context, true),
-              style: destructive
-                  ? TextButton.styleFrom(foregroundColor: AppColors.error)
-                  : null,
-              child: Text(confirmLabel),
-            ),
-          ],
-        ),
-      );
+  }) {
+    final loc = AppLocalizations.of(context);
+    return showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text(title),
+        content: Text(body),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: Text(loc.cancelBtn)),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: destructive
+                ? TextButton.styleFrom(foregroundColor: AppColors.error)
+                : null,
+            child: Text(confirmLabel),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 // ─── Stats row (role-specific) ────────────────────────────────────────────────
@@ -367,58 +414,78 @@ class _StatsRow extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final loc = AppLocalizations.of(context);
+    final List<DashboardStatCard> cards;
+
     if (role == 'farmer') {
       final farms = ref.watch(myFarmsProvider).valueOrNull ?? [];
       final bookings = ref.watch(farmerBookingsProvider).valueOrNull ?? [];
       final pending = bookings.where((b) => b.isPending).length;
       final completed = bookings.where((b) => b.isCompleted).length;
-      return Row(children: [
-        _StatChip(value: '${farms.length}', label: loc.landsLabel),
-        const SizedBox(width: AppSpacing.sm),
-        _StatChip(value: '$pending', label: loc.bookingPending),
-        const SizedBox(width: AppSpacing.sm),
-        _StatChip(value: '$completed', label: loc.bookingCompleted),
-      ]);
+      cards = [
+        DashboardStatCard(
+          label: loc.landsLabel,
+          value: '${farms.length}',
+          icon: Icons.landscape_rounded,
+          color: AppColors.primary,
+        ),
+        DashboardStatCard(
+          label: loc.bookingPending,
+          value: '$pending',
+          icon: Icons.hourglass_top_rounded,
+          color: AppColors.warning,
+          badge: pending > 0,
+        ),
+        DashboardStatCard(
+          label: loc.bookingCompleted,
+          value: '$completed',
+          icon: Icons.task_alt_rounded,
+          color: AppColors.success,
+        ),
+      ];
     } else {
       final bookings = ref.watch(shepherdBookingsProvider).valueOrNull ?? [];
       final active = bookings.where((b) => b.isActive || b.isConfirmed).length;
       final completed = bookings.where((b) => b.isCompleted).length;
-      return Row(children: [
-        _StatChip(value: '${bookings.length}', label: loc.totalTripsLabel),
-        const SizedBox(width: AppSpacing.sm),
-        _StatChip(value: '$active', label: loc.bookingActive),
-        const SizedBox(width: AppSpacing.sm),
-        _StatChip(value: '$completed', label: loc.bookingCompleted),
-      ]);
+      cards = [
+        DashboardStatCard(
+          label: loc.totalTripsLabel,
+          value: '${bookings.length}',
+          icon: Icons.route_rounded,
+          color: AppColors.primary,
+        ),
+        DashboardStatCard(
+          label: loc.bookingActive,
+          value: '$active',
+          icon: Icons.play_circle_rounded,
+          color: AppColors.success,
+        ),
+        DashboardStatCard(
+          label: loc.bookingCompleted,
+          value: '$completed',
+          icon: Icons.task_alt_rounded,
+          color: AppColors.secondary,
+        ),
+      ];
     }
-  }
-}
 
-class _StatChip extends StatelessWidget {
-  final String value, label;
-  const _StatChip({required this.value, required this.label});
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Below ~92px per card a 3-across row leaves the bold value text
+        // prone to ellipsizing, so wrap to a 2-up layout instead.
+        const minCardWidth = 92.0;
+        const gap = AppSpacing.sm;
+        final threeAcross = (constraints.maxWidth - gap * 2) / 3;
+        final perRow = threeAcross >= minCardWidth ? 3 : 2;
+        final cardWidth = (constraints.maxWidth - gap * (perRow - 1)) / perRow;
 
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.symmetric(
-            vertical: AppSpacing.md, horizontal: AppSpacing.sm),
-        decoration: BoxDecoration(
-          color: AppColors.surfaceVariant,
-          borderRadius: AppSpacing.cardRadius,
-        ),
-        child: Column(
+        return Wrap(
+          spacing: gap,
+          runSpacing: gap,
           children: [
-            Text(value,
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    color: AppColors.primary, fontWeight: FontWeight.w700)),
-            Text(label,
-                style: Theme.of(context).textTheme.bodySmall,
-                textAlign: TextAlign.center),
+            for (final card in cards) SizedBox(width: cardWidth, child: card),
           ],
-        ),
-      ),
+        );
+      },
     );
   }
 }
@@ -504,13 +571,15 @@ class _InfoCard extends StatelessWidget {
   const _InfoCard({required this.children});
 
   @override
-  Widget build(BuildContext context) => Card(
-        elevation: 0,
-        color: AppColors.surfaceVariant,
-        child: Padding(
-          padding: AppSpacing.cardPadding,
-          child: Column(children: children),
+  Widget build(BuildContext context) => Container(
+        padding: AppSpacing.cardPadding,
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: AppSpacing.cardRadius,
+          boxShadow: AppShadows.sm,
+          border: Border.all(color: AppColors.outline),
         ),
+        child: Column(children: children),
       );
 }
 
@@ -528,16 +597,24 @@ class _InfoRow extends StatelessWidget {
             const SizedBox(width: AppSpacing.sm),
             Expanded(
               child: Text(label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: Theme.of(context)
                       .textTheme
                       .bodyMedium
                       ?.copyWith(color: AppColors.textSecondary)),
             ),
-            Text(value,
-                style: Theme.of(context)
-                    .textTheme
-                    .bodyMedium
-                    ?.copyWith(fontWeight: FontWeight.w600)),
+            const SizedBox(width: AppSpacing.sm),
+            Flexible(
+              child: Text(value,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.end,
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodyMedium
+                      ?.copyWith(fontWeight: FontWeight.w600)),
+            ),
           ],
         ),
       );

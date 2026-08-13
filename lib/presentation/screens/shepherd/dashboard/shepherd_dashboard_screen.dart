@@ -5,14 +5,19 @@ import 'package:intl/intl.dart';
 
 import '../../../../core/constants/route_constants.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_shadows.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../data/models/booking_model.dart';
 import '../../../../generated/l10n/app_localizations.dart';
 import '../../../providers/auth/auth_provider.dart';
 import '../../../providers/booking/booking_providers.dart';
 import '../../../providers/notifications/notification_providers.dart';
+import '../../../widgets/common/dashboard_stat_card.dart';
+import '../../../widgets/common/hero_banner.dart';
 import '../../../widgets/common/jm_badge.dart';
 import '../../../widgets/common/jm_loading.dart';
+import '../../../widgets/common/responsive_center.dart';
+import '../../../widgets/explore/empty_state_card.dart';
 
 JmBadgeVariant _bookingVariant(String status) => switch (status) {
       'pending' => JmBadgeVariant.warning,
@@ -43,19 +48,23 @@ class ShepherdDashboardScreen extends ConsumerWidget {
       body: CustomScrollView(
         slivers: [
           _Header(name: userDoc?.name ?? loc.roleShepherd, village: userDoc?.village),
-          SliverPadding(
+          const SliverPadding(
             padding: AppSpacing.screenPadding,
-            sliver: SliverList(
-              delegate: SliverChildListDelegate([
-                const SizedBox(height: AppSpacing.sm),
-                const _QuickActions(),
-                const SizedBox(height: AppSpacing.xl),
-                const _OverviewStats(),
-                const SizedBox(height: AppSpacing.xl),
-                const _ActiveTripBanner(),
-                const _RecentBookings(),
-                const SizedBox(height: AppSpacing.xxl),
-              ]),
+            sliver: SliverToBoxAdapter(
+              child: ResponsiveCenter(
+                child: Column(
+                  children: [
+                    SizedBox(height: AppSpacing.sm),
+                    _QuickActions(),
+                    SizedBox(height: AppSpacing.xl),
+                    _OverviewStats(),
+                    SizedBox(height: AppSpacing.xl),
+                    _ActiveTripBanner(),
+                    _RecentBookings(),
+                    SizedBox(height: AppSpacing.xxl),
+                  ],
+                ),
+              ),
             ),
           ),
         ],
@@ -80,6 +89,8 @@ class _Header extends ConsumerWidget {
       expandedHeight: 150,
       floating: false,
       pinned: true,
+      backgroundColor: AppColors.secondaryDark,
+      elevation: 0,
       actions: [
         IconButton(
           tooltip: loc.voiceAssistantTooltip,
@@ -97,43 +108,11 @@ class _Header extends ConsumerWidget {
         ),
       ],
       flexibleSpace: FlexibleSpaceBar(
-        title: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              loc.greetingName(name),
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w700,
-                fontSize: 17,
-              ),
-            ),
-            if (village != null)
-              Text(
-                village!,
-                style: const TextStyle(color: Colors.white70, fontSize: 11),
-              ),
-          ],
-        ),
-        background: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [AppColors.secondaryDark, AppColors.secondary],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-          ),
-          child: const Align(
-            alignment: Alignment.centerRight,
-            child: Padding(
-              padding: EdgeInsets.only(right: AppSpacing.xl),
-              child: Opacity(
-                opacity: 0.12,
-                child: Icon(Icons.hive_rounded, size: 120, color: Colors.white),
-              ),
-            ),
-          ),
+        background: HeroBanner(
+          name: loc.greetingName(name),
+          subtitle: village,
+          subtitleIcon: village != null ? Icons.location_on_rounded : null,
+          gradientColors: const [AppColors.secondaryDark, AppColors.secondary],
         ),
       ),
     );
@@ -192,23 +171,37 @@ class _ActionChip extends StatelessWidget {
   Widget build(BuildContext context) {
     return Expanded(
       child: Material(
-        color: color.withAlpha(26),
+        color: AppColors.surface,
         borderRadius: AppSpacing.cardRadius,
         child: InkWell(
           borderRadius: AppSpacing.cardRadius,
           onTap: onTap,
           child: Container(
-            padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+            constraints: const BoxConstraints(minHeight: 84),
+            padding: const EdgeInsets.symmetric(
+                vertical: AppSpacing.md, horizontal: AppSpacing.xs),
             decoration: BoxDecoration(
               borderRadius: AppSpacing.cardRadius,
-              border: Border.all(color: color.withAlpha(77)),
+              boxShadow: AppShadows.sm,
+              border: Border.all(color: color.withAlpha(60)),
             ),
             child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(icon, color: color, size: 26),
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: color.withAlpha(26),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(icon, color: color, size: 20),
+                ),
                 const SizedBox(height: AppSpacing.xs),
                 Text(
                   label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontSize: 11,
                     color: color,
@@ -252,127 +245,64 @@ class _OverviewStats extends ConsumerWidget {
     final fmt = NumberFormat.compact(locale: 'en_IN');
     final loc = AppLocalizations.of(context);
 
+    final cards = [
+      DashboardStatCard(
+        label: loc.upcomingLabel,
+        value: '$upcoming',
+        icon: Icons.event_rounded,
+        color: AppColors.info,
+        onTap: () => context.go(RouteConstants.shepherdBookings),
+      ),
+      DashboardStatCard(
+        label: loc.bookingActive,
+        value: '$active',
+        icon: Icons.play_circle_rounded,
+        color: AppColors.success,
+        badge: active > 0,
+        onTap: () => context.go(RouteConstants.shepherdBookings),
+      ),
+      DashboardStatCard(
+        label: loc.tripsDoneLabel,
+        value: '$completed',
+        icon: Icons.check_circle_rounded,
+        color: AppColors.secondary,
+      ),
+      DashboardStatCard(
+        label: loc.spentLabel,
+        value: '₹${fmt.format(totalSpent)}',
+        icon: Icons.currency_rupee_rounded,
+        color: AppColors.primary,
+      ),
+    ];
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(loc.overviewLabel, style: Theme.of(context).textTheme.titleLarge),
         const SizedBox(height: AppSpacing.md),
-        Row(
-          children: [
-            _StatCard(
-              label: loc.upcomingLabel,
-              value: '$upcoming',
-              icon: Icons.event_rounded,
-              color: AppColors.info,
-              onTap: () => context.go(RouteConstants.shepherdBookings),
-            ),
-            const SizedBox(width: AppSpacing.sm),
-            _StatCard(
-              label: loc.bookingActive,
-              value: '$active',
-              icon: Icons.play_circle_rounded,
-              color: AppColors.success,
-              badge: active > 0,
-              onTap: () => context.go(RouteConstants.shepherdBookings),
-            ),
-            const SizedBox(width: AppSpacing.sm),
-            _StatCard(
-              label: loc.tripsDoneLabel,
-              value: '$completed',
-              icon: Icons.check_circle_rounded,
-              color: AppColors.secondary,
-            ),
-            const SizedBox(width: AppSpacing.sm),
-            _StatCard(
-              label: loc.spentLabel,
-              value: '₹${fmt.format(totalSpent)}',
-              icon: Icons.currency_rupee_rounded,
-              color: AppColors.primary,
-            ),
-          ],
+        LayoutBuilder(
+          builder: (context, constraints) {
+            // Below ~392px of content width a 4-across row leaves each card
+            // too narrow for its bold value text to render without
+            // ellipsizing, so fall back to a 2x2 wrap.
+            const minCardWidth = 92.0;
+            const gap = AppSpacing.sm;
+            final fourAcross = (constraints.maxWidth - gap * 3) / 4;
+            final perRow = fourAcross >= minCardWidth ? 4 : 2;
+            final cardWidth =
+                (constraints.maxWidth - gap * (perRow - 1)) / perRow;
+
+            return Wrap(
+              spacing: gap,
+              runSpacing: gap,
+              children: [
+                for (final card in cards)
+                  SizedBox(width: cardWidth, child: card),
+              ],
+            );
+          },
         ),
       ],
-    );
-  }
-}
-
-class _StatCard extends StatelessWidget {
-  final String label;
-  final String value;
-  final IconData icon;
-  final Color color;
-  final bool badge;
-  final VoidCallback? onTap;
-
-  const _StatCard({
-    required this.label,
-    required this.value,
-    required this.icon,
-    required this.color,
-    this.badge = false,
-    this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: Material(
-        color: AppColors.surface,
-        borderRadius: AppSpacing.cardRadius,
-        child: InkWell(
-          borderRadius: AppSpacing.cardRadius,
-          onTap: onTap,
-          child: Container(
-            padding: const EdgeInsets.all(AppSpacing.md),
-            decoration: BoxDecoration(
-              borderRadius: AppSpacing.cardRadius,
-              border: Border.all(
-                color: badge ? color.withAlpha(140) : AppColors.outline,
-                width: badge ? 1.5 : 1,
-              ),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    Icon(icon, color: color, size: 18),
-                    if (badge)
-                      Positioned(
-                        right: -4,
-                        top: -4,
-                        child: Container(
-                          width: 8,
-                          height: 8,
-                          decoration: BoxDecoration(
-                            color: color,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-                const SizedBox(height: AppSpacing.xs),
-                Text(
-                  value,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.textPrimary,
-                      ),
-                ),
-                Text(
-                  label,
-                  style: Theme.of(context)
-                      .textTheme
-                      .bodySmall
-                      ?.copyWith(fontSize: 10),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
     );
   }
 }
@@ -424,12 +354,16 @@ class _ActiveTripBanner extends ConsumerWidget {
                     children: [
                       Text(
                         loc.activeTripMsg(trip.farmTitle),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: Theme.of(context).textTheme.titleSmall?.copyWith(
                               color: AppColors.success,
                             ),
                       ),
                       Text(
                         loc.tripEndsMsg(trip.animalCount, dateStr),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               color: AppColors.success.withAlpha(180),
                             ),
@@ -494,36 +428,13 @@ class _EmptyTrips extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context);
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: AppSpacing.xxl),
-      child: Column(
-        children: [
-          const Icon(Icons.route_rounded,
-              size: 48, color: AppColors.textDisabled),
-          const SizedBox(height: AppSpacing.md),
-          Text(
-            loc.noTripsYetTitle,
-            style: Theme.of(context)
-                .textTheme
-                .bodyMedium
-                ?.copyWith(color: AppColors.textSecondary),
-          ),
-          const SizedBox(height: AppSpacing.xs),
-          Text(
-            loc.noTripsYetSubtitle,
-            style: Theme.of(context)
-                .textTheme
-                .bodySmall
-                ?.copyWith(color: AppColors.textDisabled),
-          ),
-          const SizedBox(height: AppSpacing.xl),
-          OutlinedButton.icon(
-            onPressed: () => context.go(RouteConstants.shepherdDiscover),
-            icon: const Icon(Icons.search_rounded),
-            label: Text(loc.discoverLandsBtn),
-          ),
-        ],
-      ),
+    return EmptyStateCard(
+      icon: Icons.route_rounded,
+      title: loc.noTripsYetTitle,
+      subtitle: loc.noTripsYetSubtitle,
+      accentColor: AppColors.secondary,
+      buttonLabel: loc.discoverLandsBtn,
+      onButtonTap: () => context.go(RouteConstants.shepherdDiscover),
     );
   }
 }
@@ -580,10 +491,15 @@ class _TripRow extends StatelessWidget {
                   children: [
                     Text(
                       booking.farmTitle,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: Theme.of(context).textTheme.titleSmall,
                     ),
                     Text(
-                      loc.bookingSummaryMsg(booking.animalCount, dateStr, fmt.format(booking.totalAmount)),
+                      loc.bookingSummaryMsg(booking.animalCount, dateStr,
+                          fmt.format(booking.totalAmount)),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             color: AppColors.textSecondary,
                           ),

@@ -38,6 +38,7 @@ class RouteConstants {
   static const String emergency = '/shared/emergency';
   static const String assistant = '/shared/assistant';
   static const String notifications = '/shared/notifications';
+  static const String settings = '/shared/settings';
   static const String mapPicker = '/shared/map-picker';
   static const String reportAlert = '/shared/report-alert';
   static const String unifiedSearch = '/shared/search';

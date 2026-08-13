@@ -37,6 +37,7 @@ import '../../presentation/screens/shared/emergency_screen.dart';
 import '../../presentation/screens/shared/booking_detail_screen.dart';
 import '../../presentation/screens/shared/assistant_screen.dart';
 import '../../presentation/screens/shared/notifications_screen.dart';
+import '../../presentation/screens/shared/settings_screen.dart';
 import '../../presentation/screens/shared/map_picker_screen.dart';
 import '../../presentation/screens/shared/report_alert_screen.dart';
 import '../../presentation/screens/shepherd/bookings/book_land_screen.dart';
@@ -264,6 +265,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       // ── Shared ────────────────────────────────────────────────────────────
       GoRoute(path: RouteConstants.emergency, builder: (_, __) => const EmergencyScreen()),
       GoRoute(path: RouteConstants.notifications, builder: (_, __) => const NotificationsScreen()),
+      GoRoute(path: RouteConstants.settings, builder: (_, __) => const SettingsScreen()),
       GoRoute(path: RouteConstants.assistant, builder: (_, __) => const AssistantScreen()),
       GoRoute(
         path: RouteConstants.reportAlert,

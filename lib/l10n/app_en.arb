@@ -95,6 +95,20 @@
   "bookingActive": "Active",
   "bookingCompleted": "Completed",
   "bookingCancelled": "Cancelled",
+  "historyLabel": "History",
+  "rejectBtn": "Reject",
+  "acceptBtn": "Accept",
+  "animalsCountLabel": "{count} animals",
+  "@animalsCountLabel": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "noPendingRequestsTitle": "No Pending Requests",
+  "noPendingRequestsSubtitle": "New booking requests from shepherds will appear here",
+  "noActiveBookingsTitle": "No Active Bookings",
+  "noActiveBookingsSubtitle": "Confirmed and ongoing bookings will appear here",
+  "noHistoryYetTitle": "No History Yet",
+  "noHistoryYetSubtitle": "Completed and cancelled bookings will appear here",
+  "bookLandToSeeBookingsMsg": "Book a grazing land from Discover to see your bookings here",
 
   "nearbyVets": "Vets Nearby",
   "govtVet": "Govt. Vet",
@@ -118,6 +132,12 @@
 
   "notifications": "Notifications",
   "noNotifications": "No notifications yet",
+  "noNotificationsSubtitle": "Booking updates and alerts will appear here",
+  "markAllReadBtn": "Mark all as read",
+  "todayLabel": "Today",
+  "yesterdayLabel": "Yesterday",
+  "thisWeekLabel": "This week",
+  "earlierLabel": "Earlier",
 
   "settings": "Settings",
   "language": "Language",
@@ -255,6 +275,8 @@
   "clearFiltersBtn": "Clear Filters",
   "tryFewerFiltersMsg": "Try removing some filters or increasing the radius.",
   "noLandsFoundTitle": "No Lands Found",
+  "noLandsYetTitle": "No lands yet",
+  "noLandsYetSubtitle": "Add your farmland to start receiving bookings from shepherds",
   "locationNeededLandsMsg": "JeevaMitra needs your location to show nearby grazing lands.",
   "showUnavailableLabel": "Show unavailable lands too",
   "waterAvailableLabel": "Water Available",

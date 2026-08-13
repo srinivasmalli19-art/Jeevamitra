@@ -15,14 +15,22 @@ class HeroBanner extends StatelessWidget {
   final String? greeting;
   final String name;
   final String? subtitle;
+  final IconData? subtitleIcon;
   final List<Widget> actions;
+
+  /// Overrides the default brand (primary) gradient — e.g. the shepherd
+  /// role's secondary teal — while keeping every other visual (motif,
+  /// overlay, text treatment) identical across roles.
+  final List<Color>? gradientColors;
 
   const HeroBanner({
     super.key,
     this.greeting,
     required this.name,
     this.subtitle,
+    this.subtitleIcon,
     this.actions = const [],
+    this.gradientColors,
   });
 
   @override
@@ -31,10 +39,11 @@ class HeroBanner extends StatelessWidget {
       fit: StackFit.expand,
       children: [
         // Base brand gradient.
-        const DecoratedBox(
+        DecoratedBox(
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [AppColors.primaryLight, AppColors.primaryDark],
+              colors: gradientColors ??
+                  const [AppColors.primaryLight, AppColors.primaryDark],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -106,12 +115,23 @@ class HeroBanner extends StatelessWidget {
                       ),
                       if (subtitle != null) ...[
                         const SizedBox(height: 2),
-                        Text(
-                          subtitle!,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                              color: Colors.white70, fontSize: 12),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (subtitleIcon != null) ...[
+                              Icon(subtitleIcon, size: 13, color: Colors.white70),
+                              const SizedBox(width: 4),
+                            ],
+                            Flexible(
+                              child: Text(
+                                subtitle!,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                    color: Colors.white70, fontSize: 12),
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ],

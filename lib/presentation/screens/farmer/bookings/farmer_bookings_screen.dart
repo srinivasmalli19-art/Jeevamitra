@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 
 import '../../../../core/constants/route_constants.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_shadows.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/utils/firebase_error_translator.dart';
 import '../../../../data/models/booking_model.dart';
+import '../../../../generated/l10n/app_localizations.dart';
 import '../../../providers/booking/booking_providers.dart';
 import '../../../widgets/common/jm_badge.dart';
 import '../../../widgets/common/jm_empty_state.dart';
@@ -41,26 +45,27 @@ class _FarmerBookingsScreenState extends ConsumerState<FarmerBookingsScreen>
   @override
   Widget build(BuildContext context) {
     final bookingsAsync = ref.watch(farmerBookingsProvider);
+    final loc = AppLocalizations.of(context);
 
     return Scaffold(
       appBar: StandardAppBar(
-        title: 'Bookings',
+        title: loc.bookings,
         bottom: TabBar(
           controller: _tabs,
           labelColor: Colors.white,
           unselectedLabelColor: Colors.white70,
           indicatorColor: Colors.white,
-          tabs: const [
-            Tab(text: 'Pending'),
-            Tab(text: 'Active'),
-            Tab(text: 'History'),
+          tabs: [
+            Tab(text: loc.bookingPending),
+            Tab(text: loc.bookingActive),
+            Tab(text: loc.historyLabel),
           ],
         ),
       ),
       body: bookingsAsync.when(
-        loading: () => const Center(child: JmLoading()),
+        loading: () => const JmShimmerList(count: 3, cardHeight: 130),
         error: (e, _) => JmErrorState(
-          message: e.toString(),
+          message: friendlyFirebaseMessage(e),
           onRetry: () => ref.invalidate(farmerBookingsProvider),
         ),
         data: (all) => TabBarView(
@@ -68,23 +73,21 @@ class _FarmerBookingsScreenState extends ConsumerState<FarmerBookingsScreen>
           children: [
             _BookingList(
               bookings: all.where((b) => b.isPending).toList(),
-              emptyTitle: 'No Pending Requests',
-              emptySubtitle:
-                  'New booking requests from shepherds will appear here.',
+              emptyTitle: loc.noPendingRequestsTitle,
+              emptySubtitle: loc.noPendingRequestsSubtitle,
               role: 'farmer',
             ),
             _BookingList(
               bookings: all.where((b) => b.isConfirmed || b.isActive).toList(),
-              emptyTitle: 'No Active Bookings',
-              emptySubtitle: 'Confirmed and ongoing bookings will appear here.',
+              emptyTitle: loc.noActiveBookingsTitle,
+              emptySubtitle: loc.noActiveBookingsSubtitle,
               role: 'farmer',
             ),
             _BookingList(
               bookings:
                   all.where((b) => b.isCompleted || b.isCancelled).toList(),
-              emptyTitle: 'No History Yet',
-              emptySubtitle:
-                  'Completed and cancelled bookings will appear here.',
+              emptyTitle: loc.noHistoryYetTitle,
+              emptySubtitle: loc.noHistoryYetSubtitle,
               role: 'farmer',
             ),
           ],
@@ -135,19 +138,22 @@ class _BookingCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(
+    final loc = AppLocalizations.of(context);
+
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.surface,
         borderRadius: AppSpacing.cardRadius,
-        side: BorderSide(
+        boxShadow: AppShadows.sm,
+        border: Border.all(
           color: booking.isPending ? AppColors.warning : AppColors.outline,
           width: booking.isPending ? 1.5 : 1,
         ),
       ),
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: () =>
             context.push(RouteConstants.bookingDetail(role, booking.id)),
-        borderRadius: AppSpacing.cardRadius,
         child: Padding(
           padding: AppSpacing.cardPadding,
           child: Column(
@@ -163,7 +169,22 @@ class _BookingCard extends ConsumerWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  _statusBadge(booking.status),
+                  const SizedBox(width: AppSpacing.sm),
+                  _statusBadge(booking.status, loc),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.xs),
+              Row(
+                children: [
+                  const Icon(Icons.person_rounded,
+                      size: 13, color: AppColors.textSecondary),
+                  const SizedBox(width: 3),
+                  Expanded(
+                    child: Text(booking.shepherdName,
+                        style: Theme.of(context).textTheme.bodySmall,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis),
+                  ),
                 ],
               ),
               const SizedBox(height: AppSpacing.xs),
@@ -172,8 +193,12 @@ class _BookingCard extends ConsumerWidget {
                   const Icon(Icons.location_on_rounded,
                       size: 13, color: AppColors.textSecondary),
                   const SizedBox(width: 3),
-                  Text(booking.farmVillage,
-                      style: Theme.of(context).textTheme.bodySmall),
+                  Expanded(
+                    child: Text(booking.farmVillage,
+                        style: Theme.of(context).textTheme.bodySmall,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis),
+                  ),
                 ],
               ),
               const SizedBox(height: AppSpacing.sm),
@@ -183,16 +208,22 @@ class _BookingCard extends ConsumerWidget {
                       size: 13, color: AppColors.textSecondary),
                   const SizedBox(width: 3),
                   Text(
-                    '${_fmt(booking.checkIn)} → ${_fmt(booking.checkOut)}',
+                    '${DateFormat('d MMM').format(booking.checkIn)} → '
+                    '${DateFormat('d MMM').format(booking.checkOut)}',
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                   const Spacer(),
-                  Text(
-                    '₹${booking.totalAmount.toStringAsFixed(0)}',
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleSmall
-                        ?.copyWith(color: AppColors.primary),
+                  Flexible(
+                    child: Text(
+                      '₹${booking.totalAmount.toStringAsFixed(0)}',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.end,
+                      style: Theme.of(context)
+                          .textTheme
+                          .titleSmall
+                          ?.copyWith(color: AppColors.primary),
+                    ),
                   ),
                 ],
               ),
@@ -201,29 +232,31 @@ class _BookingCard extends ConsumerWidget {
                 Row(
                   children: [
                     Expanded(
-                      child: OutlinedButton(
+                      child: OutlinedButton.icon(
                         onPressed: () => ref
                             .read(bookingNotifierProvider.notifier)
                             .cancelBooking(booking.id, 'Rejected by farmer'),
+                        icon: const Icon(Icons.close_rounded, size: 16),
+                        label: Text(loc.rejectBtn),
                         style: OutlinedButton.styleFrom(
                           foregroundColor: AppColors.error,
                           side: const BorderSide(color: AppColors.error),
                           visualDensity: VisualDensity.compact,
                         ),
-                        child: const Text('Reject'),
                       ),
                     ),
                     const SizedBox(width: AppSpacing.sm),
                     Expanded(
-                      child: FilledButton(
+                      child: FilledButton.icon(
                         onPressed: () => ref
                             .read(bookingNotifierProvider.notifier)
                             .confirmBooking(booking.id),
+                        icon: const Icon(Icons.check_rounded, size: 16),
+                        label: Text(loc.acceptBtn),
                         style: FilledButton.styleFrom(
                           backgroundColor: AppColors.success,
                           visualDensity: VisualDensity.compact,
                         ),
-                        child: const Text('Accept'),
                       ),
                     ),
                   ],
@@ -236,33 +269,14 @@ class _BookingCard extends ConsumerWidget {
     );
   }
 
-  Widget _statusBadge(String status) {
+  Widget _statusBadge(String status, AppLocalizations loc) {
     final (label, variant) = switch (status) {
-      'pending' => ('Pending', JmBadgeVariant.warning),
-      'confirmed' => ('Confirmed', JmBadgeVariant.info),
-      'active' => ('Active', JmBadgeVariant.success),
-      'completed' => ('Completed', JmBadgeVariant.neutral),
-      _ => ('Cancelled', JmBadgeVariant.error),
+      'pending' => (loc.bookingPending, JmBadgeVariant.warning),
+      'confirmed' => (loc.bookingConfirmed, JmBadgeVariant.info),
+      'active' => (loc.bookingActive, JmBadgeVariant.success),
+      'completed' => (loc.bookingCompleted, JmBadgeVariant.neutral),
+      _ => (loc.bookingCancelled, JmBadgeVariant.error),
     };
     return JmBadge(label: label, variant: variant, small: true);
-  }
-
-  String _fmt(DateTime d) {
-    const m = [
-      '',
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec'
-    ];
-    return '${d.day} ${m[d.month]}';
   }
 }
