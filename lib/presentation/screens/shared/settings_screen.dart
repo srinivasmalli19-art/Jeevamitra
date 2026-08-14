@@ -110,7 +110,8 @@ class SettingsScreen extends ConsumerWidget {
       destructive: true,
     );
     if (confirmed != true) return;
-    final error = await ref.read(authNotifierProvider.notifier).deleteAccount(uid);
+    final error =
+        await ref.read(authNotifierProvider.notifier).deleteAccount(uid, loc);
     if (!context.mounted) return;
     if (error == null) {
       context.go(RouteConstants.phoneLogin);

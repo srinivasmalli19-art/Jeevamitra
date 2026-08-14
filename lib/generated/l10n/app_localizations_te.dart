@@ -549,6 +549,22 @@ class AppLocalizationsTe extends AppLocalizations {
   String get deleteAccountSubtitle => 'మీ మొత్తం డేటాను శాశ్వతంగా తొలగిస్తుంది';
 
   @override
+  String get reauthRequiredBeforeDeleteMsg =>
+      'భద్రత కోసం, మీ ఖాతాను తొలగించే ముందు దయచేసి మళ్లీ సైన్ ఇన్ చేయండి.';
+
+  @override
+  String get deleteAccountDataFailedMsg =>
+      'మీ డేటాను తొలగించలేకపోయాము. దయచేసి మీ కనెక్షన్‌ని తనిఖీ చేసి మళ్లీ ప్రయత్నించండి.';
+
+  @override
+  String get deleteAccountPartialReauthMsg =>
+      'మీ డేటా తొలగించబడింది. భద్రత కోసం, పూర్తి చేయడానికి దయచేసి మళ్లీ సైన్ ఇన్ చేసి మీ ఖాతాను మళ్లీ తొలగించండి.';
+
+  @override
+  String get deleteAccountPartialFailedMsg =>
+      'మీ డేటా తొలగించబడింది, కానీ మీ సైన్-ఇన్‌ను తీసివేయలేకపోయాము. దయచేసి మళ్లీ ప్రయత్నించండి.';
+
+  @override
   String get landsLabel => 'భూములు';
 
   @override
@@ -1068,6 +1084,33 @@ class AppLocalizationsTe extends AppLocalizations {
 
   @override
   String get sharedViaAppMsg => 'జీవమిత్ర ద్వారా షేర్ చేయబడింది';
+
+  @override
+  String get myReportedAlertsTitle => 'నేను నివేదించిన హెచ్చరికలు';
+
+  @override
+  String get noReportedAlertsTitle => 'నివేదించిన హెచ్చరికలు లేవు';
+
+  @override
+  String get noReportedAlertsSubtitle =>
+      'మీరు నివేదించిన హెచ్చరికలు ఇక్కడ కనిపిస్తాయి';
+
+  @override
+  String get withdrawAlertBtn => 'హెచ్చరికను ఉపసంహరించు';
+
+  @override
+  String get withdrawAlertConfirmTitle => 'ఈ హెచ్చరికను ఉపసంహరించాలా?';
+
+  @override
+  String get withdrawAlertConfirmBody =>
+      'ఇది హెచ్చరికను నిష్క్రియంగా గుర్తిస్తుంది. ఇతర వినియోగదారులకు ఇది యాక్టివ్ హెచ్చరికలలో కనిపించదు.';
+
+  @override
+  String get withdrawAlertSuccessMsg => 'హెచ్చరిక ఉపసంహరించబడింది';
+
+  @override
+  String get withdrawAlertFailedMsg =>
+      'హెచ్చరికను ఉపసంహరించలేకపోయాము. దయచేసి మళ్లీ ప్రయత్నించండి.';
 
   @override
   String get reportAlertTitle => 'వ్యాధి హెచ్చరిక నివేదించండి';

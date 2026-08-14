@@ -137,6 +137,17 @@ class _AlertDashboardState extends ConsumerState<AlertDashboard>
                   onPressed: () => context.push(RouteConstants.alertMap),
                 ),
               ),
+              const SizedBox(width: AppSpacing.sm),
+              Material(
+                color: AppColors.surface,
+                borderRadius: AppSpacing.cardRadius,
+                child: IconButton(
+                  icon: const Icon(Icons.campaign_outlined),
+                  tooltip: loc.myReportedAlertsTitle,
+                  onPressed: () =>
+                      context.push(RouteConstants.myReportedAlerts),
+                ),
+              ),
             ],
           ),
         ),

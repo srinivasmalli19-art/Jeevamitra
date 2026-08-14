@@ -98,7 +98,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     );
     if (confirmed != true) return;
     final error =
-        await ref.read(authNotifierProvider.notifier).deleteAccount(uid);
+        await ref.read(authNotifierProvider.notifier).deleteAccount(uid, loc);
     if (!mounted) return;
     if (error == null) {
       context.go(RouteConstants.phoneLogin);

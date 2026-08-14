@@ -39,6 +39,16 @@ final alertDetailProvider =
   return ref.watch(diseaseAlertRepositoryProvider).watchAlert(alertId);
 });
 
+/// Alerts the current user reported themselves — active and withdrawn —
+/// for the "My Reported Alerts" screen. Auth-gated the same way the other
+/// providers in this file are (see nearbyAlertsProvider's comment).
+final myReportedAlertsProvider =
+    StreamProvider.autoDispose<List<DiseaseAlertModel>>((ref) {
+  final uid = ref.watch(authStateProvider).valueOrNull?.uid;
+  if (uid == null) return Stream.value([]);
+  return ref.watch(diseaseAlertRepositoryProvider).watchByReporter(uid);
+});
+
 // ── Create / manage alerts ────────────────────────────────────────────────────
 
 class DiseaseAlertNotifier extends StateNotifier<AsyncValue<void>> {

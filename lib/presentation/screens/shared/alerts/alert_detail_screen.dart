@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -20,6 +21,15 @@ import '../../../widgets/explore/empty_state_card.dart';
 import '../../../widgets/explore/premium_vet_card.dart';
 import '../../../widgets/explore/retry_card.dart';
 import 'alert_severity.dart';
+
+/// Whether the Withdraw action should be shown on Alert Detail: only to the
+/// alert's own reporter, and only while it's still active — deactivating
+/// an already-inactive alert is a no-op, and the actual authorization is
+/// enforced server-side by firestore.rules regardless of this UI gate.
+bool canWithdrawAlert(DiseaseAlertModel alert, String? currentUid) =>
+    alert.isActive &&
+    alert.reportedBy.isNotEmpty &&
+    alert.reportedBy == currentUid;
 
 /// Alert Detail: hero, severity badge, description, symptoms, treatment,
 /// prevention, government advisory (source authority), nearest
@@ -225,6 +235,21 @@ class _AlertDetailBody extends ConsumerWidget {
                   side: const BorderSide(color: AppColors.secondary),
                 ),
               ),
+              if (canWithdrawAlert(
+                  alert, FirebaseAuth.instance.currentUser?.uid)) ...[
+                const SizedBox(height: AppSpacing.sm),
+                OutlinedButton.icon(
+                  onPressed: () => _withdraw(context, ref, alert, loc),
+                  icon: const Icon(Icons.block_rounded),
+                  label: Text(loc.withdrawAlertBtn),
+                  style: OutlinedButton.styleFrom(
+                    minimumSize:
+                        const Size(double.infinity, AppSpacing.buttonHeight),
+                    foregroundColor: AppColors.error,
+                    side: const BorderSide(color: AppColors.error),
+                  ),
+                ),
+              ],
               const SizedBox(height: AppSpacing.xxl),
             ]),
           ),
@@ -247,6 +272,36 @@ class _AlertDetailBody extends ConsumerWidget {
   Future<void> _call(BuildContext context, String phone, AppLocalizations loc) =>
       launchExternalUrl(context, telUri(phone),
           failureMessage: loc.couldNotOpenDialerMsg);
+
+  Future<void> _withdraw(BuildContext context, WidgetRef ref,
+      DiseaseAlertModel alert, AppLocalizations loc) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text(loc.withdrawAlertConfirmTitle),
+        content: Text(loc.withdrawAlertConfirmBody),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: Text(loc.cancelBtn)),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(foregroundColor: AppColors.error),
+            child: Text(loc.withdrawAlertBtn),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+
+    final ok = await ref
+        .read(diseaseAlertNotifierProvider.notifier)
+        .deactivateAlert(alert.id);
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(ok ? loc.withdrawAlertSuccessMsg : loc.withdrawAlertFailedMsg),
+    ));
+  }
 
   Future<void> _share(DiseaseAlertModel alert, AppLocalizations loc) {
     final where = alert.village.isNotEmpty

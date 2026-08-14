@@ -546,6 +546,22 @@ class AppLocalizationsHi extends AppLocalizations {
       'आपका सारा डेटा स्थायी रूप से हटा देता है';
 
   @override
+  String get reauthRequiredBeforeDeleteMsg =>
+      'For security, please sign in again before deleting your account.';
+
+  @override
+  String get deleteAccountDataFailedMsg =>
+      'Could not delete your data. Please check your connection and try again.';
+
+  @override
+  String get deleteAccountPartialReauthMsg =>
+      'Your data was deleted. For security, please sign in again and delete your account once more to finish removing it.';
+
+  @override
+  String get deleteAccountPartialFailedMsg =>
+      'Your data was deleted, but we could not remove your sign-in. Please try again.';
+
+  @override
   String get landsLabel => 'भूमियाँ';
 
   @override
@@ -1062,6 +1078,32 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get sharedViaAppMsg => 'Shared via JeevaMitra';
+
+  @override
+  String get myReportedAlertsTitle => 'My Reported Alerts';
+
+  @override
+  String get noReportedAlertsTitle => 'No reported alerts';
+
+  @override
+  String get noReportedAlertsSubtitle => 'Alerts you report will appear here';
+
+  @override
+  String get withdrawAlertBtn => 'Withdraw Alert';
+
+  @override
+  String get withdrawAlertConfirmTitle => 'Withdraw this alert?';
+
+  @override
+  String get withdrawAlertConfirmBody =>
+      'This will mark the alert as inactive. Other users will no longer see it in active alerts.';
+
+  @override
+  String get withdrawAlertSuccessMsg => 'Alert withdrawn';
+
+  @override
+  String get withdrawAlertFailedMsg =>
+      'Could not withdraw the alert. Please try again.';
 
   @override
   String get reportAlertTitle => 'Report Disease Alert';

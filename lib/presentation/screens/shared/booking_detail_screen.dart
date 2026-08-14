@@ -237,6 +237,19 @@ class BookingDetailScreen extends ConsumerWidget {
             ),
           ),
         );
+        actions.add(const SizedBox(height: AppSpacing.sm));
+        actions.add(
+          OutlinedButton.icon(
+            onPressed: () => _cancelDialog(context, notifier, booking.id, booking: booking),
+            icon: const Icon(Icons.cancel_rounded),
+            label: const Text('Cancel Booking'),
+            style: OutlinedButton.styleFrom(
+              minimumSize: const Size(double.infinity, AppSpacing.buttonHeight),
+              foregroundColor: AppColors.error,
+              side: const BorderSide(color: AppColors.error),
+            ),
+          ),
+        );
       }
       if (booking.isActive) {
         actions.add(
@@ -323,7 +336,7 @@ class BookingDetailScreen extends ConsumerWidget {
     if (confirmed != true) return;
     await notifier.cancelBooking(
         bookingId, reasonCtrl.text.trim().isEmpty ? 'Cancelled' : reasonCtrl.text.trim(),
-        booking: booking);
+        booking: booking, cancelledByRole: role);
     if (!context.mounted) return;
     ScaffoldMessenger.of(context)
         .showSnackBar(const SnackBar(content: Text('Booking cancelled')));

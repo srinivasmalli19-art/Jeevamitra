@@ -139,6 +139,37 @@ void main() {
     });
   });
 
+  group('watchByReporter', () {
+    test('returns only alerts reported by the given user, active and inactive',
+        () async {
+      await firestore.collection('disease_alerts').add(_alert(
+              id: 'mine-active', lat: originLat, lng: originLng, isActive: true)
+          .toFirestore()
+        ..['reportedBy'] = 'reporter-1');
+      await firestore.collection('disease_alerts').add(_alert(
+              id: 'mine-inactive', lat: originLat, lng: originLng, isActive: false)
+          .toFirestore()
+        ..['reportedBy'] = 'reporter-1');
+      await firestore.collection('disease_alerts').add(
+          _alert(id: 'not-mine', lat: originLat, lng: originLng).toFirestore()
+            ..['reportedBy'] = 'reporter-2');
+
+      final results = await repo.watchByReporter('reporter-1').first;
+
+      expect(results, hasLength(2));
+      expect(results.every((a) => a.id != 'not-mine'), isTrue);
+    });
+
+    test('returns an empty list for a user who has reported nothing', () async {
+      await firestore.collection('disease_alerts').add(
+          _alert(id: 'x', lat: originLat, lng: originLng).toFirestore()
+            ..['reportedBy'] = 'someone-else');
+
+      final results = await repo.watchByReporter('reporter-1').first;
+      expect(results, isEmpty);
+    });
+  });
+
   group('watchAlert', () {
     test('streams a single alert document by id', () async {
       final ref = await firestore
@@ -194,6 +225,29 @@ void main() {
       final doc = await firestore.collection('disease_alerts').doc(ref.id).get();
       expect(doc.data()!['isActive'], isFalse);
       expect(doc.data()!['disease'], 'PPR');
+    });
+
+    test(
+        'deactivateAlert causes watchAlert\'s live stream to emit the '
+        'updated (inactive) alert — the mechanism AlertDetailScreen relies '
+        'on to hide the Withdraw button immediately after use', () async {
+      final ref = await firestore
+          .collection('disease_alerts')
+          .add(_alert(id: 'x', lat: originLat, lng: originLng, isActive: true)
+              .toFirestore());
+
+      final emissions = <bool>[];
+      final sub = repo.watchAlert(ref.id).listen((a) {
+        if (a != null) emissions.add(a.isActive);
+      });
+      await Future<void>.delayed(Duration.zero);
+
+      await repo.deactivateAlert(ref.id);
+      await Future<void>.delayed(Duration.zero);
+      await sub.cancel();
+
+      expect(emissions.first, isTrue);
+      expect(emissions.last, isFalse);
     });
   });
 }

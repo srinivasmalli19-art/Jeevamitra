@@ -41,6 +41,18 @@ service cloud.firestore {
         allow write: if isSignedIn() &&
             request.auth.uid ==
             get(/databases/$(database)/documents/farms/$(farmId)).data.ownerId;
+
+        // Releasing a confirmed-booking lock (BookingRepository sets
+        // `bookingId` on periods it auto-creates — see cancelBooking /
+        // _confirmWithLock): either party of that specific booking may
+        // delete it, not just the farm owner, since a shepherd can cancel
+        // their own confirmed booking and that must free the reservation.
+        allow delete: if isSignedIn() &&
+            resource.data.bookingId != null &&
+            request.auth.uid in [
+              get(/databases/$(database)/documents/bookings/$(resource.data.bookingId)).data.farmerId,
+              get(/databases/$(database)/documents/bookings/$(resource.data.bookingId)).data.shepherdId
+            ];
       }
     }
 

@@ -7,6 +7,7 @@ import '../../../../core/constants/route_constants.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../data/models/booking_model.dart';
+import '../../../../data/repositories/booking_repository.dart';
 import '../../../../data/repositories/farm_availability_repository.dart';
 import '../../../providers/auth/auth_provider.dart';
 import '../../../providers/booking/booking_providers.dart';
@@ -121,7 +122,10 @@ class _BookLandScreenState extends ConsumerState<BookLandScreen> {
       );
       context.go(RouteConstants.shepherdBookings);
     } else {
-      _snack('Failed to submit booking. Please try again.');
+      final error = ref.read(bookingNotifierProvider).error;
+      _snack(error is BookingConflictException
+          ? error.message
+          : 'Failed to submit booking. Please try again.');
     }
   }
 

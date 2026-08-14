@@ -61,6 +61,18 @@ class DiseaseAlertRepository {
       .map((s) =>
           s.docs.map((d) => d.data()).where((a) => !a.isExpired).toList());
 
+  /// All alerts reported by [uid] — active and withdrawn — newest first,
+  /// for the "My Reported Alerts" screen.
+  Stream<List<DiseaseAlertModel>> watchByReporter(String uid) => _col
+      .where('reportedBy', isEqualTo: uid)
+      .orderBy('issuedAt', descending: true)
+      .snapshots()
+      .map((s) => s.docs.map((d) => d.data()).toList());
+
+  /// Creates the alert. Recipient discovery/notification fan-out happens
+  /// server-side (Cloud Function `onDiseaseAlertCreated` in
+  /// functions/index.js), not here — the client has no legitimate way to
+  /// query other users' documents, and never should.
   Future<String> createAlert(DiseaseAlertModel alert) async {
     final ref = await _col.add(alert);
     return ref.id;

@@ -33,6 +33,7 @@ import '../../presentation/screens/shepherd/explore_map/explore_map_screen.dart'
 import '../../presentation/screens/shared/search/unified_search_screen.dart';
 import '../../presentation/screens/shared/alerts/alert_detail_screen.dart';
 import '../../presentation/screens/shared/alerts/alert_map_screen.dart';
+import '../../presentation/screens/shared/alerts/my_reported_alerts_screen.dart';
 import '../../presentation/screens/shared/emergency_screen.dart';
 import '../../presentation/screens/shared/booking_detail_screen.dart';
 import '../../presentation/screens/shared/assistant_screen.dart';
@@ -288,6 +289,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: RouteConstants.unifiedSearch,
         builder: (_, __) => const UnifiedSearchScreen(),
+      ),
+      GoRoute(
+        path: RouteConstants.myReportedAlerts,
+        builder: (_, __) => const MyReportedAlertsScreen(),
       ),
       GoRoute(
         path: RouteConstants.alertDetailPath,

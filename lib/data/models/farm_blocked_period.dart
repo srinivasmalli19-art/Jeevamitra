@@ -8,6 +8,13 @@ class FarmBlockedPeriod {
   final String? reason;
   final DateTime createdAt;
 
+  /// Set only for periods BookingRepository auto-creates when a booking is
+  /// confirmed (see createBooking/updateStatus) — null for periods the
+  /// farmer added manually via FarmAvailabilityRepository. Lets a confirmed
+  /// booking's reservation be found and released again on cancellation
+  /// without disturbing manual blocks.
+  final String? bookingId;
+
   const FarmBlockedPeriod({
     required this.id,
     required this.farmId,
@@ -15,6 +22,7 @@ class FarmBlockedPeriod {
     required this.endDate,
     this.reason,
     required this.createdAt,
+    this.bookingId,
   });
 
   factory FarmBlockedPeriod.fromFirestore(
@@ -27,6 +35,7 @@ class FarmBlockedPeriod {
       endDate: (d['endDate'] as Timestamp).toDate(),
       reason: d['reason'] as String?,
       createdAt: (d['createdAt'] as Timestamp).toDate(),
+      bookingId: d['bookingId'] as String?,
     );
   }
 
@@ -36,6 +45,7 @@ class FarmBlockedPeriod {
         'endDate': Timestamp.fromDate(endDate),
         if (reason != null) 'reason': reason,
         'createdAt': Timestamp.fromDate(createdAt),
+        if (bookingId != null) 'bookingId': bookingId,
       };
 
   bool containsDate(DateTime day) {

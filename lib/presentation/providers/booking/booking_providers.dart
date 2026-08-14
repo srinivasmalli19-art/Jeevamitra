@@ -65,10 +65,11 @@ class BookingNotifier extends StateNotifier<AsyncValue<void>> {
           booking: booking);
 
   Future<bool> cancelBooking(String bookingId, String reason,
-      {BookingModel? booking}) async {
+      {BookingModel? booking, String? cancelledByRole}) async {
     state = const AsyncValue.loading();
     try {
-      await _repo.cancelBooking(bookingId, reason, booking: booking);
+      await _repo.cancelBooking(bookingId, reason,
+          booking: booking, cancelledByRole: cancelledByRole);
       state = const AsyncValue.data(null);
       return true;
     } catch (e, st) {

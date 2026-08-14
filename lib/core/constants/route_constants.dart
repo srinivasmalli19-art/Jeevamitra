@@ -44,6 +44,7 @@ class RouteConstants {
   static const String unifiedSearch = '/shared/search';
   static const String alertDetailPath = '/shared/alerts/:alertId';
   static const String alertMap = '/shared/alerts-map';
+  static const String myReportedAlerts = '/shared/alerts/mine';
 
   // Helper: path with substituted params
   static String landDetail(String landId) => '/farmer/lands/$landId';

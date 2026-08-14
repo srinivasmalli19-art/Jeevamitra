@@ -6,6 +6,7 @@
 // terminal callback to prove sendOtp() now waits for the real outcome.
 import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:jeevamitra/presentation/providers/auth/auth_provider.dart';
 import 'package:mocktail/mocktail.dart';
@@ -15,6 +16,18 @@ class MockFirebaseAuth extends Mock implements FirebaseAuth {}
 class MockUser extends Mock implements User {}
 
 class MockUserCredential extends Mock implements UserCredential {}
+
+class MockUserMetadata extends Mock implements UserMetadata {}
+
+/// A [MockUser] whose `metadata.lastSignInTime` looks recent enough to pass
+/// deleteAccount()'s proactive requires-recent-login pre-check.
+MockUser _freshlySignedInUser() {
+  final user = MockUser();
+  final metadata = MockUserMetadata();
+  when(() => metadata.lastSignInTime).thenReturn(DateTime.now());
+  when(() => user.metadata).thenReturn(metadata);
+  return user;
+}
 
 class FakePhoneAuthCredential extends Fake implements PhoneAuthCredential {}
 
@@ -253,7 +266,7 @@ void main() {
   group('deleteAccount', () {
     test('deletes the Firestore doc and the auth account on full success', () async {
       await fakeFirestore.collection('users').doc('uid-del').set({'name': 'Gone Soon'});
-      final mockUser = MockUser();
+      final mockUser = _freshlySignedInUser();
       when(() => mockUser.delete()).thenAnswer((_) async {});
       when(() => mockAuth.currentUser).thenReturn(mockUser);
 
@@ -263,23 +276,68 @@ void main() {
       final doc = await fakeFirestore.collection('users').doc('uid-del').get();
       expect(doc.exists, isFalse);
       verify(() => mockUser.delete()).called(1);
+      expect(notifier.state, isA<AsyncData<void>>());
     });
 
     test(
-        'reports the requires-recent-login case explicitly instead of hiding '
-        'the half-finished deletion', () async {
-      await fakeFirestore.collection('users').doc('uid-del2').set({'name': 'X'});
+        'stale session -> refuses up front and never touches Firestore or '
+        'calls Auth.delete()', () async {
+      await fakeFirestore.collection('users').doc('uid-stale').set({'name': 'Still Here'});
       final mockUser = MockUser();
+      final metadata = MockUserMetadata();
+      when(() => metadata.lastSignInTime)
+          .thenReturn(DateTime.now().subtract(const Duration(minutes: 30)));
+      when(() => mockUser.metadata).thenReturn(metadata);
+      when(() => mockAuth.currentUser).thenReturn(mockUser);
+
+      final result = await notifier.deleteAccount('uid-stale');
+
+      expect(result, contains('sign in again'));
+      // Nothing was deleted — the whole point of the proactive check.
+      final doc = await fakeFirestore.collection('users').doc('uid-stale').get();
+      expect(doc.exists, isTrue);
+      verifyNever(() => mockUser.delete());
+      expect(notifier.state, isA<AsyncData<void>>());
+    });
+
+    test(
+        'reactive requires-recent-login (fresh session, but Firebase '
+        'disagrees) -> reports it explicitly instead of hiding the '
+        'half-finished deletion, and does not claim success', () async {
+      await fakeFirestore.collection('users').doc('uid-del2').set({'name': 'X'});
+      final mockUser = _freshlySignedInUser();
       when(() => mockUser.delete())
           .thenThrow(FirebaseAuthException(code: 'requires-recent-login'));
       when(() => mockAuth.currentUser).thenReturn(mockUser);
 
       final result = await notifier.deleteAccount('uid-del2');
 
+      expect(result, isNotNull);
       expect(result, contains('sign in again'));
-      // Firestore doc must already be gone even though the auth delete failed.
+      // Firestore doc must already be gone even though the auth delete failed
+      // (documented, unavoidable trade-off — the reactive fallback path).
       final doc = await fakeFirestore.collection('users').doc('uid-del2').get();
       expect(doc.exists, isFalse);
+      expect(notifier.state, isA<AsyncError<void>>());
+    });
+
+    test(
+        'generic Auth deletion failure -> reports failure, never reports '
+        'success, and never signs the user out as if it worked', () async {
+      await fakeFirestore.collection('users').doc('uid-del3').set({'name': 'Y'});
+      final mockUser = _freshlySignedInUser();
+      when(() => mockUser.delete())
+          .thenThrow(FirebaseAuthException(code: 'network-request-failed'));
+      when(() => mockAuth.currentUser).thenReturn(mockUser);
+
+      final result = await notifier.deleteAccount('uid-del3');
+
+      expect(result, isNotNull);
+      expect(result, isNot(contains('sign in again')));
+      expect(notifier.state, isA<AsyncError<void>>());
+      // deleteAccount() never itself calls signOut() — a failed deletion
+      // must not look like a completed one to the caller.
+      verifyNever(() => mockAuth.signOut());
     });
   });
 

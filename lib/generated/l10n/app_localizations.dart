@@ -1084,6 +1084,30 @@ abstract class AppLocalizations {
   /// **'Permanently removes all your data'**
   String get deleteAccountSubtitle;
 
+  /// No description provided for @reauthRequiredBeforeDeleteMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'For security, please sign in again before deleting your account.'**
+  String get reauthRequiredBeforeDeleteMsg;
+
+  /// No description provided for @deleteAccountDataFailedMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not delete your data. Please check your connection and try again.'**
+  String get deleteAccountDataFailedMsg;
+
+  /// No description provided for @deleteAccountPartialReauthMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Your data was deleted. For security, please sign in again and delete your account once more to finish removing it.'**
+  String get deleteAccountPartialReauthMsg;
+
+  /// No description provided for @deleteAccountPartialFailedMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Your data was deleted, but we could not remove your sign-in. Please try again.'**
+  String get deleteAccountPartialFailedMsg;
+
   /// No description provided for @landsLabel.
   ///
   /// In en, this message translates to:
@@ -2067,6 +2091,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Shared via JeevaMitra'**
   String get sharedViaAppMsg;
+
+  /// No description provided for @myReportedAlertsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'My Reported Alerts'**
+  String get myReportedAlertsTitle;
+
+  /// No description provided for @noReportedAlertsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No reported alerts'**
+  String get noReportedAlertsTitle;
+
+  /// No description provided for @noReportedAlertsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Alerts you report will appear here'**
+  String get noReportedAlertsSubtitle;
+
+  /// No description provided for @withdrawAlertBtn.
+  ///
+  /// In en, this message translates to:
+  /// **'Withdraw Alert'**
+  String get withdrawAlertBtn;
+
+  /// No description provided for @withdrawAlertConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Withdraw this alert?'**
+  String get withdrawAlertConfirmTitle;
+
+  /// No description provided for @withdrawAlertConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This will mark the alert as inactive. Other users will no longer see it in active alerts.'**
+  String get withdrawAlertConfirmBody;
+
+  /// No description provided for @withdrawAlertSuccessMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Alert withdrawn'**
+  String get withdrawAlertSuccessMsg;
+
+  /// No description provided for @withdrawAlertFailedMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not withdraw the alert. Please try again.'**
+  String get withdrawAlertFailedMsg;
 
   /// No description provided for @reportAlertTitle.
   ///

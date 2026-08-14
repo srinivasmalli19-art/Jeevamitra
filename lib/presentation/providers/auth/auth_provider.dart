@@ -6,7 +6,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/constants/firebase_constants.dart';
+import '../../../core/services/fcm_service.dart';
 import '../../../core/utils/otp_flow_logger.dart';
+import '../../../generated/l10n/app_localizations.dart';
 import 'user_doc.dart';
 
 // ─── Firebase auth state stream ───────────────────────────────────────────────
@@ -234,18 +236,42 @@ class AuthNotifier extends StateNotifier<AsyncValue<void>> {
     }
   }
 
+  /// How long a sign-in stays "recent" enough for Firebase Auth to allow a
+  /// sensitive operation (account deletion) without throwing
+  /// `requires-recent-login`. Not a documented guarantee, but this has been
+  /// Firebase's stable, de facto threshold — used here only as a proactive
+  /// check to avoid deleting Firestore data right before a predictable
+  /// Auth failure (see [deleteAccount]).
+  static const _recentLoginWindow = Duration(minutes: 5);
+
   /// Deletes the user's Firestore document, then their Firebase Auth account.
   ///
   /// Returns null on full success, or a user-facing message describing what
   /// happened. There is no server (no Cloud Functions in this project), so
-  /// the two deletes cannot be made atomic from the client: the Firestore
-  /// delete must happen first, while the session is still valid enough for
-  /// Firestore's security rules to authorize it. If the account delete then
-  /// fails afterwards (most commonly `requires-recent-login`), the user's
-  /// data is already gone but their Auth account still exists — rather than
-  /// hiding that, we say so explicitly so they know exactly what to do next.
-  Future<String?> deleteAccount(String uid) async {
+  /// the two deletes cannot be made atomic from the client — and the order
+  /// can't be flipped either: once `User.delete()` succeeds it immediately
+  /// invalidates the session, so a Firestore delete attempted afterwards
+  /// would fail `isSignedIn()` regardless of how fresh the login was. The
+  /// Firestore delete must therefore happen first, while the session is
+  /// still valid enough for Firestore's security rules to authorize it.
+  ///
+  /// To avoid destroying the user's data right before a *predictable*
+  /// `requires-recent-login` failure, this proactively checks the sign-in
+  /// age first and refuses — touching nothing — if it looks stale. That
+  /// heuristic isn't authoritative, so the original reactive handling stays
+  /// in place as a fallback for whenever Firebase disagrees with it: if the
+  /// account delete still fails after Firestore already succeeded, we say
+  /// so explicitly rather than reporting success.
+  Future<String?> deleteAccount(String uid, [AppLocalizations? loc]) async {
     state = const AsyncValue.loading();
+
+    final lastSignIn = _auth.currentUser?.metadata.lastSignInTime;
+    if (lastSignIn != null &&
+        DateTime.now().difference(lastSignIn) > _recentLoginWindow) {
+      state = const AsyncValue.data(null);
+      return loc?.reauthRequiredBeforeDeleteMsg ??
+          'For security, please sign in again before deleting your account.';
+    }
 
     try {
       await _firestore
@@ -255,7 +281,8 @@ class AuthNotifier extends StateNotifier<AsyncValue<void>> {
     } catch (e, st) {
       // Nothing was removed — safe to retry from scratch.
       state = AsyncValue.error(e, st);
-      return 'Could not delete your data. Please check your connection and try again.';
+      return loc?.deleteAccountDataFailedMsg ??
+          'Could not delete your data. Please check your connection and try again.';
     }
 
     try {
@@ -265,13 +292,19 @@ class AuthNotifier extends StateNotifier<AsyncValue<void>> {
     } on FirebaseAuthException catch (e, st) {
       state = AsyncValue.error(e, st);
       if (e.code == 'requires-recent-login') {
-        return 'Your data was deleted. For security, please sign in again and delete your account once more to finish removing it.';
+        return loc?.deleteAccountPartialReauthMsg ??
+            'Your data was deleted. For security, please sign in again and delete your account once more to finish removing it.';
       }
-      return 'Your data was deleted, but we could not remove your sign-in. Please try again.';
+      return loc?.deleteAccountPartialFailedMsg ??
+          'Your data was deleted, but we could not remove your sign-in. Please try again.';
     }
   }
 
   Future<void> signOut() async {
+    final uid = _auth.currentUser?.uid;
+    if (uid != null) {
+      await FcmService().clearToken(uid);
+    }
     await _auth.signOut();
     state = const AsyncValue.data(null);
   }
