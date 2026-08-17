@@ -57,6 +57,16 @@
   "roleShepherd": "Shepherd",
   "roleShepherdDesc": "I have animals and need grazing land",
 
+  "chooseProfileTitle": "Choose Your Profile",
+  "chooseProfileSubtitle": "Tell us how you'd like to use JeevaMitra",
+  "profileLivestockOwner": "Livestock Owner",
+  "profileLivestockOwnerDesc": "Find and book grazing or fodder land for your animals",
+  "profileFodderLandProvider": "Fodder Land Provider",
+  "profileFodderLandProviderDesc": "List and manage your grazing or fodder land",
+  "profileBoth": "Both",
+  "profileBothDesc": "I provide land and also book land for my animals",
+  "profilePersonalizationNoticeMsg": "Your profile personalizes your experience. It does not limit what you can do in JeevaMitra.",
+
   "yourName": "Your Name",
   "yourVillage": "Village / Town",
   "yourDistrict": "District",
@@ -185,6 +195,7 @@
     "placeholders": { "name": { "type": "String" } }
   },
   "voiceAssistantTooltip": "Voice Assistant",
+  "exploreAllFeaturesTooltip": "Explore all features",
   "alertsLabel": "Alerts",
   "overviewLabel": "Overview",
   "earningsLabel": "Earnings",

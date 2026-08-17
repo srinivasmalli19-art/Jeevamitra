@@ -5,12 +5,17 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
+import 'package:jeevamitra/domain/entities/user_profile_type.dart';
 import 'package:jeevamitra/generated/l10n/app_localizations.dart';
 import 'package:jeevamitra/presentation/providers/auth/auth_provider.dart';
+import 'package:jeevamitra/presentation/providers/auth/user_doc.dart';
+import 'package:jeevamitra/presentation/providers/onboarding/profile_type_provider.dart';
 import 'package:jeevamitra/presentation/screens/auth/otp_verification_screen.dart';
 import 'package:mocktail/mocktail.dart';
 
 class _DummyAuth extends Mock implements FirebaseAuth {}
+
+class MockUser extends Mock implements User {}
 
 class FakeAuthNotifier extends AuthNotifier {
   FakeAuthNotifier({this.verifyResult = true, this.sendOtpResult})
@@ -20,6 +25,8 @@ class FakeAuthNotifier extends AuthNotifier {
   final String? sendOtpResult;
   String? lastOtpVerified;
   int resendCallCount = 0;
+  Map<String, dynamic>? lastCreateUserDocArgs;
+  bool createUserDocResult = true;
 
   @override
   Future<bool> verifyOtp(String otp) async {
@@ -32,9 +39,34 @@ class FakeAuthNotifier extends AuthNotifier {
     resendCallCount++;
     return sendOtpResult;
   }
+
+  @override
+  Future<bool> createUserDoc({
+    required String uid,
+    required String phone,
+    required String role,
+    required String name,
+    String? village,
+    String? district,
+    String preferredLanguage = 'te',
+    String? profileType,
+  }) async {
+    lastCreateUserDocArgs = {
+      'uid': uid,
+      'phone': phone,
+      'role': role,
+      'name': name,
+      'profileType': profileType,
+    };
+    return createUserDocResult;
+  }
 }
 
-Future<void> _pump(WidgetTester tester, FakeAuthNotifier fakeNotifier) async {
+Future<void> _pump(
+  WidgetTester tester,
+  FakeAuthNotifier fakeNotifier, {
+  List<Override> extraOverrides = const [],
+}) async {
   final router = GoRouter(
     initialLocation: '/auth/otp',
     routes: [
@@ -46,28 +78,56 @@ Future<void> _pump(WidgetTester tester, FakeAuthNotifier fakeNotifier) async {
         path: '/auth/role',
         builder: (_, __) => const Scaffold(body: Text('ROLE_SELECT_SCREEN')),
       ),
+      GoRoute(
+        path: '/auth/setup',
+        builder: (_, __) => const Scaffold(body: Text('PROFILE_SETUP_SCREEN')),
+      ),
     ],
   );
 
   await tester.pumpWidget(
     ProviderScope(
-      overrides: [authNotifierProvider.overrideWith((ref) => fakeNotifier)],
-      child: MaterialApp.router(
-        routerConfig: router,
-        locale: const Locale('en', 'IN'),
-        supportedLocales: const [Locale('en', 'IN')],
-        localizationsDelegates: const [
-          AppLocalizations.delegate,
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-        ],
+      overrides: [
+        authNotifierProvider.overrideWith((ref) => fakeNotifier),
+        ...extraOverrides,
+      ],
+      // In production, authStateProvider/currentUserDocProvider are always
+      // already "warm" by the time OtpVerificationScreen is reached — the
+      // router's own _RouterNotifier subscribes to both from app startup.
+      // _verify() reads them synchronously via ref.read(), so this Consumer
+      // reproduces that same early subscription here — without it, a
+      // freshly-overridden Stream.value(...) hasn't delivered its first
+      // event yet by the time _verify() runs, and ref.read() sees
+      // AsyncLoading instead of the mocked value.
+      child: Consumer(
+        builder: (context, ref, _) {
+          if (extraOverrides.isNotEmpty) {
+            ref.watch(authStateProvider);
+            ref.watch(currentUserDocProvider);
+          }
+          return MaterialApp.router(
+            routerConfig: router,
+            locale: const Locale('en', 'IN'),
+            supportedLocales: const [Locale('en', 'IN')],
+            localizationsDelegates: const [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+          );
+        },
       ),
     ),
   );
   // One settle-free pump: the countdown Timer.periodic never "settles",
   // so pumpAndSettle would hang here.
   await tester.pump();
+  if (extraOverrides.isNotEmpty) {
+    // Let the warmed-up providers' overridden streams deliver their first
+    // event before the test starts interacting with the screen.
+    await tester.pump();
+  }
 }
 
 void main() {
@@ -132,6 +192,79 @@ void main() {
       await tester.pump();
 
       expect(find.text('ROLE_SELECT_SCREEN'), findsNothing);
+    });
+  });
+
+  group('OtpVerificationScreen — pre-chosen profile (Profile Restructure)', () {
+    testWidgets(
+        'with a pending profile selection, creates the user doc automatically '
+        'and goes straight to Profile Setup — no role-select screen shown',
+        (tester) async {
+      final fake = FakeAuthNotifier(verifyResult: true);
+      final mockUser = MockUser();
+      when(() => mockUser.uid).thenReturn('uid-new');
+      when(() => mockUser.phoneNumber).thenReturn('+919876543210');
+
+      await _pump(
+        tester,
+        fake,
+        extraOverrides: [
+          pendingProfileTypeProvider
+              .overrideWith((ref) => UserProfileType.livestockOwner),
+          authStateProvider.overrideWith((ref) => Stream.value(mockUser)),
+          currentUserDocProvider.overrideWith((ref) => Stream.value(null)),
+        ],
+      );
+
+      await tester.enterText(find.byType(TextFormField), '123456');
+      await tester.tap(find.text('Verify OTP'));
+      await tester.pump();
+      await tester.pump();
+
+      expect(fake.lastCreateUserDocArgs, isNotNull);
+      expect(fake.lastCreateUserDocArgs!['uid'], 'uid-new');
+      expect(fake.lastCreateUserDocArgs!['role'], 'shepherd'); // livestockOwner's backend role
+      expect(fake.lastCreateUserDocArgs!['profileType'], 'livestockOwner');
+      expect(find.text('PROFILE_SETUP_SCREEN'), findsOneWidget);
+      expect(find.text('ROLE_SELECT_SCREEN'), findsNothing);
+    });
+
+    testWidgets(
+        'a pending selection is not applied over an already-existing '
+        'account — falls back to role-select instead of overwriting it',
+        (tester) async {
+      final fake = FakeAuthNotifier(verifyResult: true);
+      final mockUser = MockUser();
+      when(() => mockUser.uid).thenReturn('uid-existing');
+      when(() => mockUser.phoneNumber).thenReturn('+919876543210');
+      const existingDoc = UserDoc(
+        uid: 'uid-existing',
+        phone: '+919876543210',
+        role: 'farmer',
+        name: 'Ravi',
+        village: 'Narasaraopet',
+        district: 'Guntur',
+        isProfileComplete: true,
+      );
+
+      await _pump(
+        tester,
+        fake,
+        extraOverrides: [
+          pendingProfileTypeProvider
+              .overrideWith((ref) => UserProfileType.fodderLandProvider),
+          authStateProvider.overrideWith((ref) => Stream.value(mockUser)),
+          currentUserDocProvider.overrideWith((ref) => Stream.value(existingDoc)),
+        ],
+      );
+
+      await tester.enterText(find.byType(TextFormField), '123456');
+      await tester.tap(find.text('Verify OTP'));
+      await tester.pump();
+      await tester.pump();
+
+      expect(fake.lastCreateUserDocArgs, isNull);
+      expect(find.text('ROLE_SELECT_SCREEN'), findsOneWidget);
     });
   });
 }

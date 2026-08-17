@@ -55,6 +55,16 @@
   "roleShepherd": "గొర్రెల కాపరి",
   "roleShepherdDesc": "నా దగ్గర జంతువులు ఉన్నాయి, మేత భూమి కావాలి",
 
+  "chooseProfileTitle": "మీ ప్రొఫైల్‌ను ఎంచుకోండి",
+  "chooseProfileSubtitle": "మీరు జీవమిత్రను ఎలా ఉపయోగించాలనుకుంటున్నారో మాకు చెప్పండి",
+  "profileLivestockOwner": "పశు యజమాని",
+  "profileLivestockOwnerDesc": "మీ జంతువుల కోసం మేత భూమిని కనుగొని బుక్ చేయండి",
+  "profileFodderLandProvider": "మేత భూమి ప్రదాత",
+  "profileFodderLandProviderDesc": "మీ మేత భూమిని జాబితా చేసి నిర్వహించండి",
+  "profileBoth": "రెండూ",
+  "profileBothDesc": "నేను భూమిని అందిస్తాను మరియు నా జంతువుల కోసం భూమిని కూడా బుక్ చేస్తాను",
+  "profilePersonalizationNoticeMsg": "మీ ప్రొఫైల్ మీ అనుభవాన్ని వ్యక్తిగతీకరిస్తుంది. ఇది జీవమిత్రలో మీరు చేయగలిగేదాన్ని పరిమితం చేయదు.",
+
   "yourName": "మీ పేరు",
   "yourVillage": "గ్రామం / పట్టణం",
   "yourDistrict": "జిల్లా",
@@ -183,6 +193,7 @@
     "placeholders": { "name": { "type": "String" } }
   },
   "voiceAssistantTooltip": "వాయిస్ అసిస్టెంట్",
+  "exploreAllFeaturesTooltip": "అన్ని ఫీచర్లను అన్వేషించండి",
   "alertsLabel": "అలర్ట్‌లు",
   "overviewLabel": "అవలోకనం",
   "earningsLabel": "సంపాదన",

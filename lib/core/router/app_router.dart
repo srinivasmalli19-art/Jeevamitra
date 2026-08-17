@@ -8,6 +8,8 @@ import '../../presentation/providers/auth/auth_provider.dart';
 import '../../presentation/screens/splash/splash_screen.dart';
 import '../../presentation/screens/onboarding/language_select_screen.dart';
 import '../../presentation/screens/onboarding/onboarding_screen.dart';
+import '../../presentation/screens/onboarding/choose_profile_screen.dart';
+import '../../presentation/providers/onboarding/profile_type_provider.dart';
 import '../../presentation/screens/auth/phone_login_screen.dart';
 import '../../presentation/screens/auth/otp_verification_screen.dart';
 import '../../presentation/screens/auth/role_select_screen.dart';
@@ -107,12 +109,15 @@ String? _redirect(Ref ref, GoRouterState state) {
     return doc.isFarmer ? RouteConstants.farmerDashboard : RouteConstants.shepherdDashboard;
   }
 
-  // Farmer trying to access shepherd routes
-  if (doc.isFarmer && isOnShepherd) return RouteConstants.farmerDashboard;
-
-  // Shepherd trying to access farmer routes
-  if (doc.isShepherd && isOnFarmer) return RouteConstants.shepherdDashboard;
-
+  // Profile Restructure: farmer/shepherd is personalization, not a
+  // permission, so every authenticated + fully-onboarded user can reach
+  // both the /farmer/* and /shepherd/* route trees — there used to be a
+  // guard here that bounced a farmer out of /shepherd/* (and vice versa)
+  // back to their own dashboard; removed so Livestock Owner, Fodder Land
+  // Provider, and Both all have identical feature access. `doc.isFarmer`
+  // still decides only which dashboard is the *default* landing screen
+  // above; `isOnFarmer`/`isOnShepherd` remain used by the earlier
+  // loading/unauthenticated branches in this function.
   return null;
 }
 
@@ -149,6 +154,15 @@ final routerProvider = Provider<GoRouter>((ref) {
       // ── Onboarding ────────────────────────────────────────────────────────
       GoRoute(path: RouteConstants.languageSelect, builder: (_, __) => const LanguageSelectScreen()),
       GoRoute(path: RouteConstants.onboarding, builder: (_, __) => const OnboardingScreen()),
+      GoRoute(
+        path: RouteConstants.chooseProfile,
+        builder: (_, __) => ChooseProfileScreen(
+          onContinue: (context, ref, selected) async {
+            ref.read(pendingProfileTypeProvider.notifier).state = selected;
+            context.go(RouteConstants.phoneLogin);
+          },
+        ),
+      ),
 
       // ── Auth ──────────────────────────────────────────────────────────────
       GoRoute(path: RouteConstants.phoneLogin, builder: (_, __) => const PhoneLoginScreen()),

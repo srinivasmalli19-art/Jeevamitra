@@ -95,6 +95,11 @@ class _Header extends ConsumerWidget {
       elevation: 0,
       actions: [
         IconButton(
+          tooltip: loc.exploreAllFeaturesTooltip,
+          onPressed: () => context.push(RouteConstants.shepherdDashboard),
+          icon: const Icon(Icons.swap_horiz_rounded, color: Colors.white),
+        ),
+        IconButton(
           tooltip: loc.voiceAssistantTooltip,
           onPressed: () => context.push(RouteConstants.assistant),
           icon: const Icon(Icons.mic_rounded, color: Colors.white),

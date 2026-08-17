@@ -88,7 +88,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         Expanded(
                           child: JmButton(
                             label: loc.skipBtn,
-                            onPressed: () => context.go(RouteConstants.phoneLogin),
+                            onPressed: () => context.go(RouteConstants.chooseProfile),
                             variant: JmButtonVariant.ghost,
                           ),
                         ),

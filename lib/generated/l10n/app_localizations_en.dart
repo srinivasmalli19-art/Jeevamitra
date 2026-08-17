@@ -145,6 +145,38 @@ class AppLocalizationsEn extends AppLocalizations {
   String get roleShepherdDesc => 'I have animals and need grazing land';
 
   @override
+  String get chooseProfileTitle => 'Choose Your Profile';
+
+  @override
+  String get chooseProfileSubtitle =>
+      'Tell us how you\'d like to use JeevaMitra';
+
+  @override
+  String get profileLivestockOwner => 'Livestock Owner';
+
+  @override
+  String get profileLivestockOwnerDesc =>
+      'Find and book grazing or fodder land for your animals';
+
+  @override
+  String get profileFodderLandProvider => 'Fodder Land Provider';
+
+  @override
+  String get profileFodderLandProviderDesc =>
+      'List and manage your grazing or fodder land';
+
+  @override
+  String get profileBoth => 'Both';
+
+  @override
+  String get profileBothDesc =>
+      'I provide land and also book land for my animals';
+
+  @override
+  String get profilePersonalizationNoticeMsg =>
+      'Your profile personalizes your experience. It does not limit what you can do in JeevaMitra.';
+
+  @override
   String get yourName => 'Your Name';
 
   @override
@@ -444,6 +476,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get voiceAssistantTooltip => 'Voice Assistant';
+
+  @override
+  String get exploreAllFeaturesTooltip => 'Explore all features';
 
   @override
   String get alertsLabel => 'Alerts';

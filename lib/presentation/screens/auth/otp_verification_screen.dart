@@ -12,6 +12,7 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/utils/validators.dart';
 import '../../../generated/l10n/app_localizations.dart';
 import '../../providers/auth/auth_provider.dart';
+import '../../providers/onboarding/profile_type_provider.dart';
 import '../../widgets/common/jm_button.dart';
 import '../../widgets/common/jm_text_field.dart';
 
@@ -63,6 +64,39 @@ class _OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen> {
         SnackBar(content: Text(AppLocalizations.of(context).invalidOtpMsg), backgroundColor: AppColors.error),
       );
       return;
+    }
+    // If the user already chose a profile pre-auth (the new Welcome ->
+    // Choose Profile -> Phone Login flow), create their doc immediately —
+    // there's no need to ask again on a dedicated role-select screen.
+    // Everything in this block only runs when a pending selection actually
+    // exists, so the common/legacy path below (no pending selection) never
+    // touches authStateProvider/currentUserDocProvider — preserving the
+    // exact prior behavior for that case. Reads authStateProvider (rather
+    // than FirebaseAuth.instance directly) so this stays testable through
+    // Riverpod overrides like the rest of the app's auth-aware logic.
+    final pendingType = ref.read(pendingProfileTypeProvider);
+    if (pendingType != null) {
+      final user = ref.read(authStateProvider).valueOrNull;
+      final existingDoc = ref.read(currentUserDocProvider).valueOrNull;
+      // existingDoc != null means this phone number already has a complete
+      // account (e.g. re-onboarding after logging out) — don't overwrite it.
+      if (user != null && existingDoc == null) {
+        final created = await ref.read(authNotifierProvider.notifier).createUserDoc(
+              uid: user.uid,
+              phone: user.phoneNumber ?? '',
+              role: pendingType.backendRole,
+              name: '',
+              profileType: pendingType.storageValue,
+            );
+        ref.read(pendingProfileTypeProvider.notifier).state = null;
+        if (!context.mounted) return;
+        if (created) {
+          context.go(RouteConstants.profileSetup);
+          return;
+        }
+      } else {
+        ref.read(pendingProfileTypeProvider.notifier).state = null;
+      }
     }
     // Router redirect will handle navigation based on user doc state
     context.go(RouteConstants.roleSelect);

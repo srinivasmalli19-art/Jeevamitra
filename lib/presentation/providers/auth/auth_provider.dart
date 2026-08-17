@@ -185,6 +185,7 @@ class AuthNotifier extends StateNotifier<AsyncValue<void>> {
     String? village,
     String? district,
     String preferredLanguage = 'te',
+    String? profileType,
   }) async {
     state = const AsyncValue.loading();
     try {
@@ -197,6 +198,7 @@ class AuthNotifier extends StateNotifier<AsyncValue<void>> {
         district: district,
         isProfileComplete: name.isNotEmpty && village != null && district != null,
         preferredLanguage: preferredLanguage,
+        profileType: profileType,
       );
       await _firestore
           .collection(FirebaseConstants.users)

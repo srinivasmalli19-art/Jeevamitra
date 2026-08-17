@@ -216,8 +216,11 @@ void main() {
       expect(_currentPath(router), RouteConstants.farmerDashboard);
     });
 
-    testWidgets('a shepherd trying to reach a farmer-only route is bounced to their own dashboard',
-        (tester) async {
+    testWidgets(
+        'Profile Restructure: a shepherd CAN reach a farmer-only route — '
+        'role is personalization, not a permission, so cross-shell access '
+        'is no longer blocked (this used to redirect back to the shepherd '
+        'dashboard; that guard was removed)', (tester) async {
       final shepherdDoc = const UserDoc(
         uid: 'uid-2',
         phone: '+919876543211',
@@ -234,11 +237,12 @@ void main() {
         userDocState: AsyncValue.data(shepherdDoc),
         initialLocation: RouteConstants.farmerLands,
       );
-      expect(_currentPath(router), RouteConstants.shepherdDashboard);
+      expect(_currentPath(router), RouteConstants.farmerLands);
     });
 
-    testWidgets('a farmer trying to reach a shepherd-only route is bounced to their own dashboard',
-        (tester) async {
+    testWidgets(
+        'Profile Restructure: a farmer CAN reach a shepherd-only route — '
+        'same universal-access guarantee in the other direction', (tester) async {
       final farmerDoc = const UserDoc(
         uid: 'uid-3',
         phone: '+919876543212',
@@ -254,6 +258,63 @@ void main() {
         authState: AsyncValue.data(MockUser()),
         userDocState: AsyncValue.data(farmerDoc),
         initialLocation: RouteConstants.shepherdVets,
+      );
+      expect(_currentPath(router), RouteConstants.shepherdVets);
+    });
+
+    testWidgets(
+        'a "both"-profile user (backendRole farmer, profileType both) can '
+        'also reach the shepherd route tree', (tester) async {
+      final bothDoc = const UserDoc(
+        uid: 'uid-4',
+        phone: '+919876543213',
+        role: 'farmer',
+        name: 'Lakshmi',
+        village: 'Guntur',
+        district: 'Guntur',
+        isProfileComplete: true,
+        profileType: 'both',
+      );
+      final router = await _pumpRouter(
+        tester,
+        firebaseReady: true,
+        authState: AsyncValue.data(MockUser()),
+        userDocState: AsyncValue.data(bothDoc),
+        initialLocation: RouteConstants.shepherdDiscover,
+      );
+      expect(_currentPath(router), RouteConstants.shepherdDiscover);
+    });
+  });
+
+  group('router redirect — Choose Your Profile (pre-auth)', () {
+    testWidgets('is reachable pre-auth and is not redirected away', (tester) async {
+      final router = await _pumpRouter(
+        tester,
+        firebaseReady: true,
+        authState: const AsyncValue.data(null),
+        userDocState: const AsyncValue.data(null),
+        initialLocation: RouteConstants.chooseProfile,
+      );
+      expect(_currentPath(router), RouteConstants.chooseProfile);
+    });
+
+    testWidgets('a fully onboarded user visiting it is redirected to their dashboard, '
+        'not left stuck in onboarding', (tester) async {
+      final completeDoc = const UserDoc(
+        uid: 'uid-5',
+        phone: '+919876543214',
+        role: 'farmer',
+        name: 'Ravi',
+        village: 'Narasaraopet',
+        district: 'Guntur',
+        isProfileComplete: true,
+      );
+      final router = await _pumpRouter(
+        tester,
+        firebaseReady: true,
+        authState: AsyncValue.data(MockUser()),
+        userDocState: AsyncValue.data(completeDoc),
+        initialLocation: RouteConstants.chooseProfile,
       );
       expect(_currentPath(router), RouteConstants.farmerDashboard);
     });

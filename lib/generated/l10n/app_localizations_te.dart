@@ -146,6 +146,38 @@ class AppLocalizationsTe extends AppLocalizations {
   String get roleShepherdDesc => 'నా దగ్గర జంతువులు ఉన్నాయి, మేత భూమి కావాలి';
 
   @override
+  String get chooseProfileTitle => 'మీ ప్రొఫైల్‌ను ఎంచుకోండి';
+
+  @override
+  String get chooseProfileSubtitle =>
+      'మీరు జీవమిత్రను ఎలా ఉపయోగించాలనుకుంటున్నారో మాకు చెప్పండి';
+
+  @override
+  String get profileLivestockOwner => 'పశు యజమాని';
+
+  @override
+  String get profileLivestockOwnerDesc =>
+      'మీ జంతువుల కోసం మేత భూమిని కనుగొని బుక్ చేయండి';
+
+  @override
+  String get profileFodderLandProvider => 'మేత భూమి ప్రదాత';
+
+  @override
+  String get profileFodderLandProviderDesc =>
+      'మీ మేత భూమిని జాబితా చేసి నిర్వహించండి';
+
+  @override
+  String get profileBoth => 'రెండూ';
+
+  @override
+  String get profileBothDesc =>
+      'నేను భూమిని అందిస్తాను మరియు నా జంతువుల కోసం భూమిని కూడా బుక్ చేస్తాను';
+
+  @override
+  String get profilePersonalizationNoticeMsg =>
+      'మీ ప్రొఫైల్ మీ అనుభవాన్ని వ్యక్తిగతీకరిస్తుంది. ఇది జీవమిత్రలో మీరు చేయగలిగేదాన్ని పరిమితం చేయదు.';
+
+  @override
   String get yourName => 'మీ పేరు';
 
   @override
@@ -449,6 +481,9 @@ class AppLocalizationsTe extends AppLocalizations {
 
   @override
   String get voiceAssistantTooltip => 'వాయిస్ అసిస్టెంట్';
+
+  @override
+  String get exploreAllFeaturesTooltip => 'అన్ని ఫీచర్లను అన్వేషించండి';
 
   @override
   String get alertsLabel => 'అలర్ట్‌లు';

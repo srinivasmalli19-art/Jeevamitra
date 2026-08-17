@@ -3,6 +3,7 @@ class RouteConstants {
   static const String splash = '/splash';
   static const String languageSelect = '/onboarding/language';
   static const String onboarding = '/onboarding';
+  static const String chooseProfile = '/onboarding/profile';
 
   // Auth
   static const String phoneLogin = '/auth/phone';

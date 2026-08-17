@@ -358,6 +358,60 @@ abstract class AppLocalizations {
   /// **'I have animals and need grazing land'**
   String get roleShepherdDesc;
 
+  /// No description provided for @chooseProfileTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose Your Profile'**
+  String get chooseProfileTitle;
+
+  /// No description provided for @chooseProfileSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tell us how you\'d like to use JeevaMitra'**
+  String get chooseProfileSubtitle;
+
+  /// No description provided for @profileLivestockOwner.
+  ///
+  /// In en, this message translates to:
+  /// **'Livestock Owner'**
+  String get profileLivestockOwner;
+
+  /// No description provided for @profileLivestockOwnerDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Find and book grazing or fodder land for your animals'**
+  String get profileLivestockOwnerDesc;
+
+  /// No description provided for @profileFodderLandProvider.
+  ///
+  /// In en, this message translates to:
+  /// **'Fodder Land Provider'**
+  String get profileFodderLandProvider;
+
+  /// No description provided for @profileFodderLandProviderDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'List and manage your grazing or fodder land'**
+  String get profileFodderLandProviderDesc;
+
+  /// No description provided for @profileBoth.
+  ///
+  /// In en, this message translates to:
+  /// **'Both'**
+  String get profileBoth;
+
+  /// No description provided for @profileBothDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'I provide land and also book land for my animals'**
+  String get profileBothDesc;
+
+  /// No description provided for @profilePersonalizationNoticeMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Your profile personalizes your experience. It does not limit what you can do in JeevaMitra.'**
+  String get profilePersonalizationNoticeMsg;
+
   /// No description provided for @yourName.
   ///
   /// In en, this message translates to:
@@ -921,6 +975,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Voice Assistant'**
   String get voiceAssistantTooltip;
+
+  /// No description provided for @exploreAllFeaturesTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Explore all features'**
+  String get exploreAllFeaturesTooltip;
 
   /// No description provided for @alertsLabel.
   ///
