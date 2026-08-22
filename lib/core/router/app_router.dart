@@ -88,7 +88,7 @@ String? _redirect(Ref ref, GoRouterState state) {
   // stuck on a blank splash screen (happens when loading guard briefly parks
   // the user there and auth then settles to null).
   if (user == null) {
-    if (isOnFarmer || isOnShepherd || isOnSplash) return RouteConstants.phoneLogin;
+    if (isOnFarmer || isOnShepherd) return RouteConstants.phoneLogin;
     return null;
   }
 

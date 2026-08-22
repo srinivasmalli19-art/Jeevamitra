@@ -107,7 +107,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   else
                     JmButton(
                       label: loc.getStartedBtn,
-                      onPressed: () => context.go(RouteConstants.phoneLogin),
+                      onPressed: () => context.go(RouteConstants.chooseProfile),
                       leadingIcon: Icons.arrow_forward_rounded,
                     ),
                   const SizedBox(height: AppSpacing.base),
