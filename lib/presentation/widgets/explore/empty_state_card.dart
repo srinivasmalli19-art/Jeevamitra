@@ -7,8 +7,8 @@ import '../common/jm_button.dart';
 
 /// Polished "no data" state: a shadowed card rather than bare centered
 /// text on the raw screen background, matching the Dashboard's elevated
-/// -surface language. Drop-in replacement for JmEmptyState wherever a
-/// premium empty state is wanted.
+/// -surface language. The single canonical empty-state component for the
+/// app — the former JmEmptyState was consolidated into this one.
 class EmptyStateCard extends StatelessWidget {
   final IconData icon;
   final String title;

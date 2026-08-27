@@ -196,7 +196,10 @@ void main() {
   });
 
   group('router redirect — fully onboarded', () {
-    testWidgets('a farmer landing on splash is routed to the farmer dashboard path',
+    testWidgets(
+        'Sprint 4: a farmer landing on splash is routed into the Universal '
+        'Shell at the canonical /home path (previously the role-specific '
+        '/farmer/dashboard — the shell is now identical for every role)',
         (tester) async {
       final completeDoc = const UserDoc(
         uid: 'uid-1',
@@ -213,14 +216,15 @@ void main() {
         authState: AsyncValue.data(MockUser()),
         userDocState: AsyncValue.data(completeDoc),
       );
-      expect(_currentPath(router), RouteConstants.farmerDashboard);
+      expect(_currentPath(router), RouteConstants.home);
     });
 
     testWidgets(
-        'Profile Restructure: a shepherd CAN reach a farmer-only route — '
-        'role is personalization, not a permission, so cross-shell access '
-        'is no longer blocked (this used to redirect back to the shepherd '
-        'dashboard; that guard was removed)', (tester) async {
+        'Sprint 4: the legacy /farmer/lands route still resolves (not '
+        'broken) for a shepherd-role user — it now redirects into the '
+        'Universal Shell\'s canonical /lands tab rather than rendering '
+        'standalone, since Lands is one shared tab for every profile',
+        (tester) async {
       final shepherdDoc = const UserDoc(
         uid: 'uid-2',
         phone: '+919876543211',
@@ -237,12 +241,13 @@ void main() {
         userDocState: AsyncValue.data(shepherdDoc),
         initialLocation: RouteConstants.farmerLands,
       );
-      expect(_currentPath(router), RouteConstants.farmerLands);
+      expect(_currentPath(router), RouteConstants.lands);
     });
 
     testWidgets(
-        'Profile Restructure: a farmer CAN reach a shepherd-only route — '
-        'same universal-access guarantee in the other direction', (tester) async {
+        'Sprint 4: the legacy /shepherd/vets route still resolves for a '
+        'farmer-role user, redirecting into the canonical /vets tab',
+        (tester) async {
       final farmerDoc = const UserDoc(
         uid: 'uid-3',
         phone: '+919876543212',
@@ -259,12 +264,13 @@ void main() {
         userDocState: AsyncValue.data(farmerDoc),
         initialLocation: RouteConstants.shepherdVets,
       );
-      expect(_currentPath(router), RouteConstants.shepherdVets);
+      expect(_currentPath(router), RouteConstants.vets);
     });
 
     testWidgets(
-        'a "both"-profile user (backendRole farmer, profileType both) can '
-        'also reach the shepherd route tree', (tester) async {
+        'Sprint 4: a "both"-profile user (backendRole farmer, profileType '
+        'both) reaching the legacy /shepherd/discover route also lands on '
+        'the canonical /lands tab', (tester) async {
       final bothDoc = const UserDoc(
         uid: 'uid-4',
         phone: '+919876543213',
@@ -282,7 +288,113 @@ void main() {
         userDocState: AsyncValue.data(bothDoc),
         initialLocation: RouteConstants.shepherdDiscover,
       );
-      expect(_currentPath(router), RouteConstants.shepherdDiscover);
+      expect(_currentPath(router), RouteConstants.lands);
+    });
+  });
+
+  group('router redirect — Universal Shell (Sprint 4)', () {
+    const farmerDoc = UserDoc(
+      uid: 'uid-shell-farmer',
+      phone: '+919876543220',
+      role: 'farmer',
+      name: 'Ravi',
+      village: 'Narasaraopet',
+      district: 'Guntur',
+      isProfileComplete: true,
+      profileType: 'fodderLandProvider',
+    );
+    const shepherdDoc = UserDoc(
+      uid: 'uid-shell-shepherd',
+      phone: '+919876543221',
+      role: 'shepherd',
+      name: 'Suresh',
+      village: 'Vijayawada',
+      district: 'Krishna',
+      isProfileComplete: true,
+      profileType: 'livestockOwner',
+    );
+    const bothDoc = UserDoc(
+      uid: 'uid-shell-both',
+      phone: '+919876543222',
+      role: 'farmer',
+      name: 'Lakshmi',
+      village: 'Guntur',
+      district: 'Guntur',
+      isProfileComplete: true,
+      profileType: 'both',
+    );
+
+    const canonicalTabs = [
+      RouteConstants.home,
+      RouteConstants.lands,
+      RouteConstants.bookings,
+      RouteConstants.vets,
+      RouteConstants.profile,
+    ];
+
+    for (final entry in {
+      'Fodder Land Provider': farmerDoc,
+      'Livestock Owner': shepherdDoc,
+      'Both': bothDoc,
+    }.entries) {
+      for (final tab in canonicalTabs) {
+        testWidgets(
+            '${entry.key} can open the $tab tab directly (not redirected '
+            'away — Universal Access: identical navigation for every '
+            'profile)', (tester) async {
+          final router = await _pumpRouter(
+            tester,
+            firebaseReady: true,
+            authState: AsyncValue.data(MockUser()),
+            userDocState: AsyncValue.data(entry.value),
+            initialLocation: tab,
+          );
+          expect(_currentPath(router), tab);
+        });
+      }
+    }
+
+    testWidgets(
+        'an unauthenticated deep link to any canonical shell tab is blocked, '
+        'same protection the old /farmer, /shepherd prefixes had',
+        (tester) async {
+      for (final tab in canonicalTabs) {
+        final router = await _pumpRouter(
+          tester,
+          firebaseReady: true,
+          authState: const AsyncValue.data(null),
+          userDocState: const AsyncValue.data(null),
+          initialLocation: tab,
+        );
+        expect(_currentPath(router), RouteConstants.phoneLogin);
+      }
+    });
+
+    testWidgets(
+        'every legacy farmer/shepherd shell route redirects into its '
+        'canonical Universal Shell equivalent, so no old deep link/bookmark '
+        'breaks', (tester) async {
+      const expectedRedirects = {
+        RouteConstants.farmerDashboard: RouteConstants.home,
+        RouteConstants.shepherdDashboard: RouteConstants.home,
+        RouteConstants.farmerLands: RouteConstants.lands,
+        RouteConstants.shepherdDiscover: RouteConstants.lands,
+        RouteConstants.farmerBookings: RouteConstants.bookings,
+        RouteConstants.shepherdBookings: RouteConstants.bookings,
+        RouteConstants.shepherdVets: RouteConstants.vets,
+        RouteConstants.farmerProfile: RouteConstants.profile,
+        RouteConstants.shepherdProfile: RouteConstants.profile,
+      };
+      for (final e in expectedRedirects.entries) {
+        final router = await _pumpRouter(
+          tester,
+          firebaseReady: true,
+          authState: AsyncValue.data(MockUser()),
+          userDocState: AsyncValue.data(bothDoc),
+          initialLocation: e.key,
+        );
+        expect(_currentPath(router), e.value, reason: 'redirect from ${e.key}');
+      }
     });
   });
 
@@ -316,7 +428,7 @@ void main() {
         userDocState: AsyncValue.data(completeDoc),
         initialLocation: RouteConstants.chooseProfile,
       );
-      expect(_currentPath(router), RouteConstants.farmerDashboard);
+      expect(_currentPath(router), RouteConstants.home);
     });
   });
 }

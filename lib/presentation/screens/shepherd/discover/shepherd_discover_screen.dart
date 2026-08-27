@@ -13,6 +13,7 @@ import '../../../widgets/explore/nearby_land_card.dart';
 import '../../../widgets/explore/retry_card.dart';
 import '../../../widgets/common/jm_loading.dart';
 import '../../../widgets/explore/loading_skeleton.dart';
+import '../../farmer/lands/farmer_lands_screen.dart';
 import 'discover_filter.dart';
 
 // ─── Sort UI ──────────────────────────────────────────────────────────────────
@@ -75,6 +76,16 @@ class _ShepherdDiscoverScreenState
             floating: true,
             snap: true,
             actions: [
+              // Universal Access: posting/managing your own land is
+              // available to every profile, not just this tab's default
+              // (discover) view.
+              IconButton(
+                icon: const Icon(Icons.landscape_rounded),
+                tooltip: loc.myLands,
+                onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const FarmerLandsScreen()),
+                ),
+              ),
               IconButton(
                 icon: const Icon(Icons.search_rounded),
                 tooltip: loc.searchEverythingTooltip,

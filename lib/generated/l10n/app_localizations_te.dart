@@ -178,6 +178,16 @@ class AppLocalizationsTe extends AppLocalizations {
       'మీ ప్రొఫైల్ మీ అనుభవాన్ని వ్యక్తిగతీకరిస్తుంది. ఇది జీవమిత్రలో మీరు చేయగలిగేదాన్ని పరిమితం చేయదు.';
 
   @override
+  String get yourProfileLabel => 'మీ ప్రొఫైల్';
+
+  @override
+  String get changeProfileAction => 'ప్రొఫైల్ మార్చండి';
+
+  @override
+  String get changeProfileSubtitle =>
+      'మీ డాష్‌బోర్డ్‌ను వ్యక్తిగతీకరిస్తుంది — మీ యాక్సెస్‌ను పరిమితం చేయదు';
+
+  @override
   String get yourName => 'మీ పేరు';
 
   @override
@@ -215,6 +225,44 @@ class AppLocalizationsTe extends AppLocalizations {
 
   @override
   String get addLand => 'భూమి జోడించు';
+
+  @override
+  String get nearbyLandsLabel => 'సమీప భూములు';
+
+  @override
+  String get nearbyLandsAvailableLabel => 'సమీపంలో లభ్యమయ్యే భూములు';
+
+  @override
+  String get activeHighSeverityAlertsLabel => 'తీవ్రమైన హెచ్చరికలు';
+
+  @override
+  String get goodMorningLabel => 'శుభోదయం';
+
+  @override
+  String get goodAfternoonLabel => 'శుభ మధ్యాహ్నం';
+
+  @override
+  String get goodEveningLabel => 'శుభ సాయంత్రం';
+
+  @override
+  String namasteNameLabel(String name) {
+    return 'నమస్తే, $name';
+  }
+
+  @override
+  String get postLandLabel => 'భూమి పోస్ట్ చేయండి';
+
+  @override
+  String get bookingRequestsLabel => 'బుకింగ్ అభ్యర్థనలు';
+
+  @override
+  String get myBookingsLabel => 'నా బుకింగ్‌లు';
+
+  @override
+  String get activeBookingsLabel => 'యాక్టివ్ బుకింగ్‌లు';
+
+  @override
+  String get quickActionsLabel => 'త్వరిత చర్యలు';
 
   @override
   String get landTitle => 'భూమి పేరు';

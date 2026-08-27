@@ -66,6 +66,9 @@
   "profileBoth": "Both",
   "profileBothDesc": "I provide land and also book land for my animals",
   "profilePersonalizationNoticeMsg": "Your profile personalizes your experience. It does not limit what you can do in JeevaMitra.",
+  "yourProfileLabel": "Your Profile",
+  "changeProfileAction": "Change Profile",
+  "changeProfileSubtitle": "Personalizes your dashboard — doesn't limit your access",
 
   "yourName": "Your Name",
   "yourVillage": "Village / Town",
@@ -83,6 +86,21 @@
   "vets": "Vets",
 
   "addLand": "Add Land",
+  "nearbyLandsLabel": "Nearby Lands",
+  "nearbyLandsAvailableLabel": "Nearby lands available",
+  "activeHighSeverityAlertsLabel": "Active high-severity alerts",
+  "goodMorningLabel": "Good Morning",
+  "goodAfternoonLabel": "Good Afternoon",
+  "goodEveningLabel": "Good Evening",
+  "namasteNameLabel": "Namaste, {name}",
+  "@namasteNameLabel": {
+    "placeholders": { "name": {"type": "String"} }
+  },
+  "postLandLabel": "Post Land",
+  "bookingRequestsLabel": "Booking Requests",
+  "myBookingsLabel": "My Bookings",
+  "activeBookingsLabel": "Active Bookings",
+  "quickActionsLabel": "Quick Actions",
   "landTitle": "Land Title",
   "landArea": "Land Area",
   "pricePerDay": "Price per Day / Animal",

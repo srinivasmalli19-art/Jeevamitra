@@ -8,6 +8,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_shadows.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/utils/validators.dart';
+import '../../../domain/entities/user_profile_type.dart';
 import '../../../generated/l10n/app_localizations.dart';
 import '../../providers/auth/auth_provider.dart';
 import '../../providers/booking/booking_providers.dart';
@@ -16,6 +17,7 @@ import '../../providers/locale_provider.dart';
 import '../../widgets/common/dashboard_stat_card.dart';
 import '../../widgets/common/responsive_center.dart';
 import '../../widgets/common/standard_app_bar.dart';
+import '../onboarding/choose_profile_screen.dart';
 
 // ─── Shared profile screen ────────────────────────────────────────────────────
 
@@ -71,6 +73,42 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         SnackBar(content: Text(loc.genericSaveFailedMsg)),
       );
     }
+  }
+
+  /// Pushes the existing "Choose Your Profile" widget (reused as-is from
+  /// onboarding), preselected to the user's current profile. Writes only
+  /// happen from inside `onContinue` — if the user backs out without
+  /// tapping Continue, nothing is written to Firestore.
+  Future<void> _changeProfile(String uid, userDoc) async {
+    final current = userDoc?.effectiveProfileType as UserProfileType?;
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => ChooseProfileScreen(
+          initialSelection: current,
+          onContinue: (ctx, ref, selected) async {
+            final ok = await ref.read(authNotifierProvider.notifier).updateProfile(
+                  uid: uid,
+                  name: userDoc?.name ?? '',
+                  village: userDoc?.village ?? '',
+                  district: userDoc?.district ?? '',
+                  preferredLanguage: ref.read(localeProvider).languageCode,
+                  profileType: selected.storageValue,
+                );
+            if (!ctx.mounted) return;
+            if (ok) {
+              // currentUserDocProvider is a live Firestore snapshot stream,
+              // so ProfileScreen re-renders with the new profile the moment
+              // this pop reveals it again — no manual refetch needed.
+              Navigator.of(ctx).pop();
+            } else {
+              final loc = AppLocalizations.of(ctx);
+              ScaffoldMessenger.of(ctx)
+                  .showSnackBar(SnackBar(content: Text(loc.genericSaveFailedMsg)));
+            }
+          },
+        ),
+      ),
+    );
   }
 
   Future<void> _signOut() async {
@@ -314,6 +352,27 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               ]),
               const SizedBox(height: AppSpacing.xl),
             ],
+            // ── Your Profile ─────────────────────────────────────────────────
+            _SectionHeader(loc.yourProfileLabel),
+            const SizedBox(height: AppSpacing.sm),
+            _InfoCard(children: [
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(Icons.swap_horiz_rounded,
+                    color: AppColors.textSecondary),
+                title: Text(loc.changeProfileAction),
+                subtitle: Text(
+                  '${(userDoc?.effectiveProfileType ?? UserProfileType.both).emoji} '
+                  '${_profileTypeLabel(loc, userDoc?.effectiveProfileType ?? UserProfileType.both)}\n'
+                  '${loc.changeProfileSubtitle}',
+                ),
+                isThreeLine: true,
+                trailing: const Icon(Icons.chevron_right_rounded,
+                    color: AppColors.textDisabled),
+                onTap: uid.isEmpty ? null : () => _changeProfile(uid, userDoc),
+              ),
+            ]),
+            const SizedBox(height: AppSpacing.xl),
             // ── Language preference ──────────────────────────────────────────
             _SectionHeader(loc.language),
             const SizedBox(height: AppSpacing.sm),
@@ -374,6 +433,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       ),
     );
   }
+
+  String _profileTypeLabel(AppLocalizations loc, UserProfileType type) =>
+      switch (type) {
+        UserProfileType.livestockOwner => loc.profileLivestockOwner,
+        UserProfileType.fodderLandProvider => loc.profileFodderLandProvider,
+        UserProfileType.both => loc.profileBoth,
+      };
 
   Future<bool?> _confirmDialog(
     BuildContext context, {

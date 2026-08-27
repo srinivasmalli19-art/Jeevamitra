@@ -177,6 +177,16 @@ class AppLocalizationsHi extends AppLocalizations {
       'Your profile personalizes your experience. It does not limit what you can do in JeevaMitra.';
 
   @override
+  String get yourProfileLabel => 'Your Profile';
+
+  @override
+  String get changeProfileAction => 'Change Profile';
+
+  @override
+  String get changeProfileSubtitle =>
+      'Personalizes your dashboard — doesn\'t limit your access';
+
+  @override
   String get yourName => 'आपका नाम';
 
   @override
@@ -214,6 +224,44 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get addLand => 'भूमि जोड़ें';
+
+  @override
+  String get nearbyLandsLabel => 'Nearby Lands';
+
+  @override
+  String get nearbyLandsAvailableLabel => 'Nearby lands available';
+
+  @override
+  String get activeHighSeverityAlertsLabel => 'Active high-severity alerts';
+
+  @override
+  String get goodMorningLabel => 'Good Morning';
+
+  @override
+  String get goodAfternoonLabel => 'Good Afternoon';
+
+  @override
+  String get goodEveningLabel => 'Good Evening';
+
+  @override
+  String namasteNameLabel(String name) {
+    return 'Namaste, $name';
+  }
+
+  @override
+  String get postLandLabel => 'Post Land';
+
+  @override
+  String get bookingRequestsLabel => 'Booking Requests';
+
+  @override
+  String get myBookingsLabel => 'My Bookings';
+
+  @override
+  String get activeBookingsLabel => 'Active Bookings';
+
+  @override
+  String get quickActionsLabel => 'Quick Actions';
 
   @override
   String get landTitle => 'भूमि का नाम';

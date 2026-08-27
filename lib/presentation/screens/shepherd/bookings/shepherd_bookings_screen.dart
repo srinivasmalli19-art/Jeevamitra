@@ -12,11 +12,12 @@ import '../../../../data/models/booking_model.dart';
 import '../../../../generated/l10n/app_localizations.dart';
 import '../../../providers/booking/booking_providers.dart';
 import '../../../widgets/common/jm_badge.dart';
-import '../../../widgets/common/jm_empty_state.dart';
+import '../../../widgets/explore/empty_state_card.dart';
 import '../../../widgets/common/jm_error_state.dart';
 import '../../../widgets/common/jm_loading.dart';
 import '../../../widgets/common/responsive_center.dart';
 import '../../../widgets/common/standard_app_bar.dart';
+import '../../farmer/bookings/farmer_bookings_screen.dart';
 
 class ShepherdBookingsScreen extends ConsumerWidget {
   const ShepherdBookingsScreen({super.key});
@@ -27,7 +28,21 @@ class ShepherdBookingsScreen extends ConsumerWidget {
     final loc = AppLocalizations.of(context);
 
     return Scaffold(
-      appBar: StandardAppBar(title: loc.bookings),
+      appBar: StandardAppBar(
+        title: loc.bookings,
+        actions: [
+          // Universal Access: managing booking requests for your own land
+          // is available to every profile, not just this tab's default
+          // (booker) view.
+          IconButton(
+            icon: const Icon(Icons.inbox_rounded),
+            tooltip: loc.exploreAllFeaturesTooltip,
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const FarmerBookingsScreen()),
+            ),
+          ),
+        ],
+      ),
       body: bookingsAsync.when(
         loading: () => const JmShimmerList(count: 3, cardHeight: 110),
         error: (e, _) => JmErrorState(
@@ -35,10 +50,11 @@ class ShepherdBookingsScreen extends ConsumerWidget {
           onRetry: () => ref.invalidate(shepherdBookingsProvider),
         ),
         data: (bookings) => bookings.isEmpty
-            ? JmEmptyState(
+            ? EmptyStateCard(
                 icon: Icons.calendar_month_rounded,
                 title: loc.noBookingsYetTitle,
                 subtitle: loc.bookLandToSeeBookingsMsg,
+                accentColor: AppColors.textDisabled,
               )
             : ResponsiveCenter(
                 child: ListView.separated(

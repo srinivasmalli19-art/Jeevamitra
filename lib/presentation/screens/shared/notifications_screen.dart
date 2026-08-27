@@ -11,7 +11,7 @@ import '../../../core/utils/firebase_error_translator.dart';
 import '../../../data/models/notification_model.dart';
 import '../../../generated/l10n/app_localizations.dart';
 import '../../providers/notifications/notification_providers.dart';
-import '../../widgets/common/jm_empty_state.dart';
+import '../../widgets/explore/empty_state_card.dart';
 import '../../widgets/common/jm_error_state.dart';
 import '../../widgets/common/jm_loading.dart';
 import '../../widgets/common/responsive_center.dart';
@@ -50,10 +50,11 @@ class NotificationsScreen extends ConsumerWidget {
         ),
         data: (notifications) {
           if (notifications.isEmpty) {
-            return JmEmptyState(
+            return EmptyStateCard(
               icon: Icons.notifications_none_rounded,
               title: loc.noNotifications,
               subtitle: loc.noNotificationsSubtitle,
+              accentColor: AppColors.textDisabled,
             );
           }
           final groups = _group(notifications, loc);

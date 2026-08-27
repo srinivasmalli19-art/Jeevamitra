@@ -11,7 +11,21 @@ class RouteConstants {
   static const String roleSelect = '/auth/role';
   static const String profileSetup = '/auth/setup';
 
-  // Farmer shell
+  // Universal Shell (Sprint 4) — the one bottom-nav shell every
+  // authenticated, fully-onboarded user lands in regardless of profile.
+  // The old /farmer/* and /shepherd/* shell-branch paths below still exist
+  // and still work (as redirects into these), so bookmarks/deep-links and
+  // every existing `context.go(RouteConstants.farmerX)` call site keep
+  // working unchanged.
+  static const String home = '/home';
+  static const String lands = '/lands';
+  static const String bookings = '/bookings';
+  static const String vets = '/vets';
+  static const String profile = '/profile';
+
+  // Farmer shell (legacy — now redirects into the Universal Shell above;
+  // paths kept so existing full-screen routes below that are still nested
+  // under them, e.g. farmerLandDetail, keep working unchanged)
   static const String farmerDashboard = '/farmer/dashboard';
   static const String farmerLands = '/farmer/lands';
   static const String farmerLandDetail = '/farmer/lands/:landId';
@@ -23,7 +37,7 @@ class RouteConstants {
   static const String farmerExplore = '/farmer/explore';
   static const String farmerProfile = '/farmer/profile';
 
-  // Shepherd shell
+  // Shepherd shell (legacy — now redirects into the Universal Shell above)
   static const String shepherdDashboard = '/shepherd/dashboard';
   static const String shepherdDiscover = '/shepherd/discover';
   static const String shepherdLandDetail = '/shepherd/discover/:landId';

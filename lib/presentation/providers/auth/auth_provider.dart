@@ -218,6 +218,10 @@ class AuthNotifier extends StateNotifier<AsyncValue<void>> {
     required String village,
     required String district,
     required String preferredLanguage,
+    // Personalization only — see UserProfileType doc comment. Optional so
+    // every existing caller (name/village/district edits, language switch)
+    // is unaffected; only Change Profile passes it.
+    String? profileType,
   }) async {
     state = const AsyncValue.loading();
     try {
@@ -229,6 +233,7 @@ class AuthNotifier extends StateNotifier<AsyncValue<void>> {
         'village': village,
         'district': district,
         'preferredLanguage': preferredLanguage,
+        if (profileType != null) 'profileType': profileType,
       });
       state = const AsyncValue.data(null);
       return true;

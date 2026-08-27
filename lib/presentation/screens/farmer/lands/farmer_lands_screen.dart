@@ -12,11 +12,12 @@ import '../../../../generated/l10n/app_localizations.dart';
 import '../../../providers/farm/farm_providers.dart';
 import '../../../widgets/common/cached_farm_image.dart';
 import '../../../widgets/common/jm_badge.dart';
-import '../../../widgets/common/jm_empty_state.dart';
+import '../../../widgets/explore/empty_state_card.dart';
 import '../../../widgets/common/jm_error_state.dart';
 import '../../../widgets/common/jm_loading.dart';
 import '../../../widgets/common/responsive_center.dart';
 import '../../../widgets/common/standard_app_bar.dart';
+import '../../shepherd/discover/shepherd_discover_screen.dart';
 
 class FarmerLandsScreen extends ConsumerWidget {
   const FarmerLandsScreen({super.key});
@@ -30,6 +31,15 @@ class FarmerLandsScreen extends ConsumerWidget {
       appBar: StandardAppBar(
         title: loc.myLands,
         actions: [
+          // Universal Access: booking/discovering land is available to
+          // every profile, not just this tab's default (owner) view.
+          IconButton(
+            icon: const Icon(Icons.travel_explore_rounded),
+            tooltip: loc.exploreAllFeaturesTooltip,
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const ShepherdDiscoverScreen()),
+            ),
+          ),
           IconButton(
             icon: const Icon(Icons.add_rounded),
             onPressed: () => context.push(RouteConstants.farmerAddLand),
@@ -44,10 +54,11 @@ class FarmerLandsScreen extends ConsumerWidget {
           onRetry: () => ref.invalidate(myFarmsProvider),
         ),
         data: (farms) => farms.isEmpty
-            ? JmEmptyState(
+            ? EmptyStateCard(
                 icon: Icons.landscape_rounded,
                 title: loc.noLandsYetTitle,
                 subtitle: loc.noLandsYetSubtitle,
+                accentColor: AppColors.textDisabled,
                 buttonLabel: loc.addLand,
                 onButtonTap: () => context.push(RouteConstants.farmerAddLand),
               )

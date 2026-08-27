@@ -30,6 +30,14 @@ enum UserProfileType {
   /// The Firestore-stored value for `UserDoc.profileType`.
   String get storageValue => name;
 
+  /// Emoji used consistently everywhere this profile is displayed (Choose
+  /// Profile onboarding, Change Profile in the Profile screen, etc).
+  String get emoji => switch (this) {
+        UserProfileType.livestockOwner => '🐄',
+        UserProfileType.fodderLandProvider => '🌾',
+        UserProfileType.both => '🔄',
+      };
+
   static UserProfileType? fromStorageValue(String? value) => switch (value) {
         'livestockOwner' => UserProfileType.livestockOwner,
         'fodderLandProvider' => UserProfileType.fodderLandProvider,

@@ -412,6 +412,24 @@ abstract class AppLocalizations {
   /// **'Your profile personalizes your experience. It does not limit what you can do in JeevaMitra.'**
   String get profilePersonalizationNoticeMsg;
 
+  /// No description provided for @yourProfileLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Profile'**
+  String get yourProfileLabel;
+
+  /// No description provided for @changeProfileAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Change Profile'**
+  String get changeProfileAction;
+
+  /// No description provided for @changeProfileSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Personalizes your dashboard — doesn\'t limit your access'**
+  String get changeProfileSubtitle;
+
   /// No description provided for @yourName.
   ///
   /// In en, this message translates to:
@@ -489,6 +507,78 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Add Land'**
   String get addLand;
+
+  /// No description provided for @nearbyLandsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Nearby Lands'**
+  String get nearbyLandsLabel;
+
+  /// No description provided for @nearbyLandsAvailableLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Nearby lands available'**
+  String get nearbyLandsAvailableLabel;
+
+  /// No description provided for @activeHighSeverityAlertsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Active high-severity alerts'**
+  String get activeHighSeverityAlertsLabel;
+
+  /// No description provided for @goodMorningLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Good Morning'**
+  String get goodMorningLabel;
+
+  /// No description provided for @goodAfternoonLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Good Afternoon'**
+  String get goodAfternoonLabel;
+
+  /// No description provided for @goodEveningLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Good Evening'**
+  String get goodEveningLabel;
+
+  /// No description provided for @namasteNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Namaste, {name}'**
+  String namasteNameLabel(String name);
+
+  /// No description provided for @postLandLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Post Land'**
+  String get postLandLabel;
+
+  /// No description provided for @bookingRequestsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Booking Requests'**
+  String get bookingRequestsLabel;
+
+  /// No description provided for @myBookingsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'My Bookings'**
+  String get myBookingsLabel;
+
+  /// No description provided for @activeBookingsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Active Bookings'**
+  String get activeBookingsLabel;
+
+  /// No description provided for @quickActionsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick Actions'**
+  String get quickActionsLabel;
 
   /// No description provided for @landTitle.
   ///

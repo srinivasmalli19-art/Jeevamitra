@@ -7,11 +7,25 @@ class AppColors {
   static const Color primaryDark = Color(0xFF0D4A25);
   static const Color primaryContainer = Color(0xFFD4EDDA);
 
-  // Brand ambers (harvest/earth)
+  // Brand ambers (harvest/earth) — used across existing screens for
+  // decorative accents; left untouched by the Sprint 1 visual refresh.
   static const Color secondary = Color(0xFFE07B39);
   static const Color secondaryLight = Color(0xFFFFB347);
   static const Color secondaryDark = Color(0xFFB85C20);
   static const Color secondaryContainer = Color(0xFFFFF0E0);
+
+  // Primary-action gold — provisional token for the new visual direction's
+  // gold/amber CTAs (buttons etc). Distinct from `secondary` above, which
+  // stays reserved for existing decorative accents so this refresh doesn't
+  // ripple into unrelated screens. Value is a representative amber pending
+  // the exact prototype hex — change only these four lines to retune every
+  // primary-action surface at once.
+  static const Color actionPrimary = Color(0xFFE8A33D);
+  static const Color actionPrimaryLight = Color(0xFFF4C468);
+  static const Color actionPrimaryDark = Color(0xFFC7841F);
+  static const Color actionPrimaryContainer = Color(0xFFFFF3DC);
+  // Dark text reads with far better contrast on the gold surface than white.
+  static const Color textOnActionPrimary = Color(0xFF1A2B1A);
 
   // Semantic
   static const Color success = Color(0xFF27AE60);
@@ -30,6 +44,7 @@ class AppColors {
   // Neutral surfaces
   static const Color background = Color(0xFFF7F7F2);
   static const Color surface = Color(0xFFFFFFFF);
+  static const Color surfaceCream = Color(0xFFFDFAF0);
   static const Color surfaceVariant = Color(0xFFF0F4F0);
   static const Color outline = Color(0xFFDDE1DD);
   static const Color divider = Color(0xFFE8EDE8);

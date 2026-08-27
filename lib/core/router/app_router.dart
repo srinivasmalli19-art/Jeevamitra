@@ -14,24 +14,19 @@ import '../../presentation/screens/auth/phone_login_screen.dart';
 import '../../presentation/screens/auth/otp_verification_screen.dart';
 import '../../presentation/screens/auth/role_select_screen.dart';
 import '../../presentation/screens/auth/profile_setup_screen.dart';
-import '../../presentation/screens/farmer/farmer_shell.dart';
-import '../../presentation/screens/farmer/dashboard/farmer_dashboard_screen.dart';
-import '../../presentation/screens/farmer/lands/farmer_lands_screen.dart';
 import '../../presentation/screens/farmer/lands/add_land_screen.dart';
 import '../../presentation/screens/farmer/lands/availability_calendar_screen.dart';
 import '../../presentation/screens/farmer/lands/land_detail_screen.dart';
-import '../../presentation/screens/farmer/bookings/farmer_bookings_screen.dart';
 import '../../presentation/screens/farmer/explore/farmer_explore_screen.dart';
-import '../../presentation/screens/farmer/profile/farmer_profile_screen.dart';
-import '../../presentation/screens/shepherd/shepherd_shell.dart';
-import '../../presentation/screens/shepherd/dashboard/shepherd_dashboard_screen.dart';
-import '../../presentation/screens/shepherd/discover/shepherd_discover_screen.dart';
 import '../../presentation/screens/shepherd/discover/shepherd_land_detail_screen.dart';
-import '../../presentation/screens/shepherd/bookings/shepherd_bookings_screen.dart';
 import '../../presentation/screens/shepherd/vets/shepherd_vets_screen.dart';
 import '../../presentation/screens/shepherd/vets/vet_detail_screen.dart';
-import '../../presentation/screens/shepherd/profile/shepherd_profile_screen.dart';
 import '../../presentation/screens/shepherd/explore_map/explore_map_screen.dart';
+import '../../presentation/screens/shell/universal_shell.dart';
+import '../../presentation/screens/shell/home/home_dashboard_screen.dart';
+import '../../presentation/screens/shell/lands_tab_screen.dart';
+import '../../presentation/screens/shell/bookings_tab_screen.dart';
+import '../../presentation/screens/shell/profile_tab_screen.dart';
 import '../../presentation/screens/shared/search/unified_search_screen.dart';
 import '../../presentation/screens/shared/alerts/alert_detail_screen.dart';
 import '../../presentation/screens/shared/alerts/alert_map_screen.dart';
@@ -66,6 +61,13 @@ String? _redirect(Ref ref, GoRouterState state) {
   final isOnAuth = loc.startsWith('/auth');
   final isOnFarmer = loc.startsWith('/farmer');
   final isOnShepherd = loc.startsWith('/shepherd');
+  // Universal Shell's own canonical routes need the same auth protection
+  // the /farmer, /shepherd prefixes gave their old shell-branch routes.
+  final isOnUniversalShell = loc == RouteConstants.home ||
+      loc == RouteConstants.lands ||
+      loc == RouteConstants.bookings ||
+      loc == RouteConstants.vets ||
+      loc == RouteConstants.profile;
 
   final firebaseReady = ref.read(firebaseInitializedProvider);
   if (!firebaseReady) return null; // stays on splash showing setup screen
@@ -77,7 +79,9 @@ String? _redirect(Ref ref, GoRouterState state) {
   if (isLoading) {
     // While auth is resolving, keep protected routes on splash to prevent
     // unauthenticated Firestore queries from firing.
-    if (isOnFarmer || isOnShepherd) return RouteConstants.splash;
+    if (isOnFarmer || isOnShepherd || isOnUniversalShell) {
+      return RouteConstants.splash;
+    }
     return null;
   }
 
@@ -88,7 +92,9 @@ String? _redirect(Ref ref, GoRouterState state) {
   // stuck on a blank splash screen (happens when loading guard briefly parks
   // the user there and auth then settles to null).
   if (user == null) {
-    if (isOnFarmer || isOnShepherd) return RouteConstants.phoneLogin;
+    if (isOnFarmer || isOnShepherd || isOnUniversalShell) {
+      return RouteConstants.phoneLogin;
+    }
     return null;
   }
 
@@ -104,20 +110,20 @@ String? _redirect(Ref ref, GoRouterState state) {
     return RouteConstants.profileSetup;
   }
 
-  // Fully onboarded — redirect away from auth/onboarding screens
+  // Fully onboarded — redirect away from auth/onboarding screens into the
+  // single Universal Shell (Sprint 4). Every profile lands in exactly the
+  // same place; `doc.isFarmer`/`role` no longer decide the *route* here —
+  // Home is a single unified dashboard (Sprint 5), and Lands/Bookings tab
+  // content is still role-selected inside their own tab-screen wrappers.
   if (isOnAuth || isOnOnboarding || isOnSplash) {
-    return doc.isFarmer ? RouteConstants.farmerDashboard : RouteConstants.shepherdDashboard;
+    return RouteConstants.home;
   }
 
-  // Profile Restructure: farmer/shepherd is personalization, not a
-  // permission, so every authenticated + fully-onboarded user can reach
-  // both the /farmer/* and /shepherd/* route trees — there used to be a
-  // guard here that bounced a farmer out of /shepherd/* (and vice versa)
-  // back to their own dashboard; removed so Livestock Owner, Fodder Land
-  // Provider, and Both all have identical feature access. `doc.isFarmer`
-  // still decides only which dashboard is the *default* landing screen
-  // above; `isOnFarmer`/`isOnShepherd` remain used by the earlier
-  // loading/unauthenticated branches in this function.
+  // Universal Access: no permission-based redirect exists below this
+  // point for any authenticated, fully-onboarded user — every profile
+  // (Livestock Owner, Fodder Land Provider, Both) reaches every route
+  // identically. `isOnFarmer`/`isOnShepherd` remain used only by the
+  // earlier loading/unauthenticated guards above.
   return null;
 }
 
@@ -176,48 +182,80 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: RouteConstants.roleSelect, builder: (_, __) => const RoleSelectScreen()),
       GoRoute(path: RouteConstants.profileSetup, builder: (_, __) => const ProfileSetupScreen()),
 
-      // ── Farmer Shell ──────────────────────────────────────────────────────
+      // ── Universal Shell (Sprint 4) ────────────────────────────────────────
+      // One shell, five tabs, identical for every profile. Each tab reuses
+      // an existing screen (not redesigned this sprint) chosen by the
+      // tab-screen wrappers in presentation/screens/shell/.
       StatefulShellRoute.indexedStack(
-        builder: (_, __, shell) => FarmerShell(navigationShell: shell),
+        builder: (_, __, shell) => UniversalShell(navigationShell: shell),
         branches: [
           StatefulShellBranch(routes: [
-            GoRoute(path: RouteConstants.farmerDashboard, builder: (_, __) => const FarmerDashboardScreen()),
+            GoRoute(path: RouteConstants.home, builder: (_, __) => const HomeDashboardScreen()),
           ]),
           StatefulShellBranch(routes: [
-            GoRoute(path: RouteConstants.farmerLands, builder: (_, __) => const FarmerLandsScreen()),
+            GoRoute(path: RouteConstants.lands, builder: (_, __) => const LandsTabScreen()),
           ]),
           StatefulShellBranch(routes: [
-            GoRoute(path: RouteConstants.farmerBookings, builder: (_, __) => const FarmerBookingsScreen()),
+            GoRoute(path: RouteConstants.bookings, builder: (_, __) => const BookingsTabScreen()),
           ]),
           StatefulShellBranch(routes: [
-            GoRoute(path: RouteConstants.farmerExplore, builder: (_, __) => const FarmerExploreScreen()),
+            GoRoute(path: RouteConstants.vets, builder: (_, __) => const ShepherdVetsScreen()),
           ]),
           StatefulShellBranch(routes: [
-            GoRoute(path: RouteConstants.farmerProfile, builder: (_, __) => const FarmerProfileScreen()),
+            GoRoute(path: RouteConstants.profile, builder: (_, __) => const ProfileTabScreen()),
           ]),
         ],
       ),
 
-      // ── Shepherd Shell ────────────────────────────────────────────────────
-      StatefulShellRoute.indexedStack(
-        builder: (_, __, shell) => ShepherdShell(navigationShell: shell),
-        branches: [
-          StatefulShellBranch(routes: [
-            GoRoute(path: RouteConstants.shepherdDashboard, builder: (_, __) => const ShepherdDashboardScreen()),
-          ]),
-          StatefulShellBranch(routes: [
-            GoRoute(path: RouteConstants.shepherdDiscover, builder: (_, __) => const ShepherdDiscoverScreen()),
-          ]),
-          StatefulShellBranch(routes: [
-            GoRoute(path: RouteConstants.shepherdBookings, builder: (_, __) => const ShepherdBookingsScreen()),
-          ]),
-          StatefulShellBranch(routes: [
-            GoRoute(path: RouteConstants.shepherdVets, builder: (_, __) => const ShepherdVetsScreen()),
-          ]),
-          StatefulShellBranch(routes: [
-            GoRoute(path: RouteConstants.shepherdProfile, builder: (_, __) => const ShepherdProfileScreen()),
-          ]),
-        ],
+      // ── Legacy shell routes — redirect into the Universal Shell above.
+      // Kept as real routes (not deleted) so every existing
+      // `context.go(RouteConstants.farmerX)`/`.shepherdX` call site across
+      // the app, and any bookmarked/deep-linked URL, keeps resolving
+      // instead of 404ing. Auth/redirect state is validated by _redirect()
+      // above BEFORE these run, so an unauthenticated hit still bounces to
+      // phone login rather than briefly flashing the target.
+      GoRoute(
+        path: RouteConstants.farmerDashboard,
+        redirect: (_, __) => RouteConstants.home,
+      ),
+      GoRoute(
+        path: RouteConstants.shepherdDashboard,
+        redirect: (_, __) => RouteConstants.home,
+      ),
+      GoRoute(
+        path: RouteConstants.farmerLands,
+        redirect: (_, __) => RouteConstants.lands,
+      ),
+      GoRoute(
+        path: RouteConstants.shepherdDiscover,
+        redirect: (_, __) => RouteConstants.lands,
+      ),
+      GoRoute(
+        path: RouteConstants.farmerBookings,
+        redirect: (_, __) => RouteConstants.bookings,
+      ),
+      GoRoute(
+        path: RouteConstants.shepherdBookings,
+        redirect: (_, __) => RouteConstants.bookings,
+      ),
+      GoRoute(
+        path: RouteConstants.shepherdVets,
+        redirect: (_, __) => RouteConstants.vets,
+      ),
+      GoRoute(
+        path: RouteConstants.farmerProfile,
+        redirect: (_, __) => RouteConstants.profile,
+      ),
+      GoRoute(
+        path: RouteConstants.shepherdProfile,
+        redirect: (_, __) => RouteConstants.profile,
+      ),
+
+      // ── Disease Alerts / advisory (full-screen, no longer a shell tab —
+      // reachable from Home's quick actions exactly as before) ────────────
+      GoRoute(
+        path: RouteConstants.farmerExplore,
+        builder: (_, __) => const FarmerExploreScreen(),
       ),
 
       // ── Farmer land management (full-screen, no bottom nav) ──────────────

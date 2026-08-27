@@ -79,7 +79,11 @@ class _ChooseProfileScreenState extends ConsumerState<ChooseProfileScreen> {
                       emoji: '🐄',
                       title: loc.profileLivestockOwner,
                       description: loc.profileLivestockOwnerDesc,
-                      color: AppColors.secondary,
+                      // All three profiles share the same green selection
+                      // treatment — profile choice is personalization only,
+                      // never a different permission tier, so the UI must
+                      // not visually imply otherwise.
+                      color: AppColors.primary,
                       isSelected: _selected == UserProfileType.livestockOwner,
                       onTap: () =>
                           setState(() => _selected = UserProfileType.livestockOwner),
@@ -100,7 +104,7 @@ class _ChooseProfileScreenState extends ConsumerState<ChooseProfileScreen> {
                       emoji: '🔄',
                       title: loc.profileBoth,
                       description: loc.profileBothDesc,
-                      color: AppColors.info,
+                      color: AppColors.primary,
                       isSelected: _selected == UserProfileType.both,
                       onTap: () => setState(() => _selected = UserProfileType.both),
                     ),

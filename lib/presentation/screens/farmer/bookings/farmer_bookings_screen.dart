@@ -12,11 +12,12 @@ import '../../../../data/models/booking_model.dart';
 import '../../../../generated/l10n/app_localizations.dart';
 import '../../../providers/booking/booking_providers.dart';
 import '../../../widgets/common/jm_badge.dart';
-import '../../../widgets/common/jm_empty_state.dart';
+import '../../../widgets/explore/empty_state_card.dart';
 import '../../../widgets/common/jm_error_state.dart';
 import '../../../widgets/common/jm_loading.dart';
 import '../../../widgets/common/responsive_center.dart';
 import '../../../widgets/common/standard_app_bar.dart';
+import '../../shepherd/bookings/shepherd_bookings_screen.dart';
 
 class FarmerBookingsScreen extends ConsumerStatefulWidget {
   const FarmerBookingsScreen({super.key});
@@ -50,6 +51,17 @@ class _FarmerBookingsScreenState extends ConsumerState<FarmerBookingsScreen>
     return Scaffold(
       appBar: StandardAppBar(
         title: loc.bookings,
+        actions: [
+          // Universal Access: booking land yourself is available to every
+          // profile, not just this tab's default (owner/requests) view.
+          IconButton(
+            icon: const Icon(Icons.travel_explore_rounded),
+            tooltip: loc.exploreAllFeaturesTooltip,
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const ShepherdBookingsScreen()),
+            ),
+          ),
+        ],
         bottom: TabBar(
           controller: _tabs,
           labelColor: Colors.white,
@@ -113,10 +125,11 @@ class _BookingList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (bookings.isEmpty) {
-      return JmEmptyState(
+      return EmptyStateCard(
         icon: Icons.inbox_rounded,
         title: emptyTitle,
         subtitle: emptySubtitle,
+        accentColor: AppColors.textDisabled,
       );
     }
     return ResponsiveCenter(

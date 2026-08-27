@@ -56,7 +56,14 @@ class JmButton extends StatelessWidget {
                 Icon(leadingIcon, size: fontSize + 2),
                 const SizedBox(width: AppSpacing.sm),
               ],
-              Text(label, style: TextStyle(fontSize: fontSize, fontWeight: FontWeight.w600)),
+              Flexible(
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(fontSize: fontSize, fontWeight: FontWeight.w600),
+                ),
+              ),
               if (trailingIcon != null) ...[
                 const SizedBox(width: AppSpacing.sm),
                 Icon(trailingIcon, size: fontSize + 2),
@@ -90,7 +97,7 @@ class JmButton extends StatelessWidget {
   }
 
   Color get _foregroundColor => switch (variant) {
-    JmButtonVariant.primary => Colors.white,
+    JmButtonVariant.primary => AppColors.textOnActionPrimary,
     JmButtonVariant.danger => Colors.white,
     JmButtonVariant.secondary => AppColors.secondaryDark,
     JmButtonVariant.outline => AppColors.primary,
@@ -99,7 +106,7 @@ class JmButton extends StatelessWidget {
 
   ButtonStyle _buildStyle(double height) {
     final bg = switch (variant) {
-      JmButtonVariant.primary => AppColors.primary,
+      JmButtonVariant.primary => AppColors.actionPrimary,
       JmButtonVariant.danger => AppColors.error,
       JmButtonVariant.secondary => AppColors.secondaryContainer,
       JmButtonVariant.outline => Colors.transparent,

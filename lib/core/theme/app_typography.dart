@@ -65,4 +65,17 @@ class AppTypography {
     color: AppColors.textPrimary,
     height: 1.6,
   );
+
+  /// Serif display style — added for the prototype's headline treatment
+  /// (e.g. the Home greeting "Namaste, Ravi"). Deliberately a separate
+  /// named method rather than repurposing `textTheme.displayLarge`
+  /// (Poppins), so existing callers of the Material text theme are
+  /// unaffected; Poppins remains the app's primary/default face
+  /// everywhere else per Sprint 1. Named distinctly from
+  /// `textTheme.displayLarge` to avoid confusion between the two.
+  static TextStyle serifDisplay({
+    double size = 28,
+    FontWeight weight = FontWeight.w700,
+    Color color = AppColors.textPrimary,
+  }) => GoogleFonts.merriweather(fontSize: size, fontWeight: weight, color: color, height: 1.25);
 }
