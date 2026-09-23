@@ -7,12 +7,16 @@ import '../../../domain/entities/user_profile_type.dart';
 class UserDoc {
   final String uid;
   final String phone;
-  final String role; // 'farmer' | 'shepherd' — unchanged backend value
+  final String role; // 'farmer' | 'shepherd' | 'vet' — unchanged backend value
   final String name;
   final String? village;
   final String? district;
   final bool isProfileComplete;
   final String preferredLanguage;
+
+  /// Admin-granted verification flag for vet accounts. Deliberately never
+  /// written by [toMap] — see the comment there.
+  final bool isVerified;
 
   /// The user-facing identity profile chosen on the "Choose Your Profile"
   /// onboarding step (livestockOwner | fodderLandProvider | both), stored
@@ -31,10 +35,12 @@ class UserDoc {
     required this.isProfileComplete,
     this.preferredLanguage = 'te',
     this.profileType,
+    this.isVerified = false,
   });
 
   bool get isFarmer => role == 'farmer';
   bool get isShepherd => role == 'shepherd';
+  bool get isVet => role == 'vet';
 
   /// The profile to use for personalization: the explicitly-chosen one if
   /// present, otherwise the best inference from [role] for legacy accounts.
@@ -54,9 +60,15 @@ class UserDoc {
       isProfileComplete: d['isProfileComplete'] as bool? ?? false,
       preferredLanguage: d['preferredLanguage'] as String? ?? 'te',
       profileType: d['profileType'] as String?,
+      isVerified: d['isVerified'] as bool? ?? false,
     );
   }
 
+  // isVerified is deliberately omitted here. This map is also used by
+  // createUserDoc()'s merge:true write on an already-existing doc (e.g. when
+  // profile_setup_screen.dart re-runs it), and including isVerified: false
+  // there would silently overwrite any admin-granted isVerified: true.
+  // Verification must only ever be changed by an admin-side write.
   Map<String, dynamic> toMap() => {
     'uid': uid,
     'phone': phone,

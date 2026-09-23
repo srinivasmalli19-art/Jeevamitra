@@ -11,6 +11,8 @@ class FirebaseConstants {
   static const String blockedPeriods = 'blocked_periods';
   static const String conversations = 'conversations';
   static const String messages = 'messages';
+  static const String interactions = 'interactions';
+  static const String interactionLocks = 'interactionLocks';
   static const String emergencyContacts = 'emergency_contacts';
   static const String analytics = 'analytics';
 

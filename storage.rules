@@ -33,6 +33,27 @@ service firebase.storage {
           request.resource.contentType.matches('image/.*');
     }
 
+    // ── interactions/{interactionId}/{fileName} ─────────────────────────────
+    // Image attachments for the interaction messaging system (see
+    // interaction_message_entity.dart). Access is decided purely by
+    // participation in the linked Firestore interactions/{interactionId}
+    // doc — checked via a cross-service firestore.get(), the same pattern
+    // used by the interactions/interactionLocks Firestore rules themselves.
+    match /interactions/{interactionId}/{fileName} {
+      allow read: if isSignedIn() &&
+          request.auth.uid in [
+            firestore.get(/databases/(default)/documents/interactions/$(interactionId)).data.requesterId,
+            firestore.get(/databases/(default)/documents/interactions/$(interactionId)).data.recipientId
+          ];
+      allow write: if isSignedIn() &&
+          request.auth.uid in [
+            firestore.get(/databases/(default)/documents/interactions/$(interactionId)).data.requesterId,
+            firestore.get(/databases/(default)/documents/interactions/$(interactionId)).data.recipientId
+          ] &&
+          request.resource.size < 10 * 1024 * 1024 &&
+          request.resource.contentType.matches('image/.*');
+    }
+
     // No other upload path is used by the app today (no profile-picture or
     // vet-photo upload feature exists yet — see Batch 4 report). Default
     // deny everything else rather than leaving it to whatever was last set

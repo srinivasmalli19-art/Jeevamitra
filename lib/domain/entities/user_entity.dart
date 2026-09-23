@@ -1,7 +1,7 @@
 class UserEntity {
   final String uid;
   final String phone;
-  final String role; // 'farmer' | 'shepherd'
+  final String role; // 'farmer' | 'shepherd' | 'vet'
   final String name;
   final String? village;
   final String? district;
@@ -31,6 +31,7 @@ class UserEntity {
 
   bool get isFarmer => role == 'farmer';
   bool get isShepherd => role == 'shepherd';
+  bool get isVet => role == 'vet';
 
   UserEntity copyWith({
     String? name,

@@ -17,7 +17,17 @@ service cloud.firestore {
     // Each user can read and write only their own document.
 
     match /users/{userId} {
-      allow read, write: if isOwner(userId);
+      allow read: if isOwner(userId);
+
+      // isVerified is an admin-only field — the verification gate the
+      // interaction system checks before treating a vet account as a valid
+      // interaction recipient. Every client write must leave it unchanged;
+      // only a privileged write (Admin SDK / console) may set it true.
+      allow create: if isOwner(userId) &&
+          request.resource.data.get('isVerified', false) == false;
+      allow update: if isOwner(userId) &&
+          request.resource.data.get('isVerified', false) == resource.data.get('isVerified', false);
+      allow delete: if isOwner(userId);
     }
 
     // ── farms ─────────────────────────────────────────────────────────────────
@@ -156,6 +166,193 @@ service cloud.firestore {
         allow read: if isSignedIn();
         allow create: if isSignedIn() && request.auth.uid == request.resource.data.senderId;
       }
+    }
+
+    // ── interactions & interactionLocks ─────────────────────────────────────
+    // General user-to-user interaction/messaging system (any relevant role
+    // pair — farmer/shepherd/vet), gated on: the recipient actually holding
+    // the claimed role, a vet recipient being admin-verified, and (for
+    // land-context requests) the recipient actually owning the referenced
+    // farm. A deterministic-id "lock" document (see interactionLocks below)
+    // prevents a requester from having two open interactions for the same
+    // requester+context pair at once, and is written atomically alongside
+    // the interaction doc in the same client-side batch — if the lock write
+    // is rejected, the whole batch fails, so no orphan interaction is ever
+    // created for a pair that already has one open.
+    //
+    // KNOWN GAP (flagged, not silently worked around — see Batch 1 report):
+    // the `vets` directory collection (browsable vet listings) has no field
+    // linking its documents to a real users/{uid} account, so a land-context
+    // request can verify recipient-owns-context via farms/{contextId}.ownerId,
+    // but a vet-context request cannot cross-check recipientId against the
+    // vets/{contextId} listing the same way — it relies solely on
+    // recipientRole == 'vet' plus isVerified. Reconciling the vets directory
+    // with real vet accounts is a separate, later migration.
+
+    match /interactions/{interactionId} {
+      allow read: if isSignedIn() &&
+          request.auth.uid in [resource.data.requesterId, resource.data.recipientId];
+
+      allow create: if isSignedIn() &&
+          request.auth.uid == request.resource.data.requesterId &&
+          request.resource.data.recipientId != request.resource.data.requesterId &&
+          request.resource.data.status == 'pending' &&
+          request.resource.data.subject is string &&
+          request.resource.data.subject.size() > 0 &&
+          request.resource.data.subject.size() <= 1000 &&
+          request.resource.data.createdAt is timestamp &&
+          request.resource.data.get('unreadCountRequester', 0) == 0 &&
+          request.resource.data.get('unreadCountRecipient', 0) == 0 &&
+          !('acceptedAt' in request.resource.data) &&
+          !('completedAt' in request.resource.data) &&
+          !('lastMessageAt' in request.resource.data) &&
+          !('lastMessageText' in request.resource.data) &&
+          !('lastMessageSenderId' in request.resource.data) &&
+          request.resource.data.requesterRole ==
+              get(/databases/$(database)/documents/users/$(request.resource.data.requesterId)).data.role &&
+          request.resource.data.recipientRole ==
+              get(/databases/$(database)/documents/users/$(request.resource.data.recipientId)).data.role &&
+          (
+            request.resource.data.recipientRole != 'vet' ||
+            get(/databases/$(database)/documents/users/$(request.resource.data.recipientId)).data.get('isVerified', false) == true
+          ) &&
+          (
+            request.resource.data.contextType != 'land' ||
+            request.resource.data.recipientId ==
+                get(/databases/$(database)/documents/farms/$(request.resource.data.contextId)).data.ownerId
+          );
+
+      // Only status transitions are allowed in this phase — no messaging
+      // fields (lastMessage*, unreadCount*) are writable yet; those land
+      // alongside the messaging implementation in a later phase.
+      allow update: if isSignedIn() &&
+          request.auth.uid in [resource.data.requesterId, resource.data.recipientId] &&
+          request.resource.data.requesterId == resource.data.requesterId &&
+          request.resource.data.requesterRole == resource.data.requesterRole &&
+          request.resource.data.recipientId == resource.data.recipientId &&
+          request.resource.data.recipientRole == resource.data.recipientRole &&
+          request.resource.data.interactionType == resource.data.interactionType &&
+          request.resource.data.contextType == resource.data.contextType &&
+          request.resource.data.contextId == resource.data.contextId &&
+          request.resource.data.subject == resource.data.subject &&
+          request.resource.data.createdAt == resource.data.createdAt &&
+          request.resource.data.get('lastMessageAt', null) == resource.data.get('lastMessageAt', null) &&
+          request.resource.data.get('lastMessageText', null) == resource.data.get('lastMessageText', null) &&
+          request.resource.data.get('lastMessageSenderId', null) == resource.data.get('lastMessageSenderId', null) &&
+          request.resource.data.get('unreadCountRequester', 0) == resource.data.get('unreadCountRequester', 0) &&
+          request.resource.data.get('unreadCountRecipient', 0) == resource.data.get('unreadCountRecipient', 0) &&
+          (
+            (resource.data.status == 'pending' && request.resource.data.status == 'accepted' &&
+              request.auth.uid == resource.data.recipientId &&
+              request.resource.data.acceptedAt is timestamp) ||
+            (resource.data.status == 'pending' && request.resource.data.status == 'declined' &&
+              request.auth.uid == resource.data.recipientId) ||
+            (resource.data.status == 'pending' && request.resource.data.status == 'cancelled' &&
+              request.auth.uid == resource.data.requesterId) ||
+            (resource.data.status == 'accepted' && request.resource.data.status == 'active' &&
+              request.resource.data.acceptedAt == resource.data.acceptedAt) ||
+            (resource.data.status == 'accepted' && request.resource.data.status == 'cancelled' &&
+              request.resource.data.acceptedAt == resource.data.acceptedAt) ||
+            (resource.data.status == 'active' && request.resource.data.status == 'completed' &&
+              request.resource.data.acceptedAt == resource.data.acceptedAt &&
+              request.resource.data.completedAt is timestamp) ||
+            (resource.data.status == 'active' && request.resource.data.status == 'cancelled' &&
+              request.resource.data.acceptedAt == resource.data.acceptedAt)
+          );
+
+      allow delete: if false;
+
+      // ── interactions/{interactionId}/messages ───────────────────────────
+      // Only reachable once the interaction has been accepted — matches
+      // InteractionEntity.canMessage. 'system' messages are not client-
+      // creatable in this phase (no server-side writer for them yet).
+      match /messages/{messageId} {
+        allow read: if isSignedIn() &&
+            request.auth.uid in [
+              get(/databases/$(database)/documents/interactions/$(interactionId)).data.requesterId,
+              get(/databases/$(database)/documents/interactions/$(interactionId)).data.recipientId
+            ];
+
+        allow create: if isSignedIn() &&
+            request.auth.uid == request.resource.data.senderId &&
+            request.auth.uid in [
+              get(/databases/$(database)/documents/interactions/$(interactionId)).data.requesterId,
+              get(/databases/$(database)/documents/interactions/$(interactionId)).data.recipientId
+            ] &&
+            get(/databases/$(database)/documents/interactions/$(interactionId)).data.status in ['accepted', 'active'] &&
+            request.resource.data.senderRole ==
+                get(/databases/$(database)/documents/users/$(request.resource.data.senderId)).data.role &&
+            request.resource.data.type in ['text', 'image'] &&
+            request.resource.data.createdAt is timestamp &&
+            !('readAt' in request.resource.data);
+
+        // Only the other participant (never the sender) may mark a message
+        // read, and only that one field may change.
+        allow update: if isSignedIn() &&
+            request.auth.uid in [
+              get(/databases/$(database)/documents/interactions/$(interactionId)).data.requesterId,
+              get(/databases/$(database)/documents/interactions/$(interactionId)).data.recipientId
+            ] &&
+            request.auth.uid != resource.data.senderId &&
+            request.resource.data.diff(resource.data).affectedKeys().hasOnly(['readAt']) &&
+            request.resource.data.readAt is timestamp;
+
+        allow delete: if false;
+      }
+    }
+
+    match /interactionLocks/{lockId} {
+      allow read: if isSignedIn() &&
+          request.auth.uid in [resource.data.requesterId, resource.data.recipientId];
+
+      // Lock doc id is always "{requesterId}_{contextId}" — enforce that
+      // shape so a client can't point a lock at a mismatched pair.
+      allow create: if isSignedIn() &&
+          request.auth.uid == request.resource.data.requesterId &&
+          lockId == request.resource.data.requesterId + '_' + request.resource.data.contextId &&
+          request.resource.data.status == 'pending' &&
+          request.resource.data.recipientId is string &&
+          request.resource.data.recipientId.size() > 0 &&
+          request.resource.data.currentInteractionId is string &&
+          request.resource.data.currentInteractionId.size() > 0 &&
+          request.resource.data.updatedAt is timestamp;
+
+      allow update: if isSignedIn() &&
+          request.auth.uid in [resource.data.requesterId, resource.data.recipientId] &&
+          request.resource.data.requesterId == resource.data.requesterId &&
+          request.resource.data.contextId == resource.data.contextId &&
+          request.resource.data.recipientId == resource.data.recipientId &&
+          request.resource.data.updatedAt is timestamp &&
+          (
+            // Same-status re-mirror (e.g. a redundant write) must point at
+            // the *same* interaction — otherwise a requester could silently
+            // swap which interaction an open lock tracks while appearing to
+            // make no status change, defeating the duplicate-open guard.
+            (request.resource.data.status == resource.data.status &&
+              request.resource.data.currentInteractionId == resource.data.currentInteractionId) ||
+            // Forward status mirror for the same interaction (accept /
+            // decline / activate / complete / cancel) — driven by the
+            // linked interaction's own update, never a different
+            // interaction id.
+            (request.resource.data.currentInteractionId == resource.data.currentInteractionId &&
+              (
+                (resource.data.status == 'pending' && request.resource.data.status in ['accepted', 'declined', 'cancelled']) ||
+                (resource.data.status == 'accepted' && request.resource.data.status in ['active', 'cancelled']) ||
+                (resource.data.status == 'active' && request.resource.data.status in ['completed', 'cancelled'])
+              )) ||
+            // Re-request: a terminal lock may be reopened by its requester
+            // with a brand-new interaction id — the re-request-after-
+            // completion path — but must never reuse the previous
+            // interaction id.
+            (resource.data.status in ['declined', 'cancelled', 'completed'] &&
+              request.resource.data.status == 'pending' &&
+              request.auth.uid == resource.data.requesterId &&
+              request.resource.data.currentInteractionId != resource.data.currentInteractionId &&
+              request.resource.data.currentInteractionId is string &&
+              request.resource.data.currentInteractionId.size() > 0)
+          );
+
+      allow delete: if false;
     }
 
     // ── emergency_contacts ────────────────────────────────────────────────────
