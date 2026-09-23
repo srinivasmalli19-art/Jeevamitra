@@ -190,8 +190,20 @@ service cloud.firestore {
     // with real vet accounts is a separate, later migration.
 
     match /interactions/{interactionId} {
+      // `||` (short-circuit), not `auth.uid in [a, b]` — Firestore's rule
+      // engine must build the whole list literal before checking `in`,
+      // evaluating both `a` and `b` unconditionally; a bare `in` form here
+      // breaks `list` queries filtered on only one of the two fields (e.g.
+      // InteractionRepository.watchRequesterInteractions()'s
+      // `where('requesterId', isEqualTo: ...)`), because the engine can't
+      // statically prove the *other*, unconstrained field is safe to read.
+      // `||` short-circuits, so the query's own filter alone proves the
+      // first branch and the second is never evaluated. Found via the
+      // Batch 2 emulator concurrency probe — see firebase_rules_test/
+      // concurrency_probe.mjs's header comment.
       allow read: if isSignedIn() &&
-          request.auth.uid in [resource.data.requesterId, resource.data.recipientId];
+          (request.auth.uid == resource.data.requesterId ||
+           request.auth.uid == resource.data.recipientId);
 
       allow create: if isSignedIn() &&
           request.auth.uid == request.resource.data.requesterId &&
@@ -302,8 +314,23 @@ service cloud.firestore {
     }
 
     match /interactionLocks/{lockId} {
+      // `resource == null ||` handles the lock not existing yet — the
+      // normal case for the very first request between a given
+      // requester+context pair. Without this, `resource.data.requesterId`
+      // is accessed on a null `resource` and every read throws, which
+      // breaks InteractionRepository.createInteraction()'s own
+      // `transaction.get(lockRef)` for exactly the case Phase 4 exists to
+      // handle. A non-existent lock has no data to protect, so allowing any
+      // signed-in user to observe "not found" leaks nothing; once a lock
+      // exists, the participant check below still applies. Found via the
+      // Batch 2 emulator concurrency probe — see firebase_rules_test/
+      // concurrency_probe.mjs's header comment. (Also uses `||` rather than
+      // `in [a, b]` for the same short-circuit reason as the interactions
+      // read rule above.)
       allow read: if isSignedIn() &&
-          request.auth.uid in [resource.data.requesterId, resource.data.recipientId];
+          (resource == null ||
+           request.auth.uid == resource.data.requesterId ||
+           request.auth.uid == resource.data.recipientId);
 
       // Lock doc id is always "{requesterId}_{contextId}" — enforce that
       // shape so a client can't point a lock at a mismatched pair.

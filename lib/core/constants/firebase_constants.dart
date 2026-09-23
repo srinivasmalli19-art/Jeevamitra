@@ -24,6 +24,15 @@ class FirebaseConstants {
   // User roles
   static const String roleFarmer = 'farmer';
   static const String roleShepherd = 'shepherd';
+  static const String roleVet = 'vet';
+
+  // Interaction statuses
+  static const String interactionPending = 'pending';
+  static const String interactionAccepted = 'accepted';
+  static const String interactionActive = 'active';
+  static const String interactionDeclined = 'declined';
+  static const String interactionCancelled = 'cancelled';
+  static const String interactionCompleted = 'completed';
 
   // Booking statuses
   static const String bookingPending = 'pending';
